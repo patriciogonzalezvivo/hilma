@@ -1,8 +1,10 @@
-#include "hilma/Mesh.h"
-
 #include <iostream>
 
-Mesh::Mesh():primitive(TRIANGLES) {
+#include "hilma/Mesh.h"
+
+using namespace hilma;
+
+Mesh::Mesh() : primitive(TRIANGLES) {
 
 }
 
@@ -12,14 +14,6 @@ Mesh::Mesh(const Mesh& _mother): primitive(_mother.getPrimitive()) {
 
 Mesh::~Mesh() {
 
-}
-
-Primitive Mesh::getPrimitive() const{
-    return primitive;
-}
-
-void Mesh::setPrimitive(Primitive _primitive) {
-    primitive = _primitive;
 }
 
 void Mesh::add(const Mesh& _mesh) {

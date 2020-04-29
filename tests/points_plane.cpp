@@ -4,13 +4,13 @@
 #include <iostream>
 
 #include "hilma/Mesh.h"
-#include "hilma/io/ply.h"
+#include "hilma/io/PlyOps.h"
 
 int main(int argc, char **argv) {
 
     int size = 1024;
 
-    Mesh mesh;
+    hilma::Mesh mesh;
 
     for (int y = 0; y < size; y++) {
         for (int x = 0; x < size; x++) {
@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    savePLY("plane.ply", mesh, false);
+    hilma::PlyOps::save("plane.ply", mesh, false);
 
     return 1;
 }

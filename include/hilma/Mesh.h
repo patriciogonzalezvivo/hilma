@@ -3,7 +3,7 @@
 #include <vector>
 #include <string>
 
-#include "glm/glm.hpp"
+#include "hilma/Material.h"
 
 #if defined(PLATFORM_RPI) || defined(PLATFORM_RPI4) 
 #define INDEX_TYPE uint16_t
@@ -11,11 +11,15 @@
 #define INDEX_TYPE uint32_t
 #endif
 
+namespace hilma {
+
 enum Primitive {
     POINTS,
     LINES,
+    LINE_STRIP,
     TRIANGLES,
-    LINE_STRIP
+    TRIANGLES_STRIP,
+    TRIANGLES_FAN
 };
 
 class Mesh {
@@ -27,8 +31,8 @@ public:
 
     void        add(const Mesh& _mesh);
 
-    void        setPrimitive(Primitive _drawMode = TRIANGLES);
-    Primitive   getPrimitive() const;
+    void        setPrimitive(Primitive _primitive = TRIANGLES) { primitive = _primitive; };
+    Primitive   getPrimitive() const { return primitive; };
 
     void        setColor(const glm::vec4& _color);
     void        setColor(float _r, float _g, float _b, float _a = 1.0f);
@@ -71,6 +75,7 @@ public:
     bool        computeTangents();
     void        clear();
 
+    std::vector<Material>   materials;
     std::vector<glm::vec4>  edge_colors;
     std::vector<glm::vec4>  colors;
     std::vector<glm::vec4>  tangents;
@@ -85,3 +90,5 @@ public:
 private:
     Primitive               primitive;
 };
+
+}

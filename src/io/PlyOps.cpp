@@ -1,13 +1,14 @@
-
-#include "hilma/io/ply.h"
+#include <iostream> 
+#include <fstream>
 
 #define TINYPLY_IMPLEMENTATION
 #include "hilma/io/tinyply.h"
 
-#include <iostream> 
-#include <fstream>
+#include "hilma/io/PlyOps.h"
 
-bool savePLY( const std::string& _filename, Mesh& _mesh, bool _binnary  ) {
+namespace hilma {
+
+bool PlyOps::save( const std::string& _filename, Mesh& _mesh, bool _binnary  ) {
 
     std::filebuf fb;
     fb.open(_filename.c_str(), std::ios::out | std::ios::binary);
@@ -37,4 +38,6 @@ bool savePLY( const std::string& _filename, Mesh& _mesh, bool _binnary  ) {
     file.write(outstream, _binnary);
 
     return true;
+}
+
 }

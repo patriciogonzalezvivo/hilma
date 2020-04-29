@@ -1,5 +1,4 @@
-
-%module hypatia
+%module hilma
 %include "typemaps.i"
 %include <std_vector.i>
 %include <std_string.i>
@@ -14,31 +13,22 @@
 %ignore *::operator>=;
 %ignore operator<<;
 
-%apply double &OUTPUT { double &_x, double &_y };
-
 %{
     #define SWIG_FILE_WITH_INIT
-    #include "hilma/hilma.h"
     #include "hilma/Mesh.h"
-    #include "hilma/PolarPoint.h"
-    #include "hilma/Polyline.h"
-    #include "hilma/Rectangle.h"
-    #include "hilma/io/fs.h"
-    #include "hilma/io/obj.h"
-    #include "hilma/io/ply.h"
-    
+    #include "hilma/Material.h"
+    #include "hilma/io/ObjOps.h"
+    #include "hilma/io/PlyOps.h"
+    #include "hilma/io/tinyply.h"
+    #include "hilma/io/tiny_obj_loader.h"
 %}
 
-%include "include/hilma/hilma.h"
 %include "include/hilma/Mesh.h"
-%include "include/hilma/PolarPoint.h"
-%include "include/hilma/Polyline.h"
-%include "include/hilma/Rectangle.h"
-%include "include/hilma/io/fs.h"
-%include "include/hilma/io/obj.h"
-%include "include/hilma/io/ply.h"
+%include "include/hilma/Material.h"
+// %include "include/hilma/io/ObjOps.h"
+%include "include/hilma/io/PlyOps.h"
+//%include "include/hilma/io/tinyply.h"
+//%include "include/hilma/io/tiny_obj_loader.h"
 
-namespace std {
-    %template(VectorInt) vector<int>;
-    // %template(VectorEquatorial) vector<Equatorial>;
-};
+using namespace hilma;
+
