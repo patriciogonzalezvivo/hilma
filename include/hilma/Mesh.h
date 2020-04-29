@@ -25,65 +25,63 @@ public:
     Mesh(const Mesh& _mother);
     virtual ~Mesh();
 
-    void    setPrimitive(Primitive _drawMode = TRIANGLES);
+    void        add(const Mesh& _mesh);
 
-    void    setColor(const glm::vec4& _color);
-    void    addColor(const glm::vec4& _color);
-    void    setColor(float _r, float _g, float _b, float _a = 1.0f);
-    void    addColor(float _r, float _g, float _b, float _a = 1.0f);
-    void    addColors(const std::vector<glm::vec4>& _colors);
+    void        setPrimitive(Primitive _drawMode = TRIANGLES);
+    Primitive   getPrimitive() const;
 
-    void    addVertex(const glm::vec3& _point);
-    void    addVertex(float _x, float _y, float _z = 0.0f);
-    void    addVertices(const std::vector<glm::vec3>& _verts);
-    void    addVertices(const glm::vec3* _verts, int _amt);
+    void        setColor(const glm::vec4& _color);
+    void        setColor(float _r, float _g, float _b, float _a = 1.0f);
+    void        addColor(const glm::vec4& _color);
+    void        addColor(float _r, float _g, float _b, float _a = 1.0f);
+    void        addColors(const std::vector<glm::vec4>& _colors);
 
-    void    addNormal(const glm::vec3& _normal);
-    void    addNormal(float _nX, float _nY, float _nZ);
-    void    addNormals(const std::vector<glm::vec3>& _normals );
+    void        addVertex(const glm::vec3& _point);
+    void        addVertex(float _x, float _y, float _z = 0.0f);
+    void        addVertices(const std::vector<glm::vec3>& _verts);
+    void        addVertices(const glm::vec3* _verts, int _amt);
 
-    void    addTangent(float _x, float _y, float _z, float _w);
-    void    addTangent(const glm::vec4& _tangent);
+    void        addNormal(const glm::vec3& _normal);
+    void        addNormal(float _nX, float _nY, float _nZ);
+    void        addNormals(const std::vector<glm::vec3>& _normals );
 
-    void    addTexCoord(const glm::vec2& _uv);
-    void    addTexCoord(float _tX, float _tY);
-    void    addTexCoords(const std::vector<glm::vec2>& _uvs);
+    void        addTangent(float _x, float _y, float _z, float _w);
+    void        addTangent(const glm::vec4& _tangent);
 
-    void    addIndex(INDEX_TYPE _i);
-    void    addIndices(const std::vector<INDEX_TYPE>& _inds);
-    void    addIndices(const INDEX_TYPE* _inds, int _amt);
+    void        addTexCoord(const glm::vec2& _uv);
+    void        addTexCoord(float _tX, float _tY);
+    void        addTexcoords(const std::vector<glm::vec2>& _uvs);
 
-    void    addTriangle(INDEX_TYPE index1, INDEX_TYPE index2, INDEX_TYPE index3);
+    void        addIndex(INDEX_TYPE _i);
+    void        addIndices(const std::vector<INDEX_TYPE>& _inds);
+    void        addIndices(const INDEX_TYPE* _inds, int _amt);
 
-    void    add(const Mesh& _mesh);
-
-    const bool    hasColors() const { return colors.size() > 0; }
-    const bool    hasNormals() const { return normals.size() > 0; }
-    const bool    hasTexCoords() const { return texCoords.size() > 0; }
-    const bool    hasTangents() const { return tangents.size() > 0; }
-    const bool    hasIndices() const { return indices.size() > 0; }
-
-    Primitive  getPrimitive() const;
+    void        addTriangle(INDEX_TYPE index1, INDEX_TYPE index2, INDEX_TYPE index3);
     std::vector<glm::ivec3>  getTriangles() const ;
 
-    const std::vector<glm::vec4> & getColors() const;
-    const std::vector<glm::vec4> & getTangents() const;
-    const std::vector<glm::vec3> & getVertices() const;
-    const std::vector<glm::vec3> & getNormals() const;
-    const std::vector<glm::vec2> & getTexCoords() const;
-    const std::vector<INDEX_TYPE>  & getIndices() const;
+    const bool  hasColors() const { return colors.size() > 0; }
+    const bool  hasNormals() const { return normals.size() > 0; }
+    const bool  hasTexcoords() const { return texcoords.size() > 0; }
+    const bool  hasTangents() const { return tangents.size() > 0; }
+    const bool  hasIndices() const { return indices.size() > 0; }
+    const bool  hasEdgeIndices() const { return edge_indices.size() > 0; }
+    const bool  hasEdgeColors() const { return edge_colors.size() > 0; }
 
-    bool    computeNormals();
-    bool    computeTangents();
-    void    clear();
+    bool        computeNormals();
+    bool        computeTangents();
+    void        clear();
 
-// private:
+    std::vector<glm::vec4>  edge_colors;
     std::vector<glm::vec4>  colors;
     std::vector<glm::vec4>  tangents;
     std::vector<glm::vec3>  vertices;
     std::vector<glm::vec3>  normals;
-    std::vector<glm::vec2>  texCoords;
+    std::vector<glm::vec2>  texcoords;
     std::vector<INDEX_TYPE> indices;
+    std::vector<INDEX_TYPE> indices_normals;
+    std::vector<INDEX_TYPE> indices_texcoords;
+    std::vector<INDEX_TYPE> edge_indices;
 
+private:
     Primitive               primitive;
 };

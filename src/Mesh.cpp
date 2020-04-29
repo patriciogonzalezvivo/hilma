@@ -14,23 +14,45 @@ Mesh::~Mesh() {
 
 }
 
+Primitive Mesh::getPrimitive() const{
+    return primitive;
+}
+
 void Mesh::setPrimitive(Primitive _primitive) {
     primitive = _primitive;
 }
 
-void Mesh::setColor(const glm::vec4& _color) {
-    colors.clear();
-    for (uint32_t i = 0; i < vertices.size(); i++) {
-        colors.push_back(_color);
+void Mesh::add(const Mesh& _mesh) {
+
+    if (_mesh.getPrimitive() != primitive) {
+        std::cout << "INCOMPATIBLE DRAW MODES" << std::endl;
+        return;
     }
+
+    INDEX_TYPE indexOffset = (INDEX_TYPE)vertices.size();
+
+    addColors(_mesh.colors);
+    addVertices(_mesh.vertices);
+    addNormals(_mesh.normals);
+    addTexcoords(_mesh.texcoords);
+    
+
+    for (uint32_t i = 0; i < _mesh.indices.size(); i++)
+        addIndex(indexOffset+_mesh.indices[i]);
 }
 
-void Mesh::addColor(const glm::vec4& _color) {
-    colors.push_back(_color);
+void Mesh::setColor(const glm::vec4& _color) {
+    colors.clear();
+    for (uint32_t i = 0; i < vertices.size(); i++)
+        colors.push_back(_color);
 }
 
 void Mesh::setColor(float _r, float _g, float _b, float _a) {
     setColor(glm::vec4(_r, _g, _b, _a));
+}
+
+void Mesh::addColor(const glm::vec4& _color) {
+    colors.push_back(_color);
 }
 
 void Mesh::addColor(float _r, float _g, float _b, float _a) {
@@ -78,15 +100,15 @@ void Mesh::addTangent(float _x, float _y, float _z, float _w) {
 }
 
 void Mesh::addTexCoord(const glm::vec2& _uv) {
-    texCoords.push_back(_uv);
+    texcoords.push_back(_uv);
 }
 
 void Mesh::addTexCoord(float _tX, float _tY) {
     addTexCoord( glm::vec2(_tX, _tY) );
 }
 
-void Mesh::addTexCoords(const std::vector<glm::vec2>& _uvs) {
-    texCoords.insert(texCoords.end(), _uvs.begin(), _uvs.end());
+void Mesh::addTexcoords(const std::vector<glm::vec2>& _uvs) {
+    texcoords.insert(texcoords.end(), _uvs.begin(), _uvs.end());
 }
 
 void Mesh::addIndex(INDEX_TYPE _i) {
@@ -105,53 +127,6 @@ void Mesh::addTriangle(INDEX_TYPE index1, INDEX_TYPE index2, INDEX_TYPE index3) 
     addIndex(index1);
     addIndex(index2);
     addIndex(index3);
-}
-
-void Mesh::add(const Mesh& _mesh) {
-
-    if (_mesh.getPrimitive() != primitive) {
-        std::cout << "INCOMPATIBLE DRAW MODES" << std::endl;
-        return;
-    }
-
-    INDEX_TYPE indexOffset = (INDEX_TYPE)getVertices().size();
-
-    addColors(_mesh.getColors());
-    addVertices(_mesh.getVertices());
-    addNormals(_mesh.getNormals());
-    addTexCoords(_mesh.getTexCoords());
-
-    for (uint32_t i = 0; i < _mesh.getIndices().size(); i++) {
-        addIndex(indexOffset+_mesh.getIndices()[i]);
-    }
-}
-
-Primitive Mesh::getPrimitive() const{
-    return primitive;
-}
-
-const std::vector<glm::vec4> & Mesh::getColors() const{
-    return colors;
-}
-
-const std::vector<glm::vec4> & Mesh::getTangents() const {
-    return tangents;
-}
-
-const std::vector<glm::vec3> & Mesh::getVertices() const{
-    return vertices;
-}
-
-const std::vector<glm::vec3> & Mesh::getNormals() const{
-    return normals;
-}
-
-const std::vector<glm::vec2> & Mesh::getTexCoords() const{
-    return texCoords;
-}
-
-const std::vector<INDEX_TYPE> & Mesh::getIndices() const{
-    return indices;
 }
 
 std::vector<glm::ivec3> Mesh::getTriangles() const {
@@ -187,24 +162,17 @@ std::vector<glm::ivec3> Mesh::getTriangles() const {
 }
 
 void Mesh::clear() {
-    if (!vertices.empty()) {
-        vertices.clear();
-    }
-    if (hasColors()) {
-        colors.clear();
-    }
-    if (hasNormals()) {
-        normals.clear();
-    }
-    if (hasTexCoords()) {
-        texCoords.clear();
-    }
-    if (hasTangents()) {
-        tangents.clear();
-    }
-    if (hasIndices()) {
-        indices.clear();
-    }
+    if (!vertices.empty()) vertices.clear();
+    
+    if (!colors.empty()) colors.clear();
+    if (!normals.empty()) normals.clear();
+    if (!texcoords.empty()) texcoords.clear();
+    if (!tangents.empty()) tangents.clear();
+    if (!indices.empty()) indices.clear();
+    if (!indices_normals.empty()) indices_normals.clear();
+    if (!indices_texcoords.empty()) indices_texcoords.clear();
+    if (!edge_colors.empty()) edge_colors.clear();
+    if (!edge_indices.empty()) edge_indices.clear();
 }
 
 bool Mesh::computeNormals() {
@@ -256,7 +224,7 @@ bool Mesh::computeTangents() {
     //The number of the vertices
     size_t nV = vertices.size();
 
-    if (texCoords.size() != nV || 
+    if (texcoords.size() != nV || 
         normals.size() != nV || 
         getPrimitive() != TRIANGLES)
         return false;
@@ -281,9 +249,9 @@ bool Mesh::computeTangents() {
         const glm::vec3 &v2 = vertices[ i2 ];
         const glm::vec3 &v3 = vertices[ i3 ];
 
-        const glm::vec2 &w1 = texCoords[i1];
-        const glm::vec2 &w2 = texCoords[i2];
-        const glm::vec2 &w3 = texCoords[i3];
+        const glm::vec2 &w1 = texcoords[i1];
+        const glm::vec2 &w2 = texcoords[i2];
+        const glm::vec2 &w3 = texcoords[i3];
 
         float x1 = v2.x - v1.x;
         float x2 = v3.x - v1.x;
