@@ -1,4 +1,4 @@
-#include "hilma/tools/shapes.h"
+#include "hilma/hilma.h"
 #include "hilma/tools/geom.h"
 
 #include <iostream>

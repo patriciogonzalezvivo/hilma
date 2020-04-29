@@ -1,3 +1,4 @@
 
-#add_executable (test_tiles tiles.cpp)
-#target_link_libraries (test_tiles PRIVATE hypatia)
+add_executable (plane plane.cpp)
+include_directories("${CMAKE_SOURCE_DIR}/include")
+target_link_libraries (plane PRIVATE hilma)

@@ -16,7 +16,7 @@ Mesh rect(const Rectangle&_rect);
 Mesh rectBorders(const Rectangle &_rect);
 Mesh rectCorners(const Rectangle &_rect, float _width = 4.);
 
-Mesh polyline(const std::vector<glm::vec3> &_pts );
+Mesh polyline(const std::vector<glm::vec3> &_pts);
 
 Mesh axis(float _size, float _y = 0.0);
 

@@ -15,7 +15,14 @@ hilma_module = Extension(
   include_dirs=['include'],
   sources= [ 
     'hilma_wrap.cxx', 
-    'src/*.cpp',
+    'src/hilma.cpp',
+    'src/Mesh.cpp',
+    'src/PolarPoint.cpp',
+    'src/Polyline.cpp',
+    'src/Rectangle.cpp',
+    'src/io/obj.cpp',
+    'src/io/ply.cpp',
+    'src/tools/geom.cpp'
    ],
    swig_opts = ['-c++']
 )

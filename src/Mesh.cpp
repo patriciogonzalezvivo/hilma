@@ -6,7 +6,7 @@ Mesh::Mesh():primitive(TRIANGLES) {
 
 }
 
-Mesh::Mesh(const Mesh &_mother): primitive(_mother.getPrimitive()) {
+Mesh::Mesh(const Mesh& _mother): primitive(_mother.getPrimitive()) {
     add(_mother);
 }
 
@@ -18,23 +18,35 @@ void Mesh::setPrimitive(Primitive _primitive) {
     primitive = _primitive;
 }
 
-void Mesh::setColor(const glm::vec4 &_color) {
+void Mesh::setColor(const glm::vec4& _color) {
     colors.clear();
     for (uint32_t i = 0; i < vertices.size(); i++) {
         colors.push_back(_color);
     }
 }
 
-void Mesh::addColor(const glm::vec4 &_color) {
+void Mesh::addColor(const glm::vec4& _color) {
     colors.push_back(_color);
 }
 
-void Mesh::addColors(const std::vector<glm::vec4> &_colors) {
+void Mesh::setColor(float _r, float _g, float _b, float _a) {
+    setColor(glm::vec4(_r, _g, _b, _a));
+}
+
+void Mesh::addColor(float _r, float _g, float _b, float _a) {
+    addColor(glm::vec4(_r, _g, _b, _a));
+}
+
+void Mesh::addColors(const std::vector<glm::vec4>& _colors) {
     colors.insert(colors.end(), _colors.begin(), _colors.end());
 }
 
-void Mesh::addVertex(const glm::vec3 &_point) {
+void Mesh::addVertex(const glm::vec3& _point) {
    vertices.push_back(_point);
+}
+
+void Mesh::addVertex(float _x, float _y, float _z) {
+    addVertex( glm::vec3(_x, _y, _z) );
 }
 
 void Mesh::addVertices(const std::vector<glm::vec3>& _verts) {
@@ -45,23 +57,35 @@ void Mesh::addVertices(const glm::vec3* verts, int amt) {
    vertices.insert(vertices.end(),verts,verts+amt);
 }
 
-void Mesh::addNormal(const glm::vec3 &_normal) {
+void Mesh::addNormal(const glm::vec3& _normal) {
     normals.push_back(_normal);
 }
 
-void Mesh::addNormals(const std::vector<glm::vec3> &_normals ) {
+void Mesh::addNormal(float _nX, float _nY, float _nZ) {
+    addNormal( glm::vec3(_nX, _nY, _nZ) );
+}
+
+void Mesh::addNormals(const std::vector<glm::vec3>& _normals ) {
     normals.insert(normals.end(), _normals.begin(), _normals.end());
 }
 
-void  Mesh::addTangent(const glm::vec4 &_tangent) {
+void  Mesh::addTangent(const glm::vec4& _tangent) {
     tangents.push_back(_tangent);
 }
 
-void Mesh::addTexCoord(const glm::vec2 &_uv) {
+void Mesh::addTangent(float _x, float _y, float _z, float _w) {
+    tangents.push_back( glm::vec4(_x, _y, _z, _w) );
+}
+
+void Mesh::addTexCoord(const glm::vec2& _uv) {
     texCoords.push_back(_uv);
 }
 
-void Mesh::addTexCoords(const std::vector<glm::vec2> &_uvs) {
+void Mesh::addTexCoord(float _tX, float _tY) {
+    addTexCoord( glm::vec2(_tX, _tY) );
+}
+
+void Mesh::addTexCoords(const std::vector<glm::vec2>& _uvs) {
     texCoords.insert(texCoords.end(), _uvs.begin(), _uvs.end());
 }
 
@@ -83,7 +107,7 @@ void Mesh::addTriangle(INDEX_TYPE index1, INDEX_TYPE index2, INDEX_TYPE index3) 
     addIndex(index3);
 }
 
-void Mesh::add(const Mesh &_mesh) {
+void Mesh::add(const Mesh& _mesh) {
 
     if (_mesh.getPrimitive() != primitive) {
         std::cout << "INCOMPATIBLE DRAW MODES" << std::endl;

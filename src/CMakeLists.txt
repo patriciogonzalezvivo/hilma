@@ -21,4 +21,5 @@ source_group(TREE "${PROJECT_SOURCE_DIR}/include" PREFIX "Header Files" FILES ${
 
 install(TARGETS hilma DESTINATION lib)
 install(FILES ${ROOT_HEADER} DESTINATION include/hilma)
-#install(FILES ${IO_HEADER} DESTINATION include/hilma/io)
+install(FILES ${IO_HEADER} DESTINATION include/hilma/io)
+install(FILES ${TOOLS_SOURCE} DESTINATION include/hilma/tools)

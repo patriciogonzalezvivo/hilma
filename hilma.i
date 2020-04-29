@@ -15,11 +15,10 @@
 %ignore operator<<;
 
 %apply double &OUTPUT { double &_x, double &_y };
-%apply double &OUTPUT { double &_lng, double &_lat };
 
 %{
     #define SWIG_FILE_WITH_INIT
-    
+    #include "hilma/hilma.h"
     #include "hilma/Mesh.h"
     #include "hilma/PolarPoint.h"
     #include "hilma/Polyline.h"
@@ -30,6 +29,7 @@
     
 %}
 
+%include "include/hilma/hilma.h"
 %include "include/hilma/Mesh.h"
 %include "include/hilma/PolarPoint.h"
 %include "include/hilma/Polyline.h"
@@ -40,5 +40,5 @@
 
 namespace std {
     %template(VectorInt) vector<int>;
-    %template(VectorEquatorial) vector<Equatorial>;
+    // %template(VectorEquatorial) vector<Equatorial>;
 };
