@@ -1,0 +1,6 @@
+.DS_Store
+*.pyc
+*.so
+build/*
+hypatia_wrap.cxx
+hypatia.py

@@ -4,26 +4,21 @@
 file(GLOB ROOT_HEADER "../include/hypatia/*.h")
 file(GLOB ROOT_SOURCE "./*.cpp")
 
-file(GLOB COORD_HEADER "../include/hypatia/coordinates/*.h")
-file(GLOB COORD_SOURCE "./coordinates/*.cpp")
+file(GLOB IO_HEADER "../include/hypatia/io/*.h")
+file(GLOB IO_SOURCE "./io/*.cpp")
 
-file(GLOB MODEL_HEADER "../include/hypatia/models/*.h")
-file(GLOB MODEL_SOURCE "./models/*.cpp")
-
-file(GLOB PRIMI_HEADER "../include/hypatia/primitives/*.h")
-file(GLOB PRIMI_SOURCE "./primitives/*.cpp")
+file(GLOB TOOLS_HEADER "../include/hypatia/tools/*.h")
+file(GLOB TOOLS_SOURCE "./tools/*.cpp")
 
 # Make an automatic library - will be static or dynamic based on user setting
-add_library(hypatia ${ROOT_SOURCE} ${COORD_SOURCE} ${MODEL_SOURCE} ${PRIMI_SOURCE})
+add_library(hilma ${ROOT_SOURCE} ${IO_SOURCE} ${TOOLS_SOURCE} )
 
 # We need this directory, and users of our library will need it too
-target_include_directories(hypatia PUBLIC ../include)
+target_include_directories(hilma PUBLIC ../include)
 
 # IDEs should put the headers in a nice place
 source_group(TREE "${PROJECT_SOURCE_DIR}/include" PREFIX "Header Files" FILES ${ROOT_HEADER})
 
-install(TARGETS hypatia DESTINATION lib)
-install(FILES ${ROOT_HEADER} DESTINATION include/hypatia)
-install(FILES ${COORD_HEADER} DESTINATION include/hypatia/coordinates)
-install(FILES ${MODEL_HEADER} DESTINATION include/hypatia/models)
-install(FILES ${PRIMI_HEADER} DESTINATION include/hypatia/primitives)
+install(TARGETS hilma DESTINATION lib)
+install(FILES ${ROOT_HEADER} DESTINATION include/hilma)
+#install(FILES ${IO_HEADER} DESTINATION include/hilma/io)

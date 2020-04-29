@@ -20,11 +20,23 @@
 %{
     #define SWIG_FILE_WITH_INIT
     
-    #include "include/hilma/*.h"
+    #include "hilma/Mesh.h"
+    #include "hilma/PolarPoint.h"
+    #include "hilma/Polyline.h"
+    #include "hilma/Rectangle.h"
+    #include "hilma/io/fs.h"
+    #include "hilma/io/obj.h"
+    #include "hilma/io/ply.h"
     
 %}
 
-%include "include/hilma/*.h"
+%include "include/hilma/Mesh.h"
+%include "include/hilma/PolarPoint.h"
+%include "include/hilma/Polyline.h"
+%include "include/hilma/Rectangle.h"
+%include "include/hilma/io/fs.h"
+%include "include/hilma/io/obj.h"
+%include "include/hilma/io/ply.h"
 
 namespace std {
     %template(VectorInt) vector<int>;
