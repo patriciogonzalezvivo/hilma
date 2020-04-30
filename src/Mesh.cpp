@@ -16,6 +16,23 @@ Mesh::~Mesh() {
 
 }
 
+void Mesh::clear() {
+    if (!vertices.empty()) vertices.clear();
+    
+    if (!colors.empty()) colors.clear();
+    if (!normals.empty()) normals.clear();
+    if (!texcoords.empty()) texcoords.clear();
+    if (!tangents.empty()) tangents.clear();
+    if (!indices.empty()) indices.clear();
+    if (!indices_normals.empty()) indices_normals.clear();
+    if (!indices_texcoords.empty()) indices_texcoords.clear();
+    if (!edge_colors.empty()) edge_colors.clear();
+    if (!edge_indices.empty()) edge_indices.clear();
+}
+
+
+
+
 void Mesh::add(const Mesh& _mesh) {
 
     if (_mesh.getPrimitive() != primitive) {
@@ -23,17 +40,19 @@ void Mesh::add(const Mesh& _mesh) {
         return;
     }
 
-    INDEX_TYPE indexOffset = (INDEX_TYPE)vertices.size();
+    int indexOffset = (int)vertices.size();
 
     addColors(_mesh.colors);
     addVertices(_mesh.vertices);
     addNormals(_mesh.normals);
-    addTexcoords(_mesh.texcoords);
+    addTexCoords(_mesh.texcoords);
     
 
     for (uint32_t i = 0; i < _mesh.indices.size(); i++)
         addIndex(indexOffset+_mesh.indices[i]);
 }
+
+
 
 
 void Mesh::addVertex(const glm::vec3& _point) {
@@ -51,13 +70,20 @@ void Mesh::addVertex(const float* _data, int _n) {
         addVertex(_data[0], _data[1], 0.0);
 }
 
+void Mesh::addVertices(const glm::vec3* verts, int amt) {
+   vertices.insert(vertices.end(),verts,verts+amt);
+}
+
+void Mesh::addVertices(const float* _data, int _m, int _n) {
+    for (int i = 0; i < _m; i++)
+        addVertex(&_data[i*_n], _n);
+}
+
 void Mesh::addVertices(const std::vector<glm::vec3>& _verts) {
    vertices.insert(vertices.end(),_verts.begin(),_verts.end());
 }
 
-void Mesh::addVertices(const glm::vec3* verts, int amt) {
-   vertices.insert(vertices.end(),verts,verts+amt);
-}
+
 
 void Mesh::setColor(const glm::vec4& _color) {
     colors.clear();
@@ -95,6 +121,9 @@ void Mesh::addColors(const std::vector<glm::vec4>& _colors) {
     colors.insert(colors.end(), _colors.begin(), _colors.end());
 }
 
+
+
+
 void Mesh::addNormal(const glm::vec3& _normal) {
     normals.push_back(_normal);
 }
@@ -112,6 +141,8 @@ void Mesh::addNormals(const std::vector<glm::vec3>& _normals ) {
     normals.insert(normals.end(), _normals.begin(), _normals.end());
 }
 
+
+
 void  Mesh::addTangent(const glm::vec4& _tangent) {
     tangents.push_back(_tangent);
 }
@@ -125,39 +156,52 @@ void Mesh::addTangent(float _x, float _y, float _z, float _w) {
     tangents.push_back( glm::vec4(_x, _y, _z, _w) );
 }
 
-void Mesh::addTexcoord(const glm::vec2& _uv) {
+
+
+
+void Mesh::addTexCoord(const glm::vec2& _uv) {
     texcoords.push_back(_uv);
 }
 
-void Mesh::addTexcoord(const float* _data, int _n) {
+void Mesh::addTexCoord(const float* _data, int _n) {
     if (_n == 2)
-        addTexcoord(_data[0], _data[1]);
+        addTexCoord(_data[0], _data[1]);
 }
 
-void Mesh::addTexcoord(float _tX, float _tY) {
-    addTexcoord( glm::vec2(_tX, _tY) );
+void Mesh::addTexCoord(float _tX, float _tY) {
+    addTexCoord( glm::vec2(_tX, _tY) );
 }
 
-void Mesh::addTexcoords(const std::vector<glm::vec2>& _uvs) {
+void Mesh::addTexCoords(const std::vector<glm::vec2>& _uvs) {
     texcoords.insert(texcoords.end(), _uvs.begin(), _uvs.end());
 }
 
-void Mesh::addIndex(INDEX_TYPE _i) {
+
+
+
+void Mesh::addIndex(int _i) {
     indices.push_back(_i);
 }
 
-void Mesh::addIndices(const INDEX_TYPE* inds, int amt) {
-    indices.insert(indices.end(),inds,inds+amt);
+void Mesh::addIndices(const int* _data, int _n) {
+    indices.insert(indices.end(),_data,_data+_n);
 }
 
-void Mesh::addIndices(const std::vector<INDEX_TYPE>& inds) {
-    indices.insert(indices.end(),inds.begin(),inds.end());
+void Mesh::addIndices(const std::vector<int>& _data) {
+    indices.insert(indices.end(),_data.begin(),_data.end());
 }
 
-void Mesh::addTriangle(INDEX_TYPE index1, INDEX_TYPE index2, INDEX_TYPE index3) {
-    addIndex(index1);
-    addIndex(index2);
-    addIndex(index3);
+
+
+void Mesh::addLine( int _index1, int _index2 ){
+    addIndex(_index1);
+    addIndex(_index2);
+}
+
+void Mesh::addTriangle(int _index1, int _index2, int _index3) {
+    addIndex(_index1);
+    addIndex(_index2);
+    addIndex(_index3);
 }
 
 std::vector<glm::ivec3> Mesh::getTriangles() const {
@@ -165,20 +209,18 @@ std::vector<glm::ivec3> Mesh::getTriangles() const {
 
     if (getPrimitive() == TRIANGLES) {
         if (hasIndices()) {
-            for(unsigned int j = 0; j < indices.size(); j += 3) {
+            for(size_t j = 0; j < indices.size(); j += 3) {
                 glm::ivec3 tri;
-                for(int k = 0; k < 3; k++) {
+                for(int k = 0; k < 3; k++)
                     tri[k] = indices[j+k];
-                }
                 faces.push_back(tri);
             }
         }
         else {
-            for( unsigned int j = 0; j < vertices.size(); j += 3) {
+            for( size_t j = 0; j < vertices.size(); j += 3) {
                 glm::ivec3 tri;
-                for(int k = 0; k < 3; k++) {
+                for(int k = 0; k < 3; k++)
                     tri[k] = j+k;
-                }
                 faces.push_back(tri);
             }
         }
@@ -192,18 +234,25 @@ std::vector<glm::ivec3> Mesh::getTriangles() const {
     return faces;
 }
 
-void Mesh::clear() {
-    if (!vertices.empty()) vertices.clear();
-    
-    if (!colors.empty()) colors.clear();
-    if (!normals.empty()) normals.clear();
-    if (!texcoords.empty()) texcoords.clear();
-    if (!tangents.empty()) tangents.clear();
-    if (!indices.empty()) indices.clear();
-    if (!indices_normals.empty()) indices_normals.clear();
-    if (!indices_texcoords.empty()) indices_texcoords.clear();
-    if (!edge_colors.empty()) edge_colors.clear();
-    if (!edge_indices.empty()) edge_indices.clear();
+bool Mesh::computePrimitives(PrimitiveType _primitive) {
+    if (!hasVertices())
+        return false;
+
+    if (_primitive == LINES) {
+        for ( size_t j = 0; j < vertices.size(); j += 2)
+            addLine(j, j + 1);
+    }
+    else if (_primitive == TRIANGLES) {
+        for ( size_t j = 0; j < vertices.size(); j += 3)
+            addTriangle(j, j + 1, j + 2);
+    }
+    // else if (_primitive == QUAD) {
+    //     for ( size_t j = 0; j < vertices.size(); j += 3)
+    //         addQuad(j, j + 1, j + 2, j + 3);
+    // }
+
+    primitive = _primitive;
+    return true;
 }
 
 bool Mesh::computeNormals() {
