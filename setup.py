@@ -9,10 +9,19 @@ hilma: is a library that:
 
 from distutils.core import setup, Extension
 
+# Third-party modules - we depend on numpy for everything
+import numpy
+
+# Obtain the numpy include directory.  This logic works across numpy versions.
+try:
+    numpy_include = numpy.get_include()
+except AttributeError:
+    numpy_include = numpy.get_numpy_include()
+
 doc_lines = __doc__.split('\n')
 hilma_module = Extension(  
   '_hilma',
-  include_dirs=['include'],
+  include_dirs=['include', numpy_include],
   sources= [ 
     'hilma_wrap.cxx',
     'src/Mesh.cpp',

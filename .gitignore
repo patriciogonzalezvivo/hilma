@@ -2,5 +2,6 @@
 *.pyc
 *.so
 build/*
+cbuild/*
 hypatia_wrap.cxx
 hypatia.py
