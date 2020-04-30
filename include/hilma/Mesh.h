@@ -87,7 +87,7 @@ public:
     const bool  hasEdgeIndices() const { return !edge_indices.empty(); }
     const bool  hasEdgeColors() const { return !edge_colors.empty(); }
 
-
+private:
     std::vector<Material>   materials;
     std::vector<glm::vec4>  edge_colors;
     std::vector<glm::vec4>  colors;
@@ -100,8 +100,10 @@ public:
     std::vector<int>        indices_texcoords;
     std::vector<int>        edge_indices;
 
-private:
     PrimitiveType           primitive;
+
+    friend class PlyOps;
+    friend class ObjOps;
 };
 
 }
