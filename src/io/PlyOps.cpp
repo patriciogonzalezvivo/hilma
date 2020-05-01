@@ -92,8 +92,8 @@ bool PlyOps::load( const std::string& _filename, Mesh& _mesh ) {
         if (vertices) {
             const size_t numVerticesBytes = vertices->buffer.size_bytes();
 
-            _mesh.vertices.resize(vertices->count);
-            std::memcpy(_mesh.vertices.data(), vertices->buffer.get(), numVerticesBytes);
+            _mesh.m_vertices.resize(vertices->count);
+            std::memcpy(_mesh.m_vertices.data(), vertices->buffer.get(), numVerticesBytes);
 
             if (colors) {
                 size_t numChannels = colors_names.size();
@@ -129,16 +129,16 @@ bool PlyOps::load( const std::string& _filename, Mesh& _mesh ) {
             if (normals) {
                 if (normals->t == tinyply::Type::FLOAT32) {
                     const size_t numNormalsBytes = normals->buffer.size_bytes();
-                    _mesh.normals.resize(normals->count);
-                    std::memcpy(_mesh.normals.data(), normals->buffer.get(), numNormalsBytes);
+                    _mesh.m_normals.resize(normals->count);
+                    std::memcpy(_mesh.m_normals.data(), normals->buffer.get(), numNormalsBytes);
                 }
             }
 
             if (texcoords) {
                 if (texcoords->t == tinyply::Type::FLOAT32) {
                     const size_t numTexcoordsBytes = texcoords->buffer.size_bytes();
-                    _mesh.texcoords.resize(texcoords->count);
-                    std::memcpy(_mesh.texcoords.data(), texcoords->buffer.get(), numTexcoordsBytes);
+                    _mesh.m_texcoords.resize(texcoords->count);
+                    std::memcpy(_mesh.m_texcoords.data(), texcoords->buffer.get(), numTexcoordsBytes);
                 }
             }
 
@@ -165,25 +165,25 @@ bool PlyOps::save( const std::string& _filename, Mesh& _mesh, bool _binnary  ) {
     tinyply::PlyFile file;
 
     file.add_properties_to_element("vertex", { "x", "y", "z" }, 
-        tinyply::Type::FLOAT32, _mesh.vertices.size(), reinterpret_cast<uint8_t*>(_mesh.vertices.data()), tinyply::Type::INVALID, 0);
+        tinyply::Type::FLOAT32, _mesh.m_vertices.size(), reinterpret_cast<uint8_t*>(_mesh.m_vertices.data()), tinyply::Type::INVALID, 0);
 
     if (_mesh.hasColors())
         file.add_properties_to_element("vertex", { "r", "g", "b", "a" },
-        tinyply::Type::FLOAT32, _mesh.colors.size(), reinterpret_cast<uint8_t*>(_mesh.colors.data()), tinyply::Type::INVALID, 0);
+        tinyply::Type::FLOAT32, _mesh.m_colors.size(), reinterpret_cast<uint8_t*>(_mesh.m_colors.data()), tinyply::Type::INVALID, 0);
 
     if (_mesh.hasNormals())
         file.add_properties_to_element("vertex", { "nx", "ny", "nz" },
-        tinyply::Type::FLOAT32, _mesh.normals.size(), reinterpret_cast<uint8_t*>(_mesh.normals.data()), tinyply::Type::INVALID, 0);
+        tinyply::Type::FLOAT32, _mesh.m_normals.size(), reinterpret_cast<uint8_t*>(_mesh.m_normals.data()), tinyply::Type::INVALID, 0);
 
     if (_mesh.hasTexcoords())
         file.add_properties_to_element("vertex", { "u", "v" },
-        tinyply::Type::FLOAT32, _mesh.texcoords.size() , reinterpret_cast<uint8_t*>(_mesh.texcoords.data()), tinyply::Type::INVALID, 0);
+        tinyply::Type::FLOAT32, _mesh.m_texcoords.size() , reinterpret_cast<uint8_t*>(_mesh.m_texcoords.data()), tinyply::Type::INVALID, 0);
 
     if (_mesh.hasIndices()) {
 
-        if (_mesh.getPrimitive() == TRIANGLES ) {
+        if (_mesh.getMode() == TRIANGLES ) {
             file.add_properties_to_element("face", { "vertex_indices" },
-            tinyply::Type::INT32, _mesh.indices.size()/3 , reinterpret_cast<uint8_t*>(_mesh.indices.data()), tinyply::Type::UINT8, 3);
+            tinyply::Type::INT32, _mesh.m_indices.size()/3 , reinterpret_cast<uint8_t*>(_mesh.m_indices.data()), tinyply::Type::UINT8, 3);
         }
 
     }
