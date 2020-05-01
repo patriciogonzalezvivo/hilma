@@ -28,11 +28,12 @@
     import_array();
 %}
 
-// %apply (int* IN_ARRAY1, int DIM1 ) {(const int* _data, int _n )};
-%apply (unsigned short* IN_ARRAY1, int DIM1 ) {(const unsigned short* _data, int _n )};
+%apply (int* IN_ARRAY1, int DIM1 ) {(const int* _data, int _n )};
 %apply (float* IN_ARRAY1, int DIM1 ) {(const float* _data, int _n )};
-%apply (double* IN_ARRAY1, int DIM1 ) {(const double* _data, int _n )};
+
+%apply (int* IN_ARRAY2, int DIM1, int DIM2 ) {(const int* _data, int _m, int _n )};
 %apply (float* IN_ARRAY2, int DIM1, int DIM2 ) {(const float* _data, int _m, int _n )};
+
 
 %include "include/hilma/Mesh.h"
 %include "include/hilma/Material.h"

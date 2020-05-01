@@ -53,7 +53,7 @@ void Mesh::add(const Mesh& _mesh) {
 }
 
 
-
+// Vertices
 
 void Mesh::addVertex(const glm::vec3& _point) {
    vertices.push_back(_point);
@@ -70,8 +70,15 @@ void Mesh::addVertex(const float* _data, int _n) {
         addVertex(_data[0], _data[1], 0.0);
 }
 
-void Mesh::addVertices(const glm::vec3* verts, int amt) {
-   vertices.insert(vertices.end(),verts,verts+amt);
+
+void Mesh::addVertices(const float* _data, int _n) {
+    size_t tail = vertices.size();
+    vertices.resize(tail+_n/3);
+    std::memcpy(&vertices[tail], _data, sizeof(float) * _n);
+}
+
+void Mesh::addVertices(const glm::vec3* _data, int _amt) {
+   vertices.insert(vertices.end(),_data,_data+_amt);
 }
 
 void Mesh::addVertices(const float* _data, int _m, int _n) {
@@ -84,6 +91,8 @@ void Mesh::addVertices(const std::vector<glm::vec3>& _verts) {
 }
 
 
+
+// Color
 
 void Mesh::setColor(const glm::vec4& _color) {
     colors.clear();
@@ -121,28 +130,44 @@ void Mesh::addColors(const std::vector<glm::vec4>& _colors) {
     colors.insert(colors.end(), _colors.begin(), _colors.end());
 }
 
+void Mesh::addColors(const glm::vec4* _data, int _n) {
+   colors.insert(colors.end(),_data,_data+_n);
+}
+void Mesh::addColors(const float* _data, int _m, int _n) {
+    for (int i = 0; i < _m; i++)
+        addColor(&_data[i*_n], _n);
+}
 
-
-
+// Normals
 void Mesh::addNormal(const glm::vec3& _normal) {
     normals.push_back(_normal);
 }
 
 void Mesh::addNormal(const float* _data, int _n) {
-    if (_n == 3)
-        addNormal(_data[0], _data[1], _data[2]);
+    if (_n != 3) return;
+
+    addNormal(_data[0], _data[1], _data[2]);
 }
 
 void Mesh::addNormal(float _nX, float _nY, float _nZ) {
     addNormal( glm::vec3(_nX, _nY, _nZ) );
 }
 
-void Mesh::addNormals(const std::vector<glm::vec3>& _normals ) {
-    normals.insert(normals.end(), _normals.begin(), _normals.end());
+void Mesh::addNormals(const glm::vec3* _data, int _n) {
+    normals.insert(normals.end(),_data,_data+_n);
+}
+
+void Mesh::addNormals(const float* _data, int _m, int _n) {
+    for (int i = 0; i < _m; i++)
+        addNormal(&_data[i*_n], _n);
+}
+
+void Mesh::addNormals(const std::vector<glm::vec3>& _data ) {
+    normals.insert(normals.end(), _data.begin(), _data.end());
 }
 
 
-
+// Tangents
 void  Mesh::addTangent(const glm::vec4& _tangent) {
     tangents.push_back(_tangent);
 }
@@ -157,7 +182,7 @@ void Mesh::addTangent(float _x, float _y, float _z, float _w) {
 }
 
 
-
+// TexCoords
 
 void Mesh::addTexCoord(const glm::vec2& _uv) {
     texcoords.push_back(_uv);
@@ -172,11 +197,21 @@ void Mesh::addTexCoord(float _tX, float _tY) {
     addTexCoord( glm::vec2(_tX, _tY) );
 }
 
-void Mesh::addTexCoords(const std::vector<glm::vec2>& _uvs) {
-    texcoords.insert(texcoords.end(), _uvs.begin(), _uvs.end());
+
+void Mesh::addTexCoords(const glm::vec2* _data, int _n) {
+    texcoords.insert(texcoords.end(),_data,_data+_n);
 }
 
+void Mesh::addTexCoords(const float* _data, int _m, int _n) {
+    for (int i = 0; i < _m; i++)
+        addTexCoord(&_data[i*_n], _n);
+}
 
+void Mesh::addTexCoords(const std::vector<glm::vec2>& _data) {
+    texcoords.insert(texcoords.end(), _data.begin(), _data.end());
+}
+
+// Indices
 
 void Mesh::addIndex(int _i) {
     indices.push_back(_i);
@@ -186,11 +221,23 @@ void Mesh::addIndices(const int* _data, int _n) {
     indices.insert(indices.end(),_data,_data+_n);
 }
 
+void Mesh::addIndices(const int* _data, int _m, int _n) {
+    if (_n == 2) {
+        for (int i = 0; i < _m; i++)
+            addLine(_data[i*_n], _data[i*_n+1]);
+    }
+    else if (_n == 3) {
+        for (int i = 0; i < _m; i++)
+            addTriangle(_data[i*_n], _data[i*_n+1], _data[i*_n+2]);
+    }
+}
+
 void Mesh::addIndices(const std::vector<int>& _data) {
     indices.insert(indices.end(),_data.begin(),_data.end());
 }
 
 
+// Special Grouping
 
 void Mesh::addLine( int _index1, int _index2 ){
     addIndex(_index1);

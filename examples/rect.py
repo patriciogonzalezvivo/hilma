@@ -9,46 +9,34 @@ from __future__ import unicode_literals
 from hilma import Mesh, PlyOps
 
 import numpy as np
-from math import ceil
-
-def tessRect( mesh, width, height, precision = 1.0, z = 0.0, color = None):
-    offset = mesh.getVerticesTotal()
-    normal = [0., 0., 1.]
-
-    w = ceil(width / precision)
-    h = ceil(height / precision)
-    for y in range(0, int(h)):
-        for x in range(0, int(w)):
-            mesh.addVertex( [float(x) * precision - float(width) * 0.5, 
-                             float(y) * precision - float(height) * 0.5, 
-                             z] )
-            if color:
-                mesh.addColor( color )
-            mesh.addNormal( normal )
-            mesh.addTexCoord( [float(x)/float(w-1), float(y)/float(h-1)] )
-    
-    for y in range(0, int(h)-1):
-        for x in range(0, int(w)-1):
-            if x%2 == 0:
-                mesh.addTriangle(   offset + x + y * w,               # a
-                                    offset + (x + 1) + y * w,         # b
-                                    offset + x + (y + 1) * w)         # d
-                
-                mesh.addTriangle(   offset + (x + 1) + y * w,         # b
-                                    offset + (x + 1) + (y + 1) * w,   # c
-                                    offset + x + (y + 1) * w)         # d
-            else:
-                mesh.addTriangle(   offset + (x + 1) + (y + 1) * w,   # c
-                                    offset + x + y * w,               # a
-                                    offset + (x + 1 ) + y * w)        # b
-                
-                mesh.addTriangle(   offset + (x + 1) + (y + 1) * w,   # c
-                                    offset + x + (y + 1) * w,         # d
-                                    offset + x + y * w)               # a
-    return mesh
 
 
-mesh = Mesh()
-tessRect(mesh, 10, 10)
-PlyOps.save("rect.ply", mesh, False)
+size = 1024
+half = size/2.0
+
+
+# 1 -- 2  
+# |    |
+# 0 -- 3
+
+mesh_A = Mesh()
+mesh_A.addVertices( [ [-half, -half], [-half, half], [half, half], [half, -half] ] )
+mesh_A.addIndices( [( 1, 0, 3 ), (1, 3, 2)] ) 
+PlyOps.save("rect_A.ply", mesh_A, False)
+
+mesh_B = Mesh()
+mesh_B.addVertices( [ (-half, -half, 0.0), (-half, half, 0.0), (half, half, 0.0), (half, -half, 0.0) ] )
+mesh_B.addIndices( [ (1, 0, 3 ), (1, 3, 2)] ) 
+PlyOps.save("rect_B.ply", mesh_B, False)
+
+mesh_C = Mesh()
+mesh_C.addVertices( [ [-half, -half, 0.0], [-half, half, 0.0], [half, half, 0.0], [half, -half, 0.0] ] )
+mesh_C.addIndices( [ [1, 0, 3] , [1, 3, 2] ] ) 
+PlyOps.save("rect_C.ply", mesh_C, False)
+
+mesh_D = Mesh()
+mesh_D.addVertices( np.array([ [-half, -half, 0.0], [-half, half, 0.0], [half, half, 0.0], [half, -half, 0.0] ], dtype=np.float32) )
+mesh_D.addIndices( np.array([ [1, 0, 3], [1, 3, 2] ], dtype=np.int32) ) 
+PlyOps.save("rect_D.ply", mesh_D, False)
+
 
