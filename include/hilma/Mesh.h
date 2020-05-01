@@ -50,7 +50,7 @@ public:
     const bool  hasColors() const { return !colors.empty(); }
     // void        addColors(const glm::vec4* _data, int _n);
     void        addColors(const std::vector<glm::vec4>& _colors);
-    int         getColorssTotal() const { return colors.size(); }
+    int         getColorsTotal() const { return colors.size(); }
 
     void        addNormal(const glm::vec3& _normal);
     void        addNormal(const float* _data, int _n);

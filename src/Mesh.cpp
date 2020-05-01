@@ -178,7 +178,6 @@ void Mesh::addTexCoords(const std::vector<glm::vec2>& _uvs) {
 
 
 
-
 void Mesh::addIndex(int _i) {
     indices.push_back(_i);
 }

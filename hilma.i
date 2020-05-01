@@ -2,7 +2,6 @@
 %include "typemaps.i"
 %include <std_vector.i>
 %include <std_string.i>
-// %include "numpy.i"
 
 %ignore *::operator[];
 %ignore *::operator=;
@@ -37,8 +36,8 @@
 
 %include "include/hilma/Mesh.h"
 %include "include/hilma/Material.h"
-// %include "include/hilma/io/ObjOps.h"
 %include "include/hilma/io/PlyOps.h"
+// %include "include/hilma/io/ObjOps.h"
 
 using namespace hilma;
 

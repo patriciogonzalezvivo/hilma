@@ -3,5 +3,5 @@
 *.so
 build/*
 cbuild/*
-hypatia_wrap.cxx
-hypatia.py
+hilma_wrap.cxx
+hilma.py
