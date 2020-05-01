@@ -128,7 +128,7 @@ bool PlyOps::load( const std::string& _filename, Mesh& _mesh ) {
 
             if (normals) {
                 if (normals->t == tinyply::Type::FLOAT32) {
-                    const size_t numNormalsBytes = vertices->buffer.size_bytes();
+                    const size_t numNormalsBytes = normals->buffer.size_bytes();
                     _mesh.normals.resize(normals->count);
                     std::memcpy(_mesh.normals.data(), normals->buffer.get(), numNormalsBytes);
                 }
@@ -136,7 +136,7 @@ bool PlyOps::load( const std::string& _filename, Mesh& _mesh ) {
 
             if (texcoords) {
                 if (texcoords->t == tinyply::Type::FLOAT32) {
-                    const size_t numTexcoordsBytes = vertices->buffer.size_bytes();
+                    const size_t numTexcoordsBytes = texcoords->buffer.size_bytes();
                     _mesh.texcoords.resize(texcoords->count);
                     std::memcpy(_mesh.texcoords.data(), texcoords->buffer.get(), numTexcoordsBytes);
                 }
@@ -182,8 +182,6 @@ bool PlyOps::save( const std::string& _filename, Mesh& _mesh, bool _binnary  ) {
     if (_mesh.hasIndices()) {
 
         if (_mesh.getPrimitive() == TRIANGLES ) {
-            // std::vector<glm::ivec3> faces = _mesh.getTriangles();
-            // std::cout << faces.size() << std::endl;
             file.add_properties_to_element("face", { "vertex_indices" },
             tinyply::Type::INT32, _mesh.indices.size()/3 , reinterpret_cast<uint8_t*>(_mesh.indices.data()), tinyply::Type::UINT8, 3);
         }

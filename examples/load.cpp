@@ -10,7 +10,7 @@ int main(int argc, char **argv) {
 
     hilma::Mesh mesh;
 
-    hilma::PlyOps::load("head.ply", mesh);
+    hilma::PlyOps::load("cube.ply", mesh);
 
     std::cout << "vertices: " << mesh.getVerticesTotal() << std::endl;
     std::cout << "normals: " << mesh.getNormalsTotal() << std::endl;
