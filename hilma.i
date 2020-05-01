@@ -1,5 +1,5 @@
 %module hilma
-%include "typemaps.i"
+%include <typemaps.i>
 %include <std_vector.i>
 %include <std_string.i>
 
@@ -28,12 +28,11 @@
     import_array();
 %}
 
-%apply (int* IN_ARRAY1, int DIM1 ) {(const int* _data, int _n )};
-%apply (float* IN_ARRAY1, int DIM1 ) {(const float* _data, int _n )};
+%apply (int* IN_ARRAY1, int DIM1 ) {(const int* _array1D, int _n )};
+%apply (int* IN_ARRAY2, int DIM1, int DIM2 ) {(const int* _array2D, int _m, int _n )};
 
-%apply (int* IN_ARRAY2, int DIM1, int DIM2 ) {(const int* _data, int _m, int _n )};
-%apply (float* IN_ARRAY2, int DIM1, int DIM2 ) {(const float* _data, int _m, int _n )};
-
+%apply (float* IN_ARRAY1, int DIM1 ) {(const float* _array1D, int _n )};
+%apply (float* IN_ARRAY2, int DIM1, int DIM2 ) {(const float* _array2D, int _m, int _n )};
 
 %include "include/hilma/Mesh.h"
 %include "include/hilma/Material.h"

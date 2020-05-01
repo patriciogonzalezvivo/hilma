@@ -30,14 +30,8 @@ void Mesh::clear() {
     // if (!m_edge_indices.empty()) m_edge_indices.clear();
 }
 
-
-
-
 void Mesh::append(const Mesh& _mesh) {
-
     int indexOffset = (int)m_vertices.size();
-
-    int prevNumVertices = static_cast<int>(m_vertices.size());
 
 	if (_mesh.hasVertices())
 		m_vertices.insert(m_vertices.end(), _mesh.m_vertices.begin(), _mesh.m_vertices.end());
@@ -63,7 +57,7 @@ void Mesh::append(const Mesh& _mesh) {
 
 
 // Vertices
-
+//
 void Mesh::addVertex(const glm::vec3& _point) {
    m_vertices.push_back(_point);
 }
@@ -79,12 +73,11 @@ void Mesh::addVertex(const float* _data, int _n) {
         addVertex(_data[0], _data[1], 0.0);
 }
 
-
-void Mesh::addVertices(const float* _data, int _n) {
-    size_t tail = m_vertices.size();
-    m_vertices.resize(tail+_n/3);
-    std::memcpy(&m_vertices[tail], _data, sizeof(float) * _n);
-}
+// void Mesh::addVertices(const float* _data, int _n) {
+//     size_t tail = m_vertices.size();
+//     m_vertices.resize(tail+_n/3);
+//     std::memcpy(&m_vertices[tail], _data, sizeof(float) * _n);
+// }
 
 void Mesh::addVertices(const float* _data, int _m, int _n) {
     for (int i = 0; i < _m; i++)
@@ -93,7 +86,7 @@ void Mesh::addVertices(const float* _data, int _m, int _n) {
 
 
 // Color
-
+//
 void Mesh::setColor(const glm::vec4& _color) {
     m_colors.clear();
     for (uint32_t i = 0; i < m_vertices.size(); i++)
@@ -132,6 +125,7 @@ void Mesh::addColors(const float* _data, int _m, int _n) {
 }
 
 // Normals
+//
 void Mesh::addNormal(const glm::vec3& _normal) {
     m_normals.push_back(_normal);
 }
@@ -151,7 +145,9 @@ void Mesh::addNormals(const float* _data, int _m, int _n) {
         addNormal(&_data[i*_n], _n);
 }
 
+
 // Tangents
+//
 void  Mesh::addTangent(const glm::vec4& _tangent) {
     m_tangents.push_back(_tangent);
 }
@@ -167,7 +163,7 @@ void Mesh::addTangent(float _x, float _y, float _z, float _w) {
 
 
 // TexCoords
-
+//
 void Mesh::addTexCoord(const glm::vec2& _uv) {
     m_texcoords.push_back(_uv);
 }
@@ -189,7 +185,7 @@ void Mesh::addTexCoords(const float* _data, int _m, int _n) {
 
 
 // Indices
-
+//
 void Mesh::addIndex(int _i) {
     m_indices.push_back(_i);
 }
@@ -198,7 +194,10 @@ void Mesh::addIndices(const int* _data, int _n) {
     m_indices.insert(m_indices.end(),_data,_data+_n);
 }
 
-void Mesh::addIndices(const int* _data, int _m, int _n) {
+
+// Faces Grouping
+//
+void Mesh::addFaces(const int* _data, int _m, int _n) {
     if (_n == 2) {
         for (int i = 0; i < _m; i++)
             addLine(_data[i*_n], _data[i*_n+1]);
@@ -208,9 +207,6 @@ void Mesh::addIndices(const int* _data, int _m, int _n) {
             addTriangle(_data[i*_n], _data[i*_n+1], _data[i*_n+2]);
     }
 }
-
-// Special Grouping
-
 void Mesh::addLine( int _index1, int _index2 ){
     addIndex(_index1);
     addIndex(_index2);
