@@ -19,7 +19,7 @@ sudo make install
 
 ```cpp
 #include "hilma/Mesh.h"
-#include "hilma/io/PlyOps.h"
+#include "hilma/io/ply.h"
 
 int main(int argc, char **argv) {
 
@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
     hilma::Mesh mesh;
     mesh.addVertices( &vertices[0][0], 4, 2);
     mesh.addIndices( &indices[0][0], 2, 3);
-    hilma::PlyOps::save("rect.ply", mesh, false);
+    hilma::savePly("rect.ply", mesh, false);
 
     return 1;
 }
@@ -53,12 +53,12 @@ Then you can use it as follow:
 
 ```python
 
-from hilma import Mesh, PlyOps
+from hilma import Mesh, savePly
 
 mesh = Mesh()
 mesh.addVertices( [ [-1.0, -1.0], [-1.0, 1.0], [1.0, 1.0], [1.0, -1.0] ] )
 mesh.addIndices( [( 1, 0, 3 ), (1, 3, 2)] ) 
-PlyOps.save("rect.ply", mesh, False)
+savePly("rect.ply", mesh, False)
 
 ```
 

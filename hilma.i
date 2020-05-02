@@ -17,8 +17,13 @@
     #define SWIG_FILE_WITH_INIT
     #include "hilma/Mesh.h"
     #include "hilma/Material.h"
-    #include "hilma/io/ObjOps.h"
-    #include "hilma/io/PlyOps.h"
+    #include "hilma/BoundingBox.h"
+    #include "hilma/Polyline.h"
+    #include "hilma/transform.h"
+    #include "hilma/generate.h"
+    #include "hilma/compute.h"
+    #include "hilma/io/obj.h"
+    #include "hilma/io/ply.h"
     #include "hilma/io/tinyply.h"
     #include "hilma/io/tiny_obj_loader.h"
 %}
@@ -36,8 +41,13 @@
 
 %include "include/hilma/Mesh.h"
 %include "include/hilma/Material.h"
-%include "include/hilma/io/PlyOps.h"
-// %include "include/hilma/io/ObjOps.h"
+%include "include/hilma/BoundingBox.h"
+%include "include/hilma/Polyline.h"
+%include "include/hilma/transform.h"
+%include "include/hilma/generate.h"
+%include "include/hilma/compute.h"
+%include "include/hilma/io/ply.h"
+// %include "include/hilma/io/obj.h"
 
 using namespace hilma;
 

@@ -4,13 +4,13 @@
 #include <iostream>
 
 #include "hilma/Mesh.h"
-#include "hilma/io/PlyOps.h"
+#include "hilma/io/ply.h"
 
 int main(int argc, char **argv) {
 
     hilma::Mesh mesh;
 
-    hilma::PlyOps::load("cube.ply", mesh);
+    hilma::loadPly("cube.ply", mesh);
 
     std::cout << "vertices: " << mesh.getVerticesTotal() << std::endl;
     std::cout << "normals: " << mesh.getNormalsTotal() << std::endl;
@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
     std::cout << "texcoords: " << mesh.getTexCoordsTotal() << std::endl;
     std::cout << "indices: " << mesh.getIndicesTotal() << std::endl;
 
-    hilma::PlyOps::save("out.ply", mesh, false);
+    hilma::savePly("out.ply", mesh, false);
 
     return 1;
 }

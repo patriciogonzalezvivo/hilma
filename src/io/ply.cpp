@@ -8,11 +8,11 @@
 #define TINYPLY_IMPLEMENTATION
 #include "hilma/io/tinyply.h"
 
-#include "hilma/io/PlyOps.h"
+#include "hilma/io/ply.h"
 
 namespace hilma {
 
-bool PlyOps::load( const std::string& _filename, Mesh& _mesh ) {
+bool loadPly( const std::string& _filename, Mesh& _mesh ) {
     std::unique_ptr<std::istream> file_stream;
 
     try
@@ -155,7 +155,7 @@ bool PlyOps::load( const std::string& _filename, Mesh& _mesh ) {
     return true;
 }
 
-bool PlyOps::save( const std::string& _filename, Mesh& _mesh, bool _binnary  ) {
+bool savePly( const std::string& _filename, Mesh& _mesh, bool _binnary  ) {
 
     std::filebuf fb;
     fb.open(_filename.c_str(), std::ios::out | std::ios::binary);

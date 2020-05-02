@@ -6,8 +6,9 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from hilma import Mesh, PlyOps
+from hilma import Mesh, loadPly, savePly
 
 mesh = Mesh()
-PlyOps.load("head.ply", mesh)
+loadPly("head.ply", mesh)
+savePly("out.ply", mesh, False)
 

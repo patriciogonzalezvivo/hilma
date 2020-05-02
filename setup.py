@@ -26,8 +26,11 @@ hilma_module = Extension(
     'hilma_wrap.cxx',
     'src/Mesh.cpp',
     'src/Material.cpp',
-    'src/io/ObjOps.cpp',
-    'src/io/PlyOps.cpp',
+    'src/Polyline.cpp',
+    'src/compute.cpp',
+    'src/transform.cpp',
+    'src/io/obj.cpp',
+    'src/io/ply.cpp',
    ],
    swig_opts = ['-c++']
 )

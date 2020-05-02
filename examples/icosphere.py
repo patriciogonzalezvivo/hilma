@@ -6,7 +6,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from hilma import Mesh, PlyOps
+from hilma import Mesh, savePly
 
 import numpy as np
 from math import cos, sin, sqrt
@@ -191,5 +191,5 @@ def icosphere(mesh, radius=1, resolution=2, color=None):
 
 mesh = Mesh()
 icosphere(mesh, 1, 1)
-PlyOps.save("icosphere.ply", mesh, False)
+savePly("icosphere.ply", mesh, False)
 

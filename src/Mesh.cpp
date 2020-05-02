@@ -74,9 +74,9 @@ void Mesh::addVertex(const float* _data, int _n) {
 }
 
 // void Mesh::addVertices(const float* _data, int _n) {
-//     size_t tail = m_vertices.size();
-//     m_vertices.resize(tail+_n/3);
-//     std::memcpy(&m_vertices[tail], _data, sizeof(float) * _n);
+    // size_t tail = m_vertices.size();
+    // m_vertices.resize(tail+_n/3);
+    // std::memcpy(&m_vertices[tail], _data, sizeof(float) * _n);
 // }
 
 void Mesh::addVertices(const float* _data, int _m, int _n) {
@@ -248,7 +248,7 @@ std::vector<glm::ivec3> Mesh::getTriangles() const {
     return faces;
 }
 
-void Mesh::setMode(ModeType _mode, bool _compute) {
+void Mesh::setMode(PrimitiveMode _mode, bool _compute) {
     m_mode = _mode;
 
     if (!hasVertices())

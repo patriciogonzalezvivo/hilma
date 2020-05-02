@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "hilma/Mesh.h"
-#include "hilma/io/PlyOps.h"
+#include "hilma/io/ply.h"
 
 int main(int argc, char **argv) {
 
@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    hilma::PlyOps::save("plane.ply", mesh, false);
+    hilma::savePly("plane.ply", mesh, false);
 
     return 1;
 }

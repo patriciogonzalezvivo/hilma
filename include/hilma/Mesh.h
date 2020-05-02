@@ -1,13 +1,12 @@
 #pragma once
 
 #include <vector>
-#include <string>
 
 #include "hilma/Material.h"
 
 namespace hilma {
 
-enum ModeType {
+enum PrimitiveMode {
     UNKNOWN     = 0,
     POINTS      = 1,
     LINES       = 2,
@@ -28,8 +27,8 @@ public:
     void        clear();
     void        append(const Mesh& _mesh);
 
-    void        setMode(ModeType _mode = TRIANGLES, bool _compute = false);
-    ModeType    getMode() const { return m_mode; };
+    void        setMode(PrimitiveMode _mode = TRIANGLES, bool _compute = false);
+    PrimitiveMode    getMode() const { return m_mode; };
 
     // Vertices
     void        addVertex(const glm::vec3& _point);
@@ -114,10 +113,31 @@ private:
     // std::vector<int>        m_edge_indices;
     // std::vector<glm::vec4>  m_edge_colors;
 
-    ModeType                m_mode;
+    PrimitiveMode                m_mode;
 
-    friend class PlyOps;
-    friend class ObjOps;
+    friend bool loadPly( const std::string&, Mesh& );
+    friend bool savePly( const std::string&, Mesh&, bool);
+    friend bool saveObj( const std::string&, Mesh& );
+
+    friend void scale(Mesh&, float );
+    friend void scaleX(Mesh&, float );
+    friend void scaleY(Mesh&, float );
+    friend void scaleZ(Mesh&, float );
+    friend void scale(Mesh&, const glm::vec3& );
+    friend void scale(Mesh&, float , float , float );
+
+    friend void translateX(Mesh&, float );
+    friend void translateY(Mesh&, float );
+    friend void translateZ(Mesh&, float );
+    friend void translate(Mesh&, const glm::vec3& );
+    friend void translate(Mesh&, float , float , float );
+
+    friend void rotateX(Mesh&, float );
+    friend void rotateY(Mesh&, float );
+    friend void rotateZ(Mesh&, float );
+    friend void rotate(Mesh&, float , float, float, float );
+
+    friend void center(Mesh&);
 };
 
 }
