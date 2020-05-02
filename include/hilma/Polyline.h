@@ -30,8 +30,6 @@ public:
     const std::vector<glm::vec3> & getPoints() const;
     glm::vec3               getPointAt(const float &_dist) const;
 
-    bool                    isInside(float _x, float _y);
-
     size_t                  size() const { return m_points.size(); }
     bool                    empty() const { return size() == 0; }
 

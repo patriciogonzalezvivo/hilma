@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "hilma/Material.h"
+#include "hilma/BoundingBox.h"
 
 namespace hilma {
 
@@ -135,9 +136,12 @@ private:
     friend void rotateX(Mesh&, float );
     friend void rotateY(Mesh&, float );
     friend void rotateZ(Mesh&, float );
+    friend void rotate(Mesh&, float, const glm::vec3& );
     friend void rotate(Mesh&, float , float, float, float );
 
     friend void center(Mesh&);
+
+    friend BoundingBox getBoundingBox(const Mesh&);
 };
 
 }

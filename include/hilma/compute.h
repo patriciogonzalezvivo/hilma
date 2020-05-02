@@ -5,11 +5,21 @@
 
 namespace hilma {
 
-BoundingBox              boundingBox(const std::vector<glm::vec3>& _points);
-// glm::vec3                centroid(const std::vector<glm::vec3>& _points);
-// float                    area(const std::vector<glm::vec3>& _points);
+// 2D
+bool                    isInside(const std::vector<glm::vec2> _points, const glm::vec2 _v);
+void                    simplify(std::vector<glm::vec2>& _points, float _tolerance=0.3f);
+std::vector<glm::vec2>  getSimplify(const std::vector<glm::vec2>& _points, float _tolerance=0.3f);
+std::vector<glm::vec2>  getConvexHul(const std::vector<glm::vec2>& _points);
+float                   getArea(const std::vector<glm::vec2>& _points);
 
-// std::vector<glm::vec3>   simplify(const std::vector<glm::vec3>& _points, float _tolerance=0.3f);
-// std::vector<glm::vec3>   convexHul(const std::vector<glm::vec3>& _points, float _tolerance=0.3f);
+// 2D & 3D
+BoundingBox             getBoundingBox(const Mesh& _mesh);
+BoundingBox             getBoundingBox(const std::vector<glm::vec2>& _points);
+BoundingBox             getBoundingBox(const std::vector<glm::vec3>& _points);
+
+glm::vec2               getCentroid(const std::vector<glm::vec2>& _points);
+glm::vec3               getCentroid(const std::vector<glm::vec3>& _points);
+
+// 3D
 
 }

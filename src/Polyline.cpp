@@ -105,32 +105,3 @@ std::vector<Polyline> Polyline::splitAt(float _dist){
     }
     return RTA;
 }
-
-// http://www.geeksforgeeks.org/how-to-check-if-a-given-point-lies-inside-a-polygon/
-//
-bool Polyline::isInside(float _x, float _y){
-	int counter = 0;
-	double xinters;
-    glm::vec3 p1,p2;
-
-	int N = size();
-	p1 = m_points[0];
-	for (int i = 1; i <= N; i++) {
-		p2 = m_points[i % N];
-		if (_y > std::min(p1.y, p2.y)) {
-            if (_y <= std::max(p1.y, p2.y)) {
-                if (_x <= std::max(p1.x, p2.x)) {
-                    if (p1.y != p2.y) {
-                        xinters = (_y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y) + p1.x;
-                        if (p1.x == p2.x || _x <= xinters)
-                            counter++;
-                    }
-                }
-            }
-		}
-		p1 = p2;
-	}
-
-	if (counter % 2 == 0) return false;
-	else return true;
-}
