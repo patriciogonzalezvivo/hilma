@@ -309,11 +309,45 @@ bool Mesh::computeNormals() {
 
     //Normalize the normal's length and add it.
     m_normals.clear();
-    for (int i=0; i<nV; i++) {
+    for (int i=0; i<nV; i++)
         addNormal( glm::normalize(norm[i]) );
-    }
 
     return true;
+}
+
+void Mesh::flatNormals() {
+    if( getMode() == TRIANGLES) {
+        
+        // get copy original mesh data
+        size_t numIndices = m_indices.size();
+        std::vector<int> indices = m_indices;
+        std::vector<glm::vec3> verts = m_vertices;
+        std::vector<glm::vec4> colors = m_colors;
+        std::vector<glm::vec2> texCoords = m_texcoords;
+        
+        // remove all data to start from scratch
+        clear();
+        
+        // add mesh data back, duplicating vertices and recalculating normals
+        glm::vec3 normal;
+        for(size_t i = 0; i < numIndices; i++) {
+            size_t indexCurr = indices[i];
+    
+            if (i % 3 == 0) {
+                int indexNext1 = indices[i + 1];
+                int indexNext2 = indices[i + 2];
+                auto e1 = verts[indexCurr] - verts[indexNext1];
+                auto e2 = verts[indexNext2] - verts[indexNext1];
+                normal = glm::normalize(glm::cross(e1, e2));
+            }
+    
+            addIndex(i);
+            addNormal(normal);
+            if(indexCurr < texCoords.size()) addTexCoord(texCoords[indexCurr]);
+            if(indexCurr < verts.size()) addVertex(verts[indexCurr]);
+            if(indexCurr < colors.size()) addColor(colors[indexCurr]);
+        }
+    }
 }
 
 // http://www.terathon.com/code/tangent.html

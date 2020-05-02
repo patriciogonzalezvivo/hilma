@@ -20,7 +20,7 @@ int main(int argc, char **argv) {
         }
     }
 
-    hilma::savePly("plane.ply", mesh, false);
+    hilma::savePly("points_plane.ply", mesh, false);
 
     return 1;
 }

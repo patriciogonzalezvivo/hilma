@@ -15,13 +15,14 @@
 
 %{
     #define SWIG_FILE_WITH_INIT
-    #include "hilma/Mesh.h"
-    #include "hilma/Material.h"
     #include "hilma/BoundingBox.h"
+    #include "hilma/compute.h"
+    #include "hilma/generate.h"
+    #include "hilma/Material.h"
+    #include "hilma/math.h"
+    #include "hilma/Mesh.h"
     #include "hilma/Polyline.h"
     #include "hilma/transform.h"
-    #include "hilma/generate.h"
-    #include "hilma/compute.h"
     #include "hilma/io/obj.h"
     #include "hilma/io/ply.h"
     #include "hilma/io/tinyply.h"

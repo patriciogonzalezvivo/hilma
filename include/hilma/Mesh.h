@@ -11,11 +11,10 @@ enum PrimitiveMode {
     UNKNOWN     = 0,
     POINTS      = 1,
     LINES       = 2,
-    TRIANGLES   = 3 //,
-    // QUADS       = 4,
-    // LINE_STRIP  = 5,
-    // TRIANGLES_STRIP = 6,
-    // TRIANGLES_FAN   = 7
+    TRIANGLES   = 3,
+    LINE_STRIP,
+    TRIANGLE_STRIP,
+    TRIANGLE_FAN
 };
 
 class Mesh {
@@ -83,6 +82,7 @@ public:
 
     const bool  hasTangents() const { return !m_tangents.empty(); }
     bool        computeTangents();
+    void        flatNormals();
 
     // Indices
     void        addIndex(int _i);

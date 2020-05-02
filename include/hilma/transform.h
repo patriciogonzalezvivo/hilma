@@ -47,6 +47,6 @@ void rotateZ(Mesh& _mesh, float _rad);
 void rotate(Mesh& _mesh, float _rad, const glm::vec3& _axis );
 void rotate(Mesh& _mesh, float _rad, float _x, float _y, float _z );
 
-inline void center(Mesh& _mesh) { };
+inline void center(Mesh& _mesh) { center(_mesh.m_vertices); };
 
 }

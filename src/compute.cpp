@@ -4,29 +4,6 @@
 
 namespace hilma {
 
-BoundingBox getBoundingBox(const Mesh& _mesh) {
-    return getBoundingBox(_mesh.m_vertices);
-}
-
-BoundingBox getBoundingBox(const std::vector<glm::vec2>& _points ) {
-    BoundingBox bbox;
-
-    for(std::vector<glm::vec2>::const_iterator it = _points.begin(); it != _points.end(); ++it)
-        bbox.expand(*it);
-    
-    return bbox;
-}
-
-BoundingBox getBoundingBox(const std::vector<glm::vec3>& _points ) {
-    BoundingBox bbox;
-
-    for(std::vector<glm::vec3>::const_iterator it = _points.begin(); it != _points.end(); ++it)
-        bbox.expand(*it);
-    
-    return bbox;
-}
-
-
 //This is for polygon/contour simplification - we use it to reduce the number of m_points needed in
 //representing the letters as openGL shapes - will soon be moved to ofGraphics.cpp
 
@@ -153,32 +130,33 @@ void simplify(std::vector<glm::vec2>& _points, float _tolerance) {
     }
 }
 
-glm::vec2 getCentroid(const std::vector<glm::vec2>& _points) {
-    glm::vec2 centroid;
-    for (uint32_t i = 0; i < _points.size(); i++) {
-        centroid += _points[i] / (float)_points.size();
+// http://www.geeksforgeeks.org/how-to-check-if-a-given-point-lies-inside-a-polygon/
+//
+bool isInside(const std::vector<glm::vec2> _points, const glm::vec2 _v) {
+    int counter = 0;
+    double xinters;
+    glm::vec2 p1,p2;
+
+    size_t N = _points.size();
+    p1 = _points[0];
+    for (size_t i = 1; i <= N; i++) {
+        p2 = _points[i % N];
+        if (_v.y > std::min(p1.y, p2.y)) {
+            if (_v.y <= std::max(p1.y, p2.y)) {
+                if (_v.x <= std::max(p1.x, p2.x)) {
+                    if (p1.y != p2.y) {
+                        xinters = (_v.y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y) + p1.x;
+                        if (p1.x == p2.x || _v.x <= xinters)
+                            counter++;
+                    }
+                }
+            }
+        }
+        p1 = p2;
     }
-    return centroid;
-}
 
-glm::vec3 getCentroid(const std::vector<glm::vec3>& _points) {
-    glm::vec3 centroid;
-    for (uint32_t i = 0; i < _points.size(); i++) {
-        centroid += _points[i] / (float)_points.size();
-    }
-    return centroid;
-}
-
-float getArea(const std::vector<glm::vec3>& _points) {
-    float area = 0.0;
-
-    for(int i=0;i<(int)_points.size()-1;i++) {
-        area += _points[i].x * _points[i+1].y - _points[i+1].x * _points[i].y;
-    }
-    area += _points[_points.size()-1].x * _points[0].y - _points[0].x * _points[_points.size()-1].y;
-    area *= 0.5;
-
-    return area;
+    if (counter % 2 == 0) return false;
+    else return true;
 }
 
 
@@ -259,33 +237,55 @@ std::vector<glm::vec2> getConvexHull(const std::vector<glm::vec2>& _points) {
 }
 
 
-// http://www.geeksforgeeks.org/how-to-check-if-a-given-point-lies-inside-a-polygon/
-//
-bool isInside(const std::vector<glm::vec2> _points, const glm::vec2 _v) {
-	int counter = 0;
-	double xinters;
-    glm::vec2 p1,p2;
 
-	size_t N = _points.size();
-	p1 = _points[0];
-	for (size_t i = 1; i <= N; i++) {
-		p2 = _points[i % N];
-		if (_v.y > std::min(p1.y, p2.y)) {
-            if (_v.y <= std::max(p1.y, p2.y)) {
-                if (_v.x <= std::max(p1.x, p2.x)) {
-                    if (p1.y != p2.y) {
-                        xinters = (_v.y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y) + p1.x;
-                        if (p1.x == p2.x || _v.x <= xinters)
-                            counter++;
-                    }
-                }
-            }
-		}
-		p1 = p2;
-	}
+float getArea(const std::vector<glm::vec2>& _points) {
+    float area = 0.0;
 
-	if (counter % 2 == 0) return false;
-	else return true;
+    for(int i=0;i<(int)_points.size()-1;i++) {
+        area += _points[i].x * _points[i+1].y - _points[i+1].x * _points[i].y;
+    }
+    area += _points[_points.size()-1].x * _points[0].y - _points[0].x * _points[_points.size()-1].y;
+    area *= 0.5;
+
+    return area;
+}
+
+glm::vec2 getCentroid(const std::vector<glm::vec2>& _points) {
+    glm::vec2 centroid;
+    for (uint32_t i = 0; i < _points.size(); i++) {
+        centroid += _points[i] / (float)_points.size();
+    }
+    return centroid;
+}
+
+glm::vec3 getCentroid(const std::vector<glm::vec3>& _points) {
+    glm::vec3 centroid;
+    for (uint32_t i = 0; i < _points.size(); i++) {
+        centroid += _points[i] / (float)_points.size();
+    }
+    return centroid;
+}
+
+BoundingBox getBoundingBox(const Mesh& _mesh) {
+    return getBoundingBox(_mesh.m_vertices);
+}
+
+BoundingBox getBoundingBox(const std::vector<glm::vec2>& _points ) {
+    BoundingBox bbox;
+
+    for(std::vector<glm::vec2>::const_iterator it = _points.begin(); it != _points.end(); ++it)
+        bbox.expand(*it);
+    
+    return bbox;
+}
+
+BoundingBox getBoundingBox(const std::vector<glm::vec3>& _points ) {
+    BoundingBox bbox;
+
+    for(std::vector<glm::vec3>::const_iterator it = _points.begin(); it != _points.end(); ++it)
+        bbox.expand(*it);
+    
+    return bbox;
 }
 
 }

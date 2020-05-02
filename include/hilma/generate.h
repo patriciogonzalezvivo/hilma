@@ -4,7 +4,7 @@
 
 namespace hilma {
 
-// Mesh plane(float width, float height, int columns, int rows, PrimitiveMode mode );
+Mesh plane(float _width, float _height, int _columns, int _rows, PrimitiveMode _mode = TRIANGLES);
 // Mesh cube( float _size );
 // Mesh box( float width, float height, float depth, int resX, int resY, int resZ );
 // Mesh sphere( float radius, int res, PrimitiveMode mode );
