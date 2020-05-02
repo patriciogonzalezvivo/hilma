@@ -7,8 +7,14 @@ file(GLOB ROOT_SOURCE "./*.cpp")
 file(GLOB IO_HEADER "../include/hypatia/io/*.h")
 file(GLOB IO_SOURCE "./io/*.cpp")
 
+file(GLOB OPS_HEADER "../include/hypatia/ops/*.h")
+file(GLOB OPS_SOURCE "./ops/*.cpp")
+
+file(GLOB TYPES_HEADER "../include/hypatia/types/*.h")
+file(GLOB TYPES_SOURCE "./types/*.cpp")
+
 # Make an automatic library - will be static or dynamic based on user setting
-add_library(hilma ${ROOT_SOURCE} ${IO_SOURCE})
+add_library(hilma ${ROOT_SOURCE} ${IO_SOURCE} ${OPS_SOURCE} ${TYPES_SOURCE})
 
 # We need this directory, and users of our library will need it too
 target_include_directories(hilma PUBLIC ../include)
@@ -19,3 +25,5 @@ source_group(TREE "${PROJECT_SOURCE_DIR}/include" PREFIX "Header Files" FILES ${
 install(TARGETS hilma DESTINATION lib)
 install(FILES ${ROOT_HEADER} DESTINATION include/hilma)
 install(FILES ${IO_HEADER} DESTINATION include/hilma/io)
+install(FILES ${OPS_HEADER} DESTINATION include/hilma/ops)
+install(FILES ${TYPES_HEADER} DESTINATION include/hilma/types)

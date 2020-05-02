@@ -15,14 +15,15 @@
 
 %{
     #define SWIG_FILE_WITH_INIT
-    #include "hilma/BoundingBox.h"
-    #include "hilma/compute.h"
-    #include "hilma/generate.h"
-    #include "hilma/Material.h"
     #include "hilma/math.h"
-    #include "hilma/Mesh.h"
-    #include "hilma/Polyline.h"
-    #include "hilma/transform.h"
+    #include "hilma/types/BoundingBox.h"
+    #include "hilma/types/Mesh.h"
+    #include "hilma/types/Material.h"
+    #include "hilma/types/Polyline.h"
+    #include "hilma/ops/compute.h"
+    #include "hilma/ops/generate.h"
+    #include "hilma/ops/transform.h"
+    #include "hilma/ops/earcut.h"
     #include "hilma/io/obj.h"
     #include "hilma/io/ply.h"
     #include "hilma/io/tinyply.h"
@@ -40,13 +41,13 @@
 %apply (float* IN_ARRAY1, int DIM1 ) {(const float* _array1D, int _n )};
 %apply (float* IN_ARRAY2, int DIM1, int DIM2 ) {(const float* _array2D, int _m, int _n )};
 
-%include "include/hilma/Mesh.h"
-%include "include/hilma/Material.h"
-%include "include/hilma/BoundingBox.h"
-%include "include/hilma/Polyline.h"
-%include "include/hilma/transform.h"
-%include "include/hilma/generate.h"
-%include "include/hilma/compute.h"
+%include "include/hilma/types/Mesh.h"
+%include "include/hilma/types/Material.h"
+%include "include/hilma/types/BoundingBox.h"
+%include "include/hilma/types/Polyline.h"
+%include "include/hilma/ops/transform.h"
+%include "include/hilma/ops/generate.h"
+%include "include/hilma/ops/compute.h"
 %include "include/hilma/io/ply.h"
 // %include "include/hilma/io/obj.h"
 
