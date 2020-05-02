@@ -36,7 +36,7 @@ void Mesh::append(const Mesh& _mesh) {
 	if (_mesh.hasVertices())
 		m_vertices.insert(m_vertices.end(), _mesh.m_vertices.begin(), _mesh.m_vertices.end());
 	
-    if (_mesh.hasTexcoords())
+    if (_mesh.hasTexCoords())
 		m_texcoords.insert(m_texcoords.end(), _mesh.m_texcoords.begin(), _mesh.m_texcoords.end());
 	
     if (_mesh.hasColors())
@@ -223,17 +223,17 @@ std::vector<glm::ivec3> Mesh::getTriangles() const {
 
     if (getMode() == TRIANGLES) {
         if (hasIndices()) {
-            for(size_t j = 0; j < m_indices.size(); j += 3) {
+            for (size_t j = 0; j < m_indices.size(); j += 3) {
                 glm::ivec3 tri;
-                for(int k = 0; k < 3; k++)
+                for (int k = 0; k < 3; k++)
                     tri[k] = m_indices[j+k];
                 faces.push_back(tri);
             }
         }
         else {
-            for( size_t j = 0; j < m_vertices.size(); j += 3) {
+            for ( size_t j = 0; j < m_vertices.size(); j += 3) {
                 glm::ivec3 tri;
-                for(int k = 0; k < 3; k++)
+                for (int k = 0; k < 3; k++)
                     tri[k] = j+k;
                 faces.push_back(tri);
             }
@@ -315,6 +315,22 @@ bool Mesh::computeNormals() {
     return true;
 }
 
+void Mesh::invertWindingOrder() {
+    if( getMode() == TRIANGLES) {
+        int tmp;
+        for (size_t i = 0; i < m_indices.size(); i += 3) {
+            tmp = m_indices[i+1];
+            m_indices[i+1] = m_indices[i+2];
+            m_indices[i+2] = tmp;
+        }
+    }
+}
+
+void Mesh::invertNormals() {
+    for (std::vector<glm::vec3>::iterator it = m_normals.begin(); it != m_normals.end(); ++it)
+        *it *= -1.0f;
+}
+
 void Mesh::flatNormals() {
     if( getMode() == TRIANGLES) {
         
@@ -330,7 +346,7 @@ void Mesh::flatNormals() {
         
         // add mesh data back, duplicating vertices and recalculating normals
         glm::vec3 normal;
-        for(size_t i = 0; i < numIndices; i++) {
+        for (size_t i = 0; i < numIndices; i++) {
             size_t indexCurr = indices[i];
     
             if (i % 3 == 0) {

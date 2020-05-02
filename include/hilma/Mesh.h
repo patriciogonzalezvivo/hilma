@@ -39,6 +39,7 @@ public:
 
     bool        hasVertices() const { return !m_vertices.empty(); };
     int         getVerticesTotal() const { return m_vertices.size(); }
+    std::vector<glm::vec3> getVertices() const { return m_vertices; }
 
     // Colorss
     void        setColor(const glm::vec4& _color);
@@ -53,6 +54,7 @@ public:
 
     const bool  hasColors() const { return !m_colors.empty(); }
     int         getColorsTotal() const { return m_colors.size(); }
+    std::vector<glm::vec4> getColors() const { return m_colors; }
 
     // Normals
     void        addNormal(const glm::vec3& _normal);
@@ -63,6 +65,7 @@ public:
 
     const bool  hasNormals() const { return !m_normals.empty(); }
     int         getNormalsTotal() const { return m_normals.size(); }
+    std::vector<glm::vec3> getNormals() const { return m_normals; }
     bool        computeNormals();
 
     // TexCoord
@@ -72,8 +75,9 @@ public:
 
     void        addTexCoords(const float* _array2D, int _m, int _n);
 
-    const bool  hasTexcoords() const { return !m_texcoords.empty(); }
+    const bool  hasTexCoords() const { return !m_texcoords.empty(); }
     int         getTexCoordsTotal() const { return m_texcoords.size(); }
+    std::vector<glm::vec2> getTexCoords() const { return m_texcoords; }
 
     // Tangents
     void        addTangent(const glm::vec4& _tangent);
@@ -81,7 +85,9 @@ public:
     void        addTangent(float _x, float _y, float _z, float _w);
 
     const bool  hasTangents() const { return !m_tangents.empty(); }
+    std::vector<glm::vec4> getTangents() const { return m_tangents; }
     bool        computeTangents();
+    void        invertNormals();
     void        flatNormals();
 
     // Indices
@@ -94,6 +100,7 @@ public:
     void        addFaces(const int* _array2D, int _m, int _n);
     void        addLine(int _i1, int _i2);
     void        addTriangle(int _i1, int _i2, int _i3);
+    void        invertWindingOrder();
 
     std::vector<glm::ivec3>  getTriangles() const;
 

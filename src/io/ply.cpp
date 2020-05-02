@@ -175,7 +175,7 @@ bool savePly( const std::string& _filename, Mesh& _mesh, bool _binnary  ) {
         file.add_properties_to_element("vertex", { "nx", "ny", "nz" },
         tinyply::Type::FLOAT32, _mesh.m_normals.size(), reinterpret_cast<uint8_t*>(_mesh.m_normals.data()), tinyply::Type::INVALID, 0);
 
-    if (_mesh.hasTexcoords())
+    if (_mesh.hasTexCoords())
         file.add_properties_to_element("vertex", { "u", "v" },
         tinyply::Type::FLOAT32, _mesh.m_texcoords.size() , reinterpret_cast<uint8_t*>(_mesh.m_texcoords.data()), tinyply::Type::INVALID, 0);
 

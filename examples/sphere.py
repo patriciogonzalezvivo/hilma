@@ -6,11 +6,11 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from hilma import Mesh, icosphere, savePly
+from hilma import Mesh, sphere, savePly
 import numpy
 
 size = 1024
 
-mesh = icosphere(size/2, 2)
-# mesh.invertWindingOrder()
-savePly("icosphere.ply", mesh, False)
+mesh = sphere(size/2, 10)
+mesh.invertWindingOrder()
+savePly("sphere.ply", mesh, False)

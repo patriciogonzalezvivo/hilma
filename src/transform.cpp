@@ -25,22 +25,22 @@ namespace hilma {
 
 
 void scale(std::vector<glm::vec3>& _points, float _v){
-    for(std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
+    for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
         *it *= _v;
 }
 
 void scaleX(std::vector<glm::vec3>& _points, float _x){
-    for(std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
+    for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
         it->x *= _x;
 }
 
 void scaleY(std::vector<glm::vec3>& _points, float _y){
-    for(std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
+    for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
         it->y *= _y;
 }
 
 void scaleZ(std::vector<glm::vec3>& _points, float _z){
-    for(std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
+    for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
         it->z *= _z;
 }
 
@@ -49,23 +49,23 @@ void scale(std::vector<glm::vec3>& _points, float _x, float _y, float _z){
 }
 
 void scale(std::vector<glm::vec3>& _points, const glm::vec3& _v ){
-    for(std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
+    for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
         *it *= _v;
 }
 
 
 void translateX(std::vector<glm::vec3>& _points, float _x){
-    for(std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
+    for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
         it->x += _x;
 }
 
 void translateY(std::vector<glm::vec3>& _points, float _y){
-    for(std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
+    for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
         it->y += _y;
 }
 
 void translateZ(std::vector<glm::vec3>& _points, float _z){
-    for(std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
+    for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
         it->z += _z;
 }
 
@@ -74,14 +74,14 @@ void translate(std::vector<glm::vec3>& _points, float _x, float _y, float _z){
 }
 
 void translate(std::vector<glm::vec3>& _points, const glm::vec3& _v) {
-    for(std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
+    for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
         *it += _v;
 }
 
 void rotate(std::vector<glm::vec3>& _points, float _rad, const glm::vec3& _axis ) {
     glm::quat q = glm::angleAxis(_rad, _axis);
     glm::mat3 M = glm::mat3_cast(q);
-    for(std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
+    for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
         *it = M * *it;
 }
 
