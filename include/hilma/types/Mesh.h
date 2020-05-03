@@ -17,6 +17,8 @@ enum PrimitiveMode {
     TRIANGLE_FAN
 };
 
+#define INDEX_TYPE int
+
 class Mesh {
 public:
 
@@ -38,7 +40,7 @@ public:
     void        addVertices(const float* _array2D, int _m, int _n);
 
     bool        hasVertices() const { return !m_vertices.empty(); };
-    int         getVerticesTotal() const { return m_vertices.size(); }
+    size_t      getVerticesTotal() const { return m_vertices.size(); }
     std::vector<glm::vec3> getVertices() const { return m_vertices; }
 
     // Colorss
@@ -53,7 +55,7 @@ public:
     void        addColors(const float* _array2D, int _m, int _n);
 
     const bool  hasColors() const { return !m_colors.empty(); }
-    int         getColorsTotal() const { return m_colors.size(); }
+    size_t      getColorsTotal() const { return m_colors.size(); }
     std::vector<glm::vec4> getColors() const { return m_colors; }
 
     // Normals
@@ -64,7 +66,7 @@ public:
     void        addNormals(const float* _array2D, int _m, int _n);
 
     const bool  hasNormals() const { return !m_normals.empty(); }
-    int         getNormalsTotal() const { return m_normals.size(); }
+    size_t      getNormalsTotal() const { return m_normals.size(); }
     std::vector<glm::vec3> getNormals() const { return m_normals; }
     bool        computeNormals();
 
@@ -76,7 +78,7 @@ public:
     void        addTexCoords(const float* _array2D, int _m, int _n);
 
     const bool  hasTexCoords() const { return !m_texcoords.empty(); }
-    int         getTexCoordsTotal() const { return m_texcoords.size(); }
+    size_t      getTexCoordsTotal() const { return m_texcoords.size(); }
     std::vector<glm::vec2> getTexCoords() const { return m_texcoords; }
 
     // Tangents
@@ -91,15 +93,15 @@ public:
     void        flatNormals();
 
     // Indices
-    void        addIndex(int _i);
-    void        addIndices(const int* _array1D, int _n);
+    void        addIndex(INDEX_TYPE _i);
+    void        addIndices(const INDEX_TYPE* _array1D, int _n);
 
     const bool  hasIndices() const { return !m_indices.empty(); }
-    int         getIndicesTotal() const { return m_indices.size(); }
+    size_t      getIndicesTotal() const { return m_indices.size(); }
 
-    void        addFaces(const int* _array2D, int _m, int _n);
-    void        addLine(int _i1, int _i2);
-    void        addTriangle(int _i1, int _i2, int _i3);
+    void        addFaces(const INDEX_TYPE* _array2D, int _m, int _n);
+    void        addLine(INDEX_TYPE _i1, INDEX_TYPE _i2);
+    void        addTriangle(INDEX_TYPE _i1, INDEX_TYPE _i2, INDEX_TYPE _i3);
     void        invertWindingOrder();
 
     std::vector<glm::ivec3>  getTriangles() const;
@@ -115,10 +117,10 @@ private:
     std::vector<glm::vec3>  m_vertices;
     std::vector<glm::vec3>  m_normals;
     std::vector<glm::vec2>  m_texcoords;
-    std::vector<int>        m_indices;
-    // std::vector<int>        m_indices_normals;
-    // std::vector<int>        m_indices_texcoords;
-    // std::vector<int>        m_edge_indices;
+    std::vector<INDEX_TYPE> m_indices;
+    // std::vector<INDEX_TYPE> m_indices_normals;
+    // std::vector<INDEX_TYPE> m_indices_texcoords;
+    // std::vector<INDEX_TYPE> m_edge_indices;
     // std::vector<glm::vec4>  m_edge_colors;
 
     PrimitiveMode                m_mode;

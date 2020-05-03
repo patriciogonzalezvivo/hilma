@@ -143,7 +143,7 @@ bool loadPly( const std::string& _filename, Mesh& _mesh ) {
             }
 
             if (faces) {
-                _mesh.addIndices(reinterpret_cast<int*>(faces->buffer.get()), faces->count * 3);
+                _mesh.addIndices(reinterpret_cast<INDEX_TYPE*>(faces->buffer.get()), faces->count * 3);
             }
         }
     }

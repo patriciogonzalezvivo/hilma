@@ -51,7 +51,7 @@ void Mesh::append(const Mesh& _mesh) {
     }
 
 	if (_mesh.hasIndices())
-        for (uint32_t i = 0; i < _mesh.m_indices.size(); i++)
+        for (size_t i = 0; i < _mesh.m_indices.size(); i++)
             addIndex(indexOffset+_mesh.m_indices[i]);
 }
 
@@ -89,7 +89,7 @@ void Mesh::addVertices(const float* _data, int _m, int _n) {
 //
 void Mesh::setColor(const glm::vec4& _color) {
     m_colors.clear();
-    for (uint32_t i = 0; i < m_vertices.size(); i++)
+    for (size_t i = 0; i < m_vertices.size(); i++)
         m_colors.push_back(_color);
 }
 
@@ -186,18 +186,18 @@ void Mesh::addTexCoords(const float* _data, int _m, int _n) {
 
 // Indices
 //
-void Mesh::addIndex(int _i) {
+void Mesh::addIndex(INDEX_TYPE _i) {
     m_indices.push_back(_i);
 }
 
-void Mesh::addIndices(const int* _data, int _n) {
+void Mesh::addIndices(const INDEX_TYPE* _data, int _n) {
     m_indices.insert(m_indices.end(),_data,_data+_n);
 }
 
 
 // Faces Grouping
 //
-void Mesh::addFaces(const int* _data, int _m, int _n) {
+void Mesh::addFaces(const INDEX_TYPE* _data, int _m, int _n) {
     if (_n == 2) {
         for (int i = 0; i < _m; i++)
             addLine(_data[i*_n], _data[i*_n+1]);
@@ -207,12 +207,12 @@ void Mesh::addFaces(const int* _data, int _m, int _n) {
             addTriangle(_data[i*_n], _data[i*_n+1], _data[i*_n+2]);
     }
 }
-void Mesh::addLine( int _index1, int _index2 ){
+void Mesh::addLine( INDEX_TYPE _index1, INDEX_TYPE _index2 ){
     addIndex(_index1);
     addIndex(_index2);
 }
 
-void Mesh::addTriangle(int _index1, int _index2, int _index3) {
+void Mesh::addTriangle(INDEX_TYPE _index1, INDEX_TYPE _index2, INDEX_TYPE _index3) {
     addIndex(_index1);
     addIndex(_index2);
     addIndex(_index3);
@@ -231,7 +231,7 @@ std::vector<glm::ivec3> Mesh::getTriangles() const {
             }
         }
         else {
-            for ( size_t j = 0; j < m_vertices.size(); j += 3) {
+            for (size_t j = 0; j < m_vertices.size(); j += 3) {
                 glm::ivec3 tri;
                 for (int k = 0; k < 3; k++)
                     tri[k] = j+k;
@@ -258,17 +258,13 @@ void Mesh::setMode(PrimitiveMode _mode, bool _compute) {
         m_indices.clear();
 
         if (_mode == LINES) {
-            for ( size_t j = 0; j < m_vertices.size(); j += 2)
+            for (size_t j = 0; j < m_vertices.size(); j += 2)
                 addLine(j, j + 1);
         }
         else if (_mode == TRIANGLES) {
-            for ( size_t j = 0; j < m_vertices.size(); j += 3)
+            for (size_t j = 0; j < m_vertices.size(); j += 3)
                 addTriangle(j, j + 1, j + 2);
         }
-        // else if (_mode == QUAD) {
-        //     for ( size_t j = 0; j < m_vertices.size(); j += 3)
-        //         addQuad(j, j + 1, j + 2, j + 3);
-        // }
     }
 }
 
@@ -277,21 +273,21 @@ bool Mesh::computeNormals() {
         return false;
 
     //The number of the m_vertices
-    int nV = m_vertices.size();
+    size_t nV = m_vertices.size();
 
     //The number of the triangles
-    int nT = m_indices.size() / 3;
+    size_t nT = m_indices.size() / 3;
 
     std::vector<glm::vec3> norm( nV ); //Array for the m_normals
 
     //Scan all the triangles. For each triangle add its
     //normal to norm's vectors of triangle's m_vertices
-    for (int t=0; t<nT; t++) {
+    for (size_t t=0; t < nT; t++) {
 
         //Get m_indices of the triangle t
-        int i1 = m_indices[ 3 * t ];
-        int i2 = m_indices[ 3 * t + 1 ];
-        int i3 = m_indices[ 3 * t + 2 ];
+        INDEX_TYPE i1 = m_indices[ 3 * t ];
+        INDEX_TYPE i2 = m_indices[ 3 * t + 1 ];
+        INDEX_TYPE i3 = m_indices[ 3 * t + 2 ];
 
         //Get m_vertices of the triangle
         const glm::vec3 &v1 = m_vertices[ i1 ];
@@ -309,7 +305,7 @@ bool Mesh::computeNormals() {
 
     //Normalize the normal's length and add it.
     m_normals.clear();
-    for (int i=0; i<nV; i++)
+    for (size_t i=0; i < nV; i++)
         addNormal( glm::normalize(norm[i]) );
 
     return true;
@@ -336,7 +332,7 @@ void Mesh::flatNormals() {
         
         // get copy original mesh data
         size_t numIndices = m_indices.size();
-        std::vector<int> indices = m_indices;
+        std::vector<INDEX_TYPE> indices = m_indices;
         std::vector<glm::vec3> verts = m_vertices;
         std::vector<glm::vec4> colors = m_colors;
         std::vector<glm::vec2> texCoords = m_texcoords;
@@ -350,10 +346,10 @@ void Mesh::flatNormals() {
             size_t indexCurr = indices[i];
     
             if (i % 3 == 0) {
-                int indexNext1 = indices[i + 1];
-                int indexNext2 = indices[i + 2];
-                auto e1 = verts[indexCurr] - verts[indexNext1];
-                auto e2 = verts[indexNext2] - verts[indexNext1];
+                INDEX_TYPE indexNext1 = indices[i + 1];
+                INDEX_TYPE indexNext2 = indices[i + 2];
+                glm::vec3 e1 = verts[indexCurr] - verts[indexNext1];
+                glm::vec3 e2 = verts[indexNext2] - verts[indexNext1];
                 normal = glm::normalize(glm::cross(e1, e2));
             }
     
@@ -387,9 +383,9 @@ bool Mesh::computeTangents() {
     for (size_t t = 0; t < nT; t++) {
 
         //Get m_indices of the triangle t
-        int i1 = m_indices[ 3 * t ];
-        int i2 = m_indices[ 3 * t + 1 ];
-        int i3 = m_indices[ 3 * t + 2 ];
+        INDEX_TYPE i1 = m_indices[ 3 * t ];
+        INDEX_TYPE i2 = m_indices[ 3 * t + 1 ];
+        INDEX_TYPE i3 = m_indices[ 3 * t + 2 ];
 
         //Get m_vertices of the triangle
         const glm::vec3 &v1 = m_vertices[ i1 ];

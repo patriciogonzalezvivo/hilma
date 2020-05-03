@@ -29,6 +29,7 @@ hilma_module = Extension(
     'src/types/Polyline.cpp',
     'src/ops/compute.cpp',
     'src/ops/generate.cpp',
+    'src/ops/modify.cpp',
     'src/ops/transform.cpp',
     'src/io/obj.cpp',
     'src/io/ply.cpp',

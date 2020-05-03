@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "hilma/types/Mesh.h"
-#include "hilma/ops/generate.h"
+#include "hilma/ops/modify.h"
 #include "hilma/io/ply.h"
 
 int main(int argc, char **argv) {

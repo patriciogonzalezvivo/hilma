@@ -189,7 +189,7 @@ std::vector<glm::vec2> getConvexHull(const std::vector<glm::vec2>& _points) {
     hull.push_back(pts.at(0));
     hull.push_back(pts.at(1));
 
-    uint32_t currentPoint = 2;
+    size_t currentPoint = 2;
     int direction = 1;
 
     for (int i=0; i<3000; i++) { //max 1000 tries
@@ -222,7 +222,7 @@ std::vector<glm::vec2> getConvexHull(const std::vector<glm::vec2>& _points) {
             direction = direction * -1;
         }
 
-        currentPoint+=direction;
+        currentPoint += direction;
 
         if (hull.front()==hull.back()) {
             if(currentPoint == 3 && direction == 1) {
@@ -252,7 +252,7 @@ float getArea(const std::vector<glm::vec2>& _points) {
 
 glm::vec2 getCentroid(const std::vector<glm::vec2>& _points) {
     glm::vec2 centroid;
-    for (uint32_t i = 0; i < _points.size(); i++) {
+    for (size_t i = 0; i < _points.size(); i++) {
         centroid += _points[i] / (float)_points.size();
     }
     return centroid;
@@ -260,7 +260,7 @@ glm::vec2 getCentroid(const std::vector<glm::vec2>& _points) {
 
 glm::vec3 getCentroid(const std::vector<glm::vec3>& _points) {
     glm::vec3 centroid;
-    for (uint32_t i = 0; i < _points.size(); i++) {
+    for (size_t i = 0; i < _points.size(); i++) {
         centroid += _points[i] / (float)_points.size();
     }
     return centroid;

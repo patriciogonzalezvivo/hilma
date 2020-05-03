@@ -1,8 +1,11 @@
 
-Hilma is a library that:
-- simple C++ interfaces
-- minimal dependences so the C++ code can be added to other C++ projects easily
-- add Python package which makes a C++ wrapper usign swig
+![](docs/00.jpg)
+
+Hilma is 2D/3D geometry library in C++ with Python bindings (with support for Numpy) ready to be embed into your projects. Some of the code is based on:
+
+* [OpenFrameworks](https://openframeworks.cc/) `ofMesh`, `ofPolyline` and `ofPath`
+* [Mapbox's Earcut tessellator](https://github.com/mapbox/earcut)
+
 
 ## Hilma as C++ lib
 

@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "hilma/types/Mesh.h"
-#include "hilma/ops/generate.h"
+#include "hilma/ops/modify.h"
 #include "hilma/ops/transform.h"
 #include "hilma/io/ply.h"
 
@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
     hilma::Mesh top = bottom;
     bottom.invertWindingOrder();
     hilma::translateZ(top, 10.0f);
-    hilma::Mesh walls = hilma::extrudeWall(polygon, 10.0f);
+    hilma::Mesh walls = hilma::extrude(polygon, 10.0f);
 
 
     hilma::Mesh mesh;
