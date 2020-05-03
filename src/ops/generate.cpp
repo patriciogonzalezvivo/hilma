@@ -8,16 +8,16 @@
 #include "glm/gtx/rotate_vector.hpp"
 #include "glm/gtx/norm.hpp"
 
-// namespace mapbox { namespace util {
-// template <>
-// struct nth<0, glm::vec2> {
-//     inline static float get(const glm::vec2 &t) { return t.x; };
-// };
-// template <>
-// struct nth<1, glm::vec2> {
-//     inline static float get(const glm::vec2 &t) { return t.y; };
-// };
-// }}
+namespace mapbox { namespace util {
+template <>
+struct nth<0, glm::vec2> {
+    inline static float get(const glm::vec2 &t) { return t.x; };
+};
+template <>
+struct nth<1, glm::vec2> {
+    inline static float get(const glm::vec2 &t) { return t.y; };
+};
+}}
 
 namespace hilma {
 
@@ -589,31 +589,16 @@ Mesh icosphere(float radius, std::size_t iterations) {
 }
 
 Mesh surface(const std::vector<std::vector<glm::vec2>>& _polygon) {
-
-    // Create array
     Mesh mesh;
-    static const glm::vec3 upVector(0.0f, 0.0f, 1.0f);
 
     BoundingBox bb;
-
-    // using Point = glm::vec2;
-    using Coord = float;
-    using Point = std::array<Coord, 2>;
-    using Line = std::vector<Point>;
-    using Polygon = std::vector<Line>;
-
-    std::vector<std::vector<Point>> polygon;
+    static const glm::vec3 upVector(0.0f, 0.0f, 1.0f);
     for (size_t i = 0; i < _polygon.size(); i++) {
-        std::vector<Point> polyline;
-
         for (size_t j = 0; j < _polygon[i].size(); j++ ) {
             mesh.addVertex( _polygon[i][j].x, _polygon[i][j].y, 0.0f );
             mesh.addNormal( upVector );
             bb.expand( _polygon[i][j].x, _polygon[i][j].y );
-
-            polyline.push_back( { _polygon[i][j].x, _polygon[i][j].y} );
         }
-        polygon.push_back( polyline );
     }
 
     for (size_t i = 0; i < mesh.getVerticesTotal(); i++) {
@@ -622,9 +607,9 @@ Mesh surface(const std::vector<std::vector<glm::vec2>>& _polygon) {
                             mapValue(p.y, bb.min.y, bb.max.y, 0.0f, 1.0f, true) );
     }
 
-    std::vector<uint32_t> indices = mapbox::earcut<uint32_t>(polygon);
+    std::vector<uint32_t> indices = mapbox::earcut<uint32_t>(_polygon);
     for (size_t i = 0; i < indices.size(); i++)
-        mesh.addIndex(indices[i]);    
+        mesh.addIndex(indices[i]);
 
     return mesh;
 }
