@@ -128,13 +128,13 @@ Mesh box( float _width, float _height, float depth, int resX, int resY, int resZ
         for (int x = 0; x < resX-1; x++) {
             // first triangle //
             mesh.addIndex((y)*resX + x + vertOffset);
-            mesh.addIndex((y+1)*resX + x + vertOffset);
             mesh.addIndex((y)*resX + x+1 + vertOffset);
+            mesh.addIndex((y+1)*resX + x + vertOffset);
 
             // second triangle //
             mesh.addIndex((y)*resX + x+1 + vertOffset);
-            mesh.addIndex((y+1)*resX + x + vertOffset);
             mesh.addIndex((y+1)*resX + x+1 + vertOffset);
+            mesh.addIndex((y+1)*resX + x + vertOffset);
         }
     }
 
@@ -165,13 +165,13 @@ Mesh box( float _width, float _height, float depth, int resX, int resY, int resZ
         for (int x = 0; x < resZ-1; x++) {
             // first triangle //
             mesh.addIndex((y)*resZ + x + vertOffset);
-            mesh.addIndex((y+1)*resZ + x + vertOffset);
             mesh.addIndex((y)*resZ + x+1 + vertOffset);
+            mesh.addIndex((y+1)*resZ + x + vertOffset);
 
             // second triangle //
             mesh.addIndex((y)*resZ + x+1 + vertOffset);
-            mesh.addIndex((y+1)*resZ + x + vertOffset);
             mesh.addIndex((y+1)*resZ + x+1 + vertOffset);
+            mesh.addIndex((y+1)*resZ + x + vertOffset);
         }
     }
 
@@ -202,13 +202,13 @@ Mesh box( float _width, float _height, float depth, int resX, int resY, int resZ
         for (int x = 0; x < resZ-1; x++) {
             // first triangle //
             mesh.addIndex((y)*resZ + x + vertOffset);
-            mesh.addIndex((y+1)*resZ + x + vertOffset);
             mesh.addIndex((y)*resZ + x+1 + vertOffset);
+            mesh.addIndex((y+1)*resZ + x + vertOffset);
 
             // second triangle //
             mesh.addIndex((y)*resZ + x+1 + vertOffset);
-            mesh.addIndex((y+1)*resZ + x + vertOffset);
             mesh.addIndex((y+1)*resZ + x+1 + vertOffset);
+            mesh.addIndex((y+1)*resZ + x + vertOffset);
         }
     }
 
@@ -238,13 +238,13 @@ Mesh box( float _width, float _height, float depth, int resX, int resY, int resZ
         for (int x = 0; x < resX-1; x++) {
             // first triangle //
             mesh.addIndex((y)*resX + x + vertOffset);
-            mesh.addIndex((y+1)*resX + x + vertOffset);
             mesh.addIndex((y)*resX + x+1 + vertOffset);
+            mesh.addIndex((y+1)*resX + x + vertOffset);
 
             // second triangle //
             mesh.addIndex((y)*resX + x+1 + vertOffset);
-            mesh.addIndex((y+1)*resX + x + vertOffset);
             mesh.addIndex((y+1)*resX + x+1 + vertOffset);
+            mesh.addIndex((y+1)*resX + x + vertOffset);
         }
     }
 
@@ -276,13 +276,13 @@ Mesh box( float _width, float _height, float depth, int resX, int resY, int resZ
         for (int x = 0; x < resX-1; x++) {
             // first triangle //
             mesh.addIndex((y)*resX + x + vertOffset);
-            mesh.addIndex((y)*resX + x+1 + vertOffset);
             mesh.addIndex((y+1)*resX + x + vertOffset);
+            mesh.addIndex((y)*resX + x+1 + vertOffset);
 
             // second triangle //
             mesh.addIndex((y)*resX + x+1 + vertOffset);
-            mesh.addIndex((y+1)*resX + x+1 + vertOffset);
             mesh.addIndex((y+1)*resX + x + vertOffset);
+            mesh.addIndex((y+1)*resX + x+1 + vertOffset);
         }
     }
 
@@ -313,13 +313,13 @@ Mesh box( float _width, float _height, float depth, int resX, int resY, int resZ
         for (int x = 0; x < resX-1; x++) {
             // first triangle //
             mesh.addIndex((y)*resX + x + vertOffset);
-            mesh.addIndex((y)*resX + x+1 + vertOffset);
             mesh.addIndex((y+1)*resX + x + vertOffset);
+            mesh.addIndex((y)*resX + x+1 + vertOffset);
 
             // second triangle //
             mesh.addIndex((y)*resX + x+1 + vertOffset);
-            mesh.addIndex((y+1)*resX + x+1 + vertOffset);
             mesh.addIndex((y+1)*resX + x + vertOffset);
+            mesh.addIndex((y+1)*resX + x+1 + vertOffset);
         }
     }
 
@@ -382,8 +382,8 @@ Mesh sphere( float radius, int res, PrimitiveMode _mode ) {
                     index3 = (iy+1) * (nr) + (ix+0);
 
                     mesh.addIndex(index1);
-                    mesh.addIndex(index3);
                     mesh.addIndex(index2);
+                    mesh.addIndex(index3);
                 }
 
                 if(iy < res-1 ) {
@@ -393,8 +393,8 @@ Mesh sphere( float radius, int res, PrimitiveMode _mode ) {
                     index3 = (iy+1) * (nr) + (ix+0);
 
                     mesh.addIndex(index1);
-                    mesh.addIndex(index3);
                     mesh.addIndex(index2);
+                    mesh.addIndex(index3);
 
                 }
             }
@@ -560,30 +560,25 @@ Mesh icosphere(float radius, std::size_t iterations) {
         }
     }
 
-    // tig: flip face(=triangle) winding order, so that we are consistent with all other ofPrimitives.
-    // i wish there was a more elegant way to do this, but anything happening before "split vertices"
-    // makes things very, very complicated.
-        
-    for (int i = 0; i < indices.size(); i+=3)
-        std::swap(indices[i+1], indices[i+2]);
-
-    Mesh sphere;
-    sphere.addNormals( &vertices[0][0], vertices.size(), 3 );
-    sphere.addTexCoords( &texCoords[0][0], texCoords.size(), 2 );
+    Mesh mesh;
+    mesh.addNormals( &vertices[0][0], vertices.size(), 3 );
+    mesh.addTexCoords( &texCoords[0][0], texCoords.size(), 2 );
 
     for (int i = 0; i < vertices.size(); i++ )
         vertices[i] *= radius;
 
-    sphere.addVertices( &vertices[0][0], vertices.size(), 3 );
-    sphere.addIndices( &indices[0], indices.size() );
+    mesh.addVertices( &vertices[0][0], vertices.size(), 3 );
+    mesh.addIndices( &indices[0], indices.size() );
 
-    return  sphere;
+    return  mesh;
 }
 
 Mesh surface(const std::vector<std::vector<glm::vec2>>& _polygon) {
 
     // Create array
     Mesh mesh;
+    static const glm::vec3 upVector(0.0f, 0.0f, 1.0f);
+
     BoundingBox bb;
 
     // using Point = glm::vec2;
@@ -598,6 +593,7 @@ Mesh surface(const std::vector<std::vector<glm::vec2>>& _polygon) {
 
         for (size_t j = 0; j < _polygon[i].size(); j++ ) {
             mesh.addVertex( _polygon[i][j].x, _polygon[i][j].y, 0.0f );
+            mesh.addNormal( upVector );
             bb.expand( _polygon[i][j].x, _polygon[i][j].y );
 
             polyline.push_back( { _polygon[i][j].x, _polygon[i][j].y} );
@@ -618,10 +614,85 @@ Mesh surface(const std::vector<std::vector<glm::vec2>>& _polygon) {
     return mesh;
 }
 
-// Mesh surface(const std::vector<glm::vec2>& _contour) {
-//     const std::vector<std::vector<glm::vec2>> polygon;
-//     polygon.push_back(_contour);
-//     return surface(polygon);
-// }
+Mesh surface(const std::vector<glm::vec2>& _contour) {
+    std::vector<std::vector<glm::vec2>> polygon;
+    polygon.push_back(_contour);
+    return surface(polygon);
+}
+
+Mesh extrudeWall(const std::vector<glm::vec2>& _contour, float _maxHeight, float _minHeight) {
+    std::vector<std::vector<glm::vec2>> polygon;
+    polygon.push_back(_contour);
+    return extrudeWall(polygon, _maxHeight, _minHeight);
+}
+
+Mesh extrudeWall(const std::vector<std::vector<glm::vec2>>& _polygon, float _maxHeight, float _minHeight) {
+    Mesh mesh;
+    
+    static const glm::vec3 upVector(0.0f, 0.0f, 1.0f);
+    glm::vec3 normalVector;
+
+    int lineN  = 0;
+    int vertexN = 0;
+    for (auto& line : _polygon) {
+        size_t lineSize = line.size();
+
+        for (size_t i = 0; i < lineSize - 1; i++) {
+
+            glm::vec3 a(line[i], 0.f);
+            glm::vec3 b(line[i+1], 0.f);
+
+            
+            normalVector = glm::cross(upVector, b - a);
+            normalVector = glm::normalize(normalVector);
+
+            if (std::isnan(normalVector.x)
+             || std::isnan(normalVector.y)
+             || std::isnan(normalVector.z)) {
+                continue;
+            }
+
+            // 1st vertex top
+            a.z = _maxHeight;
+            mesh.addVertex(a);
+            mesh.addNormal(normalVector);
+            mesh.addTexCoord(1.,1.);
+
+            // 2nd vertex top
+            b.z = _maxHeight;
+            mesh.addVertex(b);
+            mesh.addNormal(normalVector);
+            mesh.addTexCoord(0.,1.);
+
+            // 1st vertex bottom
+            a.z = _minHeight;
+            mesh.addVertex(a);
+            mesh.addNormal(normalVector);
+            mesh.addTexCoord(1.,0.);
+
+            // 2nd vertex bottom
+            b.z = _minHeight;
+            mesh.addVertex(b);
+            mesh.addNormal(normalVector);
+            mesh.addTexCoord(0.,0.);
+
+            // Start the index from the previous state of the vertex Data
+            if (lineN == 0) {
+                mesh.addTriangle(vertexN, vertexN + 2, vertexN + 1);
+                mesh.addTriangle(vertexN + 1, vertexN + 2, vertexN + 3);
+            }
+            else {
+                mesh.addTriangle(vertexN, vertexN + 1, vertexN + 2);
+                mesh.addTriangle(vertexN + 1, vertexN + 3, vertexN + 2);
+            }
+
+            vertexN += 4;
+        }
+
+        lineN ++;
+    }
+
+    return mesh;
+}
 
 }

@@ -26,6 +26,10 @@ add_executable (surface surface.cpp)
 include_directories("${CMAKE_SOURCE_DIR}/include")
 target_link_libraries (surface PRIVATE hilma)
 
+add_executable (extrude extrude.cpp)
+include_directories("${CMAKE_SOURCE_DIR}/include")
+target_link_libraries (extrude PRIVATE hilma)
+
 add_executable (load load.cpp)
 include_directories("${CMAKE_SOURCE_DIR}/include")
 target_link_libraries (load PRIVATE hilma)

@@ -13,7 +13,6 @@ polygon.push_back({{100, 0}, {100, 100}, {0, 100}, {0, 0}});
 polygon.push_back({{75, 25}, {75, 75}, {25, 75}, {25, 25}});
 
 
-
-mesh = surface();
+mesh = surface(polygon);
 
 savePly("points_plane.ply", mesh, False)

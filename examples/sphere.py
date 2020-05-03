@@ -12,5 +12,4 @@ import numpy
 size = 1024
 
 mesh = sphere(size/2, 10)
-mesh.invertWindingOrder()
 savePly("sphere.ply", mesh, False)

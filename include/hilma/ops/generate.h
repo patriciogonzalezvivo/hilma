@@ -15,4 +15,7 @@ Mesh icosphere( float _radius, std::size_t _iterations );
 Mesh surface(const std::vector<glm::vec2>& _contour);
 Mesh surface(const std::vector<std::vector<glm::vec2>>& _polygon);
 
+Mesh extrudeWall(const std::vector<glm::vec2>& _contour, float _maxHeight, float _minHeight = 0.0);
+Mesh extrudeWall(const std::vector<std::vector<glm::vec2>>& _polygon, float _maxHeight, float _minHeight = 0.0f);
+
 }

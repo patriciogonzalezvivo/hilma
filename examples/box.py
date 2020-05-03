@@ -12,5 +12,4 @@ import numpy
 size = 1024
 
 mesh = box(size, size, size, 10, 10, 10)
-mesh.invertWindingOrder()
 savePly("box.ply", mesh, False)

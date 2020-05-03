@@ -12,5 +12,4 @@ import numpy
 size = 1024
 
 mesh = icosphere(size/2, 2)
-# mesh.invertWindingOrder()
 savePly("icosphere.ply", mesh, False)
