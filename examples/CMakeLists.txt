@@ -30,6 +30,10 @@ add_executable (extrude extrude.cpp)
 include_directories("${CMAKE_SOURCE_DIR}/include")
 target_link_libraries (extrude PRIVATE hilma)
 
+add_executable (spline spline.cpp)
+include_directories("${CMAKE_SOURCE_DIR}/include")
+target_link_libraries (spline PRIVATE hilma)
+
 add_executable (load load.cpp)
 include_directories("${CMAKE_SOURCE_DIR}/include")
 target_link_libraries (load PRIVATE hilma)
