@@ -18,10 +18,13 @@ add_executable (sphere sphere.cpp)
 include_directories("${CMAKE_SOURCE_DIR}/include")
 target_link_libraries (sphere PRIVATE hilma)
 
-
 add_executable (icosphere icosphere.cpp)
 include_directories("${CMAKE_SOURCE_DIR}/include")
 target_link_libraries (icosphere PRIVATE hilma)
+
+add_executable (surface surface.cpp)
+include_directories("${CMAKE_SOURCE_DIR}/include")
+target_link_libraries (surface PRIVATE hilma)
 
 add_executable (load load.cpp)
 include_directories("${CMAKE_SOURCE_DIR}/include")

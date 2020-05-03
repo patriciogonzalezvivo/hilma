@@ -1,14 +1,8 @@
 #include "hilma/ops/generate.h"
+#include "hilma/ops/earcut.h"
 
-
-#ifndef PI
-#define PI  3.14159265358979323846
-#endif
-
-#ifndef TAU
-#define TAU 6.28318530717958647693
-#endif
-
+#include "hilma/math.h"
+#include "hilma/types/BoundingBox.h"
 
 namespace hilma {
 
@@ -585,5 +579,49 @@ Mesh icosphere(float radius, std::size_t iterations) {
 
     return  sphere;
 }
+
+Mesh surface(const std::vector<std::vector<glm::vec2>>& _polygon) {
+
+    // Create array
+    Mesh mesh;
+    BoundingBox bb;
+
+    // using Point = glm::vec2;
+    using Coord = float;
+    using Point = std::array<Coord, 2>;
+    using Line = std::vector<Point>;
+    using Polygon = std::vector<Line>;
+
+    std::vector<std::vector<Point>> polygon;
+    for (size_t i = 0; i < _polygon.size(); i++) {
+        std::vector<Point> polyline;
+
+        for (size_t j = 0; j < _polygon[i].size(); j++ ) {
+            mesh.addVertex( _polygon[i][j].x, _polygon[i][j].y, 0.0f );
+            bb.expand( _polygon[i][j].x, _polygon[i][j].y );
+
+            polyline.push_back( { _polygon[i][j].x, _polygon[i][j].y} );
+        }
+        polygon.push_back( polyline );
+    }
+
+    for (size_t i = 0; i < mesh.getVerticesTotal(); i++) {
+        glm::vec3 p = mesh.getVertices()[i];
+        mesh.addTexCoord(   mapValue(p.x, bb.min.x, bb.max.x, 0.0f, 1.0f, true),
+                            mapValue(p.y, bb.min.y, bb.max.y, 0.0f, 1.0f, true) );
+    }
+
+    std::vector<uint32_t> indices = mapbox::earcut<uint32_t>(polygon);
+    for (size_t i = 0; i < indices.size(); i++)
+        mesh.addIndex(indices[i]);    
+
+    return mesh;
+}
+
+// Mesh surface(const std::vector<glm::vec2>& _contour) {
+//     const std::vector<std::vector<glm::vec2>> polygon;
+//     polygon.push_back(_contour);
+//     return surface(polygon);
+// }
 
 }

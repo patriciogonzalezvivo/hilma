@@ -12,4 +12,7 @@ Mesh icosphere( float _radius, std::size_t _iterations );
 // Mesh cylinder( float radius, float height, int radiusSegments, int heightSegments, int numCapSegments, bool bCapped, PrimitiveMode mode );
 // Mesh cone( float radius, float height, int radiusSegments, int heightSegments, int capSegments, PrimitiveMode mode );
 
+Mesh surface(const std::vector<glm::vec2>& _contour);
+Mesh surface(const std::vector<std::vector<glm::vec2>>& _polygon);
+
 }

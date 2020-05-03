@@ -10,7 +10,7 @@ public:
     glm::vec3 min;
     glm::vec3 max;
     
-    BoundingBox(): min(99999999.9f), max(-99999999.9f) {}
+    BoundingBox(): min(std::numeric_limits<float>::max()), max(std::numeric_limits<float>::min()) {}
 
     float  getWidth() const { return fabs(max.x - min.x); }
     float  getHeight() const { return fabs(max.y - min.y); }

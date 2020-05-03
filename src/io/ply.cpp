@@ -176,7 +176,7 @@ bool savePly( const std::string& _filename, Mesh& _mesh, bool _binnary  ) {
         tinyply::Type::FLOAT32, _mesh.m_normals.size(), reinterpret_cast<uint8_t*>(_mesh.m_normals.data()), tinyply::Type::INVALID, 0);
 
     if (_mesh.hasTexCoords())
-        file.add_properties_to_element("vertex", { "u", "v" },
+        file.add_properties_to_element("vertex", { "texture_u", "texture_v" },
         tinyply::Type::FLOAT32, _mesh.m_texcoords.size() , reinterpret_cast<uint8_t*>(_mesh.m_texcoords.data()), tinyply::Type::INVALID, 0);
 
     if (_mesh.hasIndices()) {
