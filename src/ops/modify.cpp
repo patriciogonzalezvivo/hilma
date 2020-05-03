@@ -21,6 +21,16 @@ struct nth<1, glm::vec2> {
 
 namespace hilma {
 
+Mesh surface(const Polyline& _polyline) {
+    return surface(_polyline.m_points);
+}
+
+Mesh surface(const std::vector<glm::vec2>& _contour) {
+    std::vector<std::vector<glm::vec2>> polygon;
+    polygon.push_back(_contour);
+    return surface(polygon);
+}
+
 Mesh surface(const std::vector<std::vector<glm::vec2>>& _polygon) {
     Mesh mesh;
 
@@ -47,10 +57,8 @@ Mesh surface(const std::vector<std::vector<glm::vec2>>& _polygon) {
     return mesh;
 }
 
-Mesh surface(const std::vector<glm::vec2>& _contour) {
-    std::vector<std::vector<glm::vec2>> polygon;
-    polygon.push_back(_contour);
-    return surface(polygon);
+Mesh extrude(const Polyline& _polyline, float _maxHeight, float _minHeight) {
+    return extrude(_polyline.m_points, _maxHeight, _minHeight);
 }
 
 Mesh extrude(const std::vector<glm::vec2>& _contour, float _maxHeight, float _minHeight) {
@@ -354,6 +362,10 @@ void buildPolyLineSegment(  const std::vector<glm::vec2>& _line, Mesh& _mesh, si
     indexPairs(1, _mesh);
     if (endCap)
         addCap(coordNext, normNext, cornersOnCap, false, _mesh, _width);
+}
+
+Mesh spline(const Polyline& _polyline, float _width, JoinType _join, CapType _cap, float _miterLimit) {
+    return spline(_polyline.m_points, _width, _join, _cap, _miterLimit);
 }
 
 Mesh spline(const std::vector<glm::vec2>& _polyline, float _width, JoinType _join, CapType _cap, float _miterLimit) { //}, bool _close) {
