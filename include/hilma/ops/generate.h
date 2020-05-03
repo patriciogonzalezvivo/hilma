@@ -9,7 +9,7 @@ Mesh box( float _width, float _height, float _depth, int _resX, int _resY, int _
 Mesh cube( float _size, int _resolution );
 Mesh sphere( float _radius, int _resolution, PrimitiveMode mode = TRIANGLES);
 Mesh icosphere( float _radius, size_t _iterations );
-// Mesh cylinder( float radius, float height, int radiusSegments, int heightSegments, int numCapSegments, bool bCapped, PrimitiveMode mode );
-// Mesh cone( float radius, float height, int radiusSegments, int heightSegments, int capSegments, PrimitiveMode mode );
+Mesh cylinder( float _radius, float _height, int _radiusSegments, int _heightSegments, int _numCapSegments, bool _bCapped, PrimitiveMode _mode = TRIANGLES);
+Mesh cone( float _radius, float _height, int _radiusSegments, int _heightSegments, int _capSegments, PrimitiveMode _mode = TRIANGLES);
 
 }
