@@ -28,6 +28,7 @@ int main(int argc, char **argv) {
     mesh.append(bottom);
     mesh.append(top);
     mesh.append(walls);
+    mesh.mergeDuplicateVertices();
     hilma::savePly("extrude.ply", mesh, false);
 
     return 1;

@@ -44,6 +44,7 @@ public:
 
     void        addVertices(const float* _array2D, int _m, int _n);
 
+    void        clearVertices() { m_vertices.clear(); }
     bool        hasVertices() const { return !m_vertices.empty(); };
     size_t      getVerticesTotal() const { return m_vertices.size(); }
     std::vector<glm::vec3> getVertices() const { return m_vertices; }
@@ -52,6 +53,7 @@ public:
     void        setColor(const glm::vec4& _color);
     void        setColor(const float* _array1D, int _n);
     void        setColor(float _r, float _g, float _b, float _a = 1.0f);
+    void        clearColors() { m_colors.clear(); }
 
     void        addColor(const glm::vec4& _color);
     void        addColor(const float* _array1D, int _n);
@@ -73,7 +75,10 @@ public:
     const bool  hasNormals() const { return !m_normals.empty(); }
     size_t      getNormalsTotal() const { return m_normals.size(); }
     std::vector<glm::vec3> getNormals() const { return m_normals; }
+    void        clearNormals() { m_normals.clear(); }
     bool        computeNormals();
+    void        invertNormals();
+    void        flatNormals();
 
     // TexCoord
     void        addTexCoord(const glm::vec2& _uv);
@@ -85,6 +90,7 @@ public:
     const bool  hasTexCoords() const { return !m_texcoords.empty(); }
     size_t      getTexCoordsTotal() const { return m_texcoords.size(); }
     std::vector<glm::vec2> getTexCoords() const { return m_texcoords; }
+    void        clearTexCoords() { m_texcoords.clear(); }
 
     // Tangents
     void        addTangent(const glm::vec4& _tangent);
@@ -94,8 +100,7 @@ public:
     const bool  hasTangents() const { return !m_tangents.empty(); }
     std::vector<glm::vec4> getTangents() const { return m_tangents; }
     bool        computeTangents();
-    void        invertNormals();
-    void        flatNormals();
+    void        clearTangets() { m_tangents.clear(); }
 
     // Indices
     void        addIndex(INDEX_TYPE _i);
@@ -107,7 +112,9 @@ public:
     void        addFaces(const INDEX_TYPE* _array2D, int _m, int _n);
     void        addLine(INDEX_TYPE _i1, INDEX_TYPE _i2);
     void        addTriangle(INDEX_TYPE _i1, INDEX_TYPE _i2, INDEX_TYPE _i3);
+    void        clearIndices() { m_indices.clear(); }
     void        invertWindingOrder();
+    void        mergeDuplicateVertices();
 
     std::vector<glm::ivec3>  getTriangles() const;
 

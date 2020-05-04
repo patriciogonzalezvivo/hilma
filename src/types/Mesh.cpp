@@ -1,4 +1,5 @@
 #include <iostream>
+#include <map>
 
 #include "hilma/types/Mesh.h"
 
@@ -312,7 +313,7 @@ bool Mesh::computeNormals() {
 }
 
 void Mesh::invertWindingOrder() {
-    if( getMode() == TRIANGLES) {
+    if ( getMode() == TRIANGLES) {
         int tmp;
         for (size_t i = 0; i < m_indices.size(); i += 3) {
             tmp = m_indices[i+1];
@@ -328,7 +329,7 @@ void Mesh::invertNormals() {
 }
 
 void Mesh::flatNormals() {
-    if( getMode() == TRIANGLES) {
+    if ( getMode() == TRIANGLES) {
         
         // get copy original mesh data
         size_t numIndices = m_indices.size();
@@ -355,9 +356,9 @@ void Mesh::flatNormals() {
     
             addIndex(i);
             addNormal(normal);
-            if(indexCurr < texCoords.size()) addTexCoord(texCoords[indexCurr]);
-            if(indexCurr < verts.size()) addVertex(verts[indexCurr]);
-            if(indexCurr < colors.size()) addColor(colors[indexCurr]);
+            if (indexCurr < texCoords.size()) addTexCoord(texCoords[indexCurr]);
+            if (indexCurr < verts.size()) addVertex(verts[indexCurr]);
+            if (indexCurr < colors.size()) addColor(colors[indexCurr]);
         }
     }
 }
@@ -441,4 +442,97 @@ bool Mesh::computeTangents() {
     }
 
     return true;
+}
+
+void Mesh::mergeDuplicateVertices() {
+
+	std::vector<glm::vec3> verts = m_vertices;
+	std::vector<INDEX_TYPE> indices = m_indices;
+
+	//get indexes to share single point - TODO: try j < i
+	for (INDEX_TYPE i = 0; i < indices.size(); i++) {
+		for (INDEX_TYPE j = 0; j < indices.size(); j++ ) {
+			if (i==j) continue;
+
+			INDEX_TYPE i1 = indices[i];
+			INDEX_TYPE i2 = indices[j];
+			const glm::vec3& v1 = verts[ i1 ];
+			const glm::vec3& v2 = verts[ i2 ];
+
+			if ( v1 == v2 && i1 != i2) {
+				indices[j] = i1;
+				break;
+			}
+		}
+	}
+
+	//indices array now has list of unique points we need
+	//but we need to delete the old points we're not using and that means the index values will change
+	//so we are going to create a new list of points and new indexes - we will use a map to map old index values to the new ones
+	std::vector<glm::vec3> newPoints;
+	std::vector<INDEX_TYPE> newIndexes;
+	std::map<INDEX_TYPE, bool> ptCreated;
+	std::map<INDEX_TYPE, INDEX_TYPE> oldIndexNewIndex;
+
+	std::vector<glm::vec4> newColors;
+	std::vector<glm::vec4>& colors = m_colors;
+	std::vector<glm::vec2> newTCoords;
+	std::vector<glm::vec2>& tcoords = m_texcoords;
+	std::vector<glm::vec3> newNormals;
+	std::vector<glm::vec3>& normals =  m_normals;
+
+	for (INDEX_TYPE i = 0; i < indices.size(); i++){
+		ptCreated[i] = false;
+	}
+
+	for (INDEX_TYPE i = 0; i < indices.size(); i++){
+		INDEX_TYPE index = indices[i];
+		const glm::vec3& p = verts[ index ];
+
+		if ( ptCreated[index] == false ){
+			oldIndexNewIndex[index] = newPoints.size();
+			newPoints.push_back( p );
+			if (hasColors()) {
+				newColors.push_back(colors[index]);
+			}
+			if (hasTexCoords()) {
+				newTCoords.push_back(tcoords[index]);
+			}
+			if (hasNormals()) {
+				newNormals.push_back(normals[index]);
+			}
+
+			ptCreated[index] = true;
+		}
+
+		//ofLogNotice("ofMesh") << "[" << i << "]: old " << index << " --> " << oldIndexNewIndex[index];
+		newIndexes.push_back( oldIndexNewIndex[index] );
+	}
+
+	verts.clear();
+	verts = newPoints;
+
+	indices.clear();
+	indices = newIndexes;
+
+	clearIndices();
+	addIndices(&indices[0], indices.size());
+	clearVertices();
+	addVertices( &verts[0].x, verts.size(), 3);
+
+	if (hasColors()) {
+		clearColors();
+		addColors( &newColors[0].x, newColors.size(), 4);
+	}
+
+	if (hasTexCoords()) {
+		clearTexCoords();
+		addTexCoords( &newTCoords[0].x, newTCoords.size(), 2);
+	}
+
+	if (hasNormals()) {
+		clearNormals();
+		addNormals( &newNormals[0].x, newNormals.size(), 3);
+	}
+
 }
