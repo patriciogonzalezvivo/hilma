@@ -17,7 +17,12 @@ enum PrimitiveMode {
     TRIANGLE_FAN
 };
 
-#define INDEX_TYPE int
+#if defined(PLATFORM_RPI)
+#define INDEX_TYPE uint16_t
+#else
+#define INDEX_TYPE uint32_t
+#endif
+
 
 class Mesh {
 public:

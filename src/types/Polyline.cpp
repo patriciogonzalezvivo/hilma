@@ -5,7 +5,6 @@
 
 using namespace hilma;
 
-
 Polyline::Polyline() {
     m_points.clear();
 }

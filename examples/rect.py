@@ -35,7 +35,7 @@ savePly("rect_C.ply", mesh_C, False)
 
 mesh_D = Mesh()
 mesh_D.addVertices( np.array([ [-half, -half, 0.0], [-half, half, 0.0], [half, half, 0.0], [half, -half, 0.0] ], dtype=np.float32) )
-mesh_D.addFaces( np.array([ [1, 0, 3], [1, 3, 2] ], dtype=np.int32) ) 
+mesh_D.addFaces( np.array([ [1, 0, 3], [1, 3, 2] ], dtype=np.uint16 ) ) 
 savePly("rect_D.ply", mesh_D, False)
 
 mesh_E = Mesh()

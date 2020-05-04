@@ -183,7 +183,11 @@ bool savePly( const std::string& _filename, Mesh& _mesh, bool _binnary  ) {
 
         if (_mesh.getMode() == TRIANGLES ) {
             file.add_properties_to_element("face", { "vertex_indices" },
-            tinyply::Type::INT32, _mesh.m_indices.size()/3 , reinterpret_cast<uint8_t*>(_mesh.m_indices.data()), tinyply::Type::UINT8, 3);
+#if defined(PLATFORM_RPI)
+            tinyply::Type::UINT16, _mesh.m_indices.size()/3 , reinterpret_cast<uint8_t*>(_mesh.m_indices.data()), tinyply::Type::UINT8, 3);
+#else
+            tinyply::Type::UINT32, _mesh.m_indices.size()/3 , reinterpret_cast<uint8_t*>(_mesh.m_indices.data()), tinyply::Type::UINT8, 3);
+#endif
         }
 
     }
