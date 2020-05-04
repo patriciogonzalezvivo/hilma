@@ -29,7 +29,6 @@ public:
     Polyline(const float* _array2D, int _m, int _n);
     virtual ~Polyline();
 
-
     void                    append(const Polyline& _poly);
 
     void                    addPoint(const glm::vec2& _point);

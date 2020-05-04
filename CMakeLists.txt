@@ -26,6 +26,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     endif()
 endif()
 
+
 # The compiled library code is here
 add_subdirectory(src)
 add_subdirectory(examples)

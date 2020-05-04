@@ -7,19 +7,34 @@ Hilma is 2D/3D geometry library in C++ with Python bindings (with support for Nu
 * [Mapbox's Earcut tessellator](https://github.com/mapbox/earcut)
 * [Tangram-es's ployline to spline converter](https://github.com/tangrams/tangram-es/blob/master/core/src/util/builders.cpp)
 
+Dependencies
 
-## Hilma as C++ lib
+* [glm](https://github.com/g-truc/glm)
 
-You can easily add hypatia into your project by adding the `include/` and `src/` folder or by installing hypatia into your system. For the former option you need to:
+## Compile and install Hilma
+
+Before compiling 
 
 ```bash
-sudo apt install cmake
+sudo apt install cmake swig python3-numpy  
 mkdir build
 cd build
 cmake ..
 make
-sudo make install
+sudo make install 
 ```
+
+**Note**: to install inside anaconda do:
+```bash
+swig -c++ -python hilma.i
+/anaconda3/bin/./python3.7 setup.py build_ext --inplace
+/anaconda3/bin/./python3.7 setup.py install 
+```
+
+## Hilma as C++ lib
+
+Alternativelly to installing Hilma on your system you can easily copy the content of `include/` and `src/` folder to your project, just make sure you 
+
 
 ```cpp
 #include "hilma/types/Mesh.h"
@@ -46,11 +61,6 @@ First you need to create the package and install it
 ```bash
 sudo apt install swig
 make install
-```
-
-**Note**: to install inside anaconda do:
-```bash
-/anaconda3/bin/./python3.7 setup.py install 
 ```
 
 Then you can use it as follow:
