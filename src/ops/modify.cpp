@@ -4,11 +4,12 @@
 #include "hilma/math.h"
 #include "hilma/types/BoundingBox.h"
 
- #define GLM_ENABLE_EXPERIMENTAL
+#define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/rotate_vector.hpp"
 #include "glm/gtx/norm.hpp"
 
 namespace mapbox { namespace util {
+
 template <>
 struct nth<0, glm::vec2> {
     inline static float get(const glm::vec2 &t) { return t.x; };
@@ -17,21 +18,23 @@ template <>
 struct nth<1, glm::vec2> {
     inline static float get(const glm::vec2 &t) { return t.y; };
 };
+
+template <>
+struct nth<0, glm::vec3> {
+    inline static float get(const glm::vec3 &t) { return t.x; };
+};
+template <>
+struct nth<1, glm::vec3> {
+    inline static float get(const glm::vec3 &t) { return t.y; };
+};
+
 }}
+
 
 namespace hilma {
 
-Mesh surface(const Polyline& _polyline) {
-    return surface(_polyline.m_points);
-}
-
-Mesh surface(const std::vector<glm::vec2>& _contour) {
-    std::vector<std::vector<glm::vec2>> polygon;
-    polygon.push_back(_contour);
-    return surface(polygon);
-}
-
-Mesh surface(const std::vector<std::vector<glm::vec2>>& _polygon) {
+template <typename T>
+Mesh Builder::surface(const std::vector<std::vector<T>>& _polygon) {
     Mesh mesh;
 
     BoundingBox bb;
@@ -57,17 +60,11 @@ Mesh surface(const std::vector<std::vector<glm::vec2>>& _polygon) {
     return mesh;
 }
 
-Mesh extrude(const Polyline& _polyline, float _maxHeight, float _minHeight) {
-    return extrude(_polyline.m_points, _maxHeight, _minHeight);
-}
+template Mesh Builder::surface<glm::vec2>(const std::vector<std::vector<glm::vec2>>&); 
+template Mesh Builder::surface<glm::vec3>(const std::vector<std::vector<glm::vec3>>&); 
 
-Mesh extrude(const std::vector<glm::vec2>& _contour, float _maxHeight, float _minHeight) {
-    std::vector<std::vector<glm::vec2>> polygon;
-    polygon.push_back(_contour);
-    return extrude(polygon, _maxHeight, _minHeight);
-}
-
-Mesh extrude(const std::vector<std::vector<glm::vec2>>& _polygon, float _maxHeight, float _minHeight) {
+template <typename T>
+Mesh Builder::extrude(const std::vector<std::vector<T>>& _polygon, float _maxHeight, float _minHeight) {
     Mesh mesh;
     
     static const glm::vec3 upVector(0.0f, 0.0f, 1.0f);
@@ -80,8 +77,8 @@ Mesh extrude(const std::vector<std::vector<glm::vec2>>& _polygon, float _maxHeig
 
         for (size_t i = 0; i < lineSize - 1; i++) {
 
-            glm::vec3 a(line[i], 0.f);
-            glm::vec3 b(line[i+1], 0.f);
+            glm::vec3 a(line[i].x, line[i].y, 0.f);
+            glm::vec3 b(line[i+1].x, line[i+1].y, 0.f);
 
             
             normalVector = glm::cross(upVector, b - a);
@@ -136,11 +133,15 @@ Mesh extrude(const std::vector<std::vector<glm::vec2>>& _polygon, float _maxHeig
     return mesh;
 }
 
+template Mesh Builder::extrude<glm::vec2>(const std::vector<std::vector<glm::vec2>>&, float, float); 
+template Mesh Builder::extrude<glm::vec3>(const std::vector<std::vector<glm::vec3>>&, float, float); 
+
 // From Tangram
 // https://github.com/tangrams/tangram-es/blob/e4a323afeb310520456aec49e338614120a7ffa2/core/src/util/builders.cpp
 
 // Get 2D perpendicular of two points
-glm::vec2 perp2d(const glm::vec2& _v1, const glm::vec2& _v2 ){
+
+inline glm::vec2 perp2d(const glm::vec2& _v1, const glm::vec2& _v2 ) {
     return glm::vec2(_v2.y - _v1.y, _v1.x - _v2.x);
 }
 
@@ -246,22 +247,30 @@ void addCap(const glm::vec2& _coord, const glm::vec2& _normal, int _numCorners, 
     addFan(_coord, nA, nB, nC, uA, uB, uC, _numCorners, _mesh, _width);
 }
 
-void buildPolyLineSegment(  const std::vector<glm::vec2>& _line, Mesh& _mesh, size_t _startIndex, size_t _endIndex,  
-                            float _width, JoinType _join, CapType _cap, bool endCap, float _miterLimit) {
+template <typename T>
+Mesh Builder::spline(const std::vector<T>& _polyline, float _width, JoinType _join, CapType _cap, float _miterLimit) { //}, bool _close) {;
+
+    Mesh mesh;
+    size_t startIndex = 0;
+    size_t endIndex = _polyline.size();
+    bool endCap = true;
+
 
     float distance = 0; // Cumulative distance along the polyline.
 
-    size_t origLineSize = _line.size();
+    size_t origLineSize = _polyline.size();
 
     // endIndex/startIndex could be wrapped values, calculate lineSize accordingly
-    int lineSize = (int)((_endIndex > _startIndex) ?
-                   (_endIndex - _startIndex) :
-                   (origLineSize - _startIndex + _endIndex));
-    if (lineSize < 2) { return; }
+    int lineSize = (int)((endIndex > startIndex) ?
+                   (endIndex - startIndex) :
+                   (origLineSize - startIndex + endIndex));
+    if (lineSize < 2) { return mesh; }
 
-    glm::vec2 coordCurr(_line[_startIndex]);
+    glm::vec2 coordCurr(_polyline[startIndex].x, 
+                        _polyline[startIndex].y);
     // get the Point using wrapped index in the original line geometry
-    glm::vec2 coordNext(_line[(_startIndex + 1) % origLineSize]);
+    glm::vec2 coordNext(_polyline[(startIndex + 1) % origLineSize].x, 
+                        _polyline[(startIndex + 1) % origLineSize].y);
     glm::vec2 normPrev, normNext, miterVec;
 
     int cornersOnCap = (int)_cap;
@@ -271,21 +280,22 @@ void buildPolyLineSegment(  const std::vector<glm::vec2>& _line, Mesh& _mesh, si
     normNext = glm::normalize(perp2d(coordCurr, coordNext));
 
     if (endCap)
-        addCap(coordCurr, normNext, cornersOnCap, true, _mesh, _width);
+        addCap(coordCurr, normNext, cornersOnCap, true, mesh, _width);
     
-    addPolyLineVertex(coordCurr, normNext, {1.0f, 0.0f}, _mesh, _width); // right corner
-    addPolyLineVertex(coordCurr, -normNext, {0.0f, 0.0f}, _mesh, _width); // left corner
+    addPolyLineVertex(coordCurr, normNext, {1.0f, 0.0f}, mesh, _width); // right corner
+    addPolyLineVertex(coordCurr, -normNext, {0.0f, 0.0f}, mesh, _width); // left corner
 
 
     // Process intermediate points
     for (int i = 1; i < lineSize - 1; i++) {
         // get the Point using wrapped index in the original line geometry
-        int nextIndex = (i + _startIndex + 1) % origLineSize;
+        int nextIndex = (i + startIndex + 1) % origLineSize;
 
         distance += glm::distance(coordCurr, coordNext);
 
         coordCurr = coordNext;
-        coordNext = _line[nextIndex];
+        coordNext.x = _polyline[nextIndex].x;
+        coordNext.y = _polyline[nextIndex].y;
 
         if (coordCurr == coordNext)
             continue;
@@ -318,9 +328,9 @@ void buildPolyLineSegment(  const std::vector<glm::vec2>& _line, Mesh& _mesh, si
         if (trianglesOnJoin == 0) {
             // Join type is a simple miter
 
-            addPolyLineVertex(coordCurr, miterVec, {1.0, v}, _mesh, _width); // right corner
-            addPolyLineVertex(coordCurr, -miterVec, {0.0, v}, _mesh, _width); // left corner
-            indexPairs(1, _mesh);
+            addPolyLineVertex(coordCurr, miterVec, {1.0, v}, mesh, _width); // right corner
+            addPolyLineVertex(coordCurr, -miterVec, {0.0, v}, mesh, _width); // left corner
+            indexPairs(1, mesh);
 
         }
         else {
@@ -331,25 +341,25 @@ void buildPolyLineSegment(  const std::vector<glm::vec2>& _line, Mesh& _mesh, si
 
             if (isRightTurn) {
 
-                addPolyLineVertex(coordCurr, miterVec, {1.0f, v}, _mesh, _width); // right (inner) corner
-                addPolyLineVertex(coordCurr, -normPrev, {0.0f, v}, _mesh, _width); // left (outer) corner
-                indexPairs(1, _mesh);
+                addPolyLineVertex(coordCurr, miterVec, {1.0f, v}, mesh, _width); // right (inner) corner
+                addPolyLineVertex(coordCurr, -normPrev, {0.0f, v}, mesh, _width); // left (outer) corner
+                indexPairs(1, mesh);
 
-                addFan(coordCurr, -normPrev, -normNext, miterVec, {0.f, v}, {0.f, v}, {1.f, v}, trianglesOnJoin, _mesh, _width);
+                addFan(coordCurr, -normPrev, -normNext, miterVec, {0.f, v}, {0.f, v}, {1.f, v}, trianglesOnJoin, mesh, _width);
 
-                addPolyLineVertex(coordCurr, miterVec, {1.0f, v}, _mesh, _width); // right (inner) corner
-                addPolyLineVertex(coordCurr, -normNext, {0.0f, v}, _mesh, _width); // left (outer) corner
+                addPolyLineVertex(coordCurr, miterVec, {1.0f, v}, mesh, _width); // right (inner) corner
+                addPolyLineVertex(coordCurr, -normNext, {0.0f, v}, mesh, _width); // left (outer) corner
 
             } else {
 
-                addPolyLineVertex(coordCurr, normPrev, {1.0f, v}, _mesh, _width); // right (outer) corner
-                addPolyLineVertex(coordCurr, -miterVec, {0.0f, v}, _mesh, _width); // left (inner) corner
-                indexPairs(1, _mesh);
+                addPolyLineVertex(coordCurr, normPrev, {1.0f, v}, mesh, _width); // right (outer) corner
+                addPolyLineVertex(coordCurr, -miterVec, {0.0f, v}, mesh, _width); // left (inner) corner
+                indexPairs(1, mesh);
 
-                addFan(coordCurr, normPrev, normNext, -miterVec, {1.f, v}, {1.f, v}, {0.0f, v}, trianglesOnJoin, _mesh, _width);
+                addFan(coordCurr, normPrev, normNext, -miterVec, {1.f, v}, {1.f, v}, {0.0f, v}, trianglesOnJoin, mesh, _width);
 
-                addPolyLineVertex(coordCurr, normNext, {1.0f, v}, _mesh, _width); // right (outer) corner
-                addPolyLineVertex(coordCurr, -miterVec, {0.0f, v}, _mesh, _width); // left (inner) corner
+                addPolyLineVertex(coordCurr, normNext, {1.0f, v}, mesh, _width); // right (outer) corner
+                addPolyLineVertex(coordCurr, -miterVec, {0.0f, v}, mesh, _width); // left (inner) corner
             }
         }
     }
@@ -357,60 +367,16 @@ void buildPolyLineSegment(  const std::vector<glm::vec2>& _line, Mesh& _mesh, si
     distance += glm::distance(coordCurr, coordNext);
 
     // Process last point in line with a cap
-    addPolyLineVertex(coordNext, normNext, {1.f, distance}, _mesh, _width); // right corner
-    addPolyLineVertex(coordNext, -normNext, {0.f, distance}, _mesh, _width); // left corner
-    indexPairs(1, _mesh);
+    addPolyLineVertex(coordNext, normNext, {1.f, distance}, mesh, _width); // right corner
+    addPolyLineVertex(coordNext, -normNext, {0.f, distance}, mesh, _width); // left corner
+    indexPairs(1, mesh);
     if (endCap)
-        addCap(coordNext, normNext, cornersOnCap, false, _mesh, _width);
-}
+        addCap(coordNext, normNext, cornersOnCap, false, mesh, _width);
 
-Mesh spline(const Polyline& _polyline, float _width, JoinType _join, CapType _cap, float _miterLimit) {
-    return spline(_polyline.m_points, _width, _join, _cap, _miterLimit);
-}
-
-Mesh spline(const std::vector<glm::vec2>& _polyline, float _width, JoinType _join, CapType _cap, float _miterLimit) { //}, bool _close) {
-
-    size_t lineSize = _polyline.size();
-    Mesh mesh;
-
-    // if (keepTileEdges) {
-        buildPolyLineSegment(_polyline, mesh, 0, lineSize, _width, _join, _cap, true, _miterLimit);
-
-    // } 
-    // else {
-
-        // int cut = 0;
-        // int firstCutEnd = 0;
-
-        // // Determine cuts
-        // for (size_t i = 0; i < lineSize - 1; i++) {
-        //     const glm::vec2& coordCurr = _polyline[i];
-        //     const glm::vec2& coordNext = _polyline[i+1];
-        //     if (isOutsideTile(coordCurr, coordNext)) {
-        //         if (cut == 0) {
-        //             firstCutEnd = i + 1;
-        //         }
-        //         buildPolyLineSegment(_polyline, _mesh, cut, i + 1);
-        //         cut = i + 1;
-        //     }
-        // }
-
-        // if (closedPolygon) {
-        //     if (cut == 0) {
-        //         // no tile edge cuts!
-        //         // loop and close the polygon with no endcaps
-        //         buildPolyLineSegment(_polyline, _mesh, 0, lineSize+2, false);
-        //     }
-        //     else {
-        //         // merge first and last cut line-segments together
-        //         buildPolyLineSegment(_polyline, _mesh, cut, firstCutEnd);
-        //     }
-        // }
-        // else {
-        //     buildPolyLineSegment(_polyline, _mesh, cut, lineSize);
-        // }
-    // }
     return mesh;
 }
+
+template Mesh Builder::spline<glm::vec2>(const std::vector<glm::vec2>&, float, JoinType, CapType, float);
+template Mesh Builder::spline<glm::vec3>(const std::vector<glm::vec3>&, float, JoinType, CapType, float);
 
 }
