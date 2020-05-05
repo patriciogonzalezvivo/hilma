@@ -17,6 +17,9 @@ int main(int argc, char **argv) {
     // Following polylines define holes.
     polygon.push_back({{75, 25}, {75, 75}, {25, 75}, {25, 25}, {75, 25}});
 
+    // hilma::Polyline p;
+    // p.addVertices(&polygon[0].x, 5, 2);
+
     hilma::Mesh bottom = hilma::surface(polygon);
     hilma::Mesh top = bottom;
     bottom.invertWindingOrder();

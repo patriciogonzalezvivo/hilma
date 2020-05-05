@@ -504,12 +504,9 @@ private:
 
     void calcData(int index, T &tangent, float &angle, T &rotation, T &normal) const;
 
-    // friend Mesh surface(const Polyline&);
-    // friend Mesh extrude(const Polyline&,float, float);
-    // friend Mesh spline(const Polyline&, float, JoinType, CapType, float);
 };
 
-using Polyline = Polyline_<glm::vec2>;
+using Polyline = Polyline_<glm::vec3>;
 
 // /// \brief Determine if an (x,y) coordinate is within the polygon defined by a vector of glm::vec3s.
 // /// \param x The x dimension of the coordinate.

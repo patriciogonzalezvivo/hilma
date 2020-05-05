@@ -77,7 +77,7 @@ inline float wrap(float value, float from, float to){
     return value - cycle * floor((value - from) / cycle);
 }
 
-float clamp(float value, float min, float max) {
+inline float clamp(float value, float min, float max) {
 	return value < min ? min : value > max ? max : value;
 }
 

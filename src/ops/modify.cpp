@@ -34,7 +34,7 @@ struct nth<1, glm::vec3> {
 namespace hilma {
 
 template <typename T>
-Mesh Builder::surface(const std::vector<std::vector<T>>& _polygon) {
+Mesh Modify::surface(const std::vector<std::vector<T>>& _polygon) {
     Mesh mesh;
 
     BoundingBox bb;
@@ -60,11 +60,11 @@ Mesh Builder::surface(const std::vector<std::vector<T>>& _polygon) {
     return mesh;
 }
 
-template Mesh Builder::surface<glm::vec2>(const std::vector<std::vector<glm::vec2>>&); 
-template Mesh Builder::surface<glm::vec3>(const std::vector<std::vector<glm::vec3>>&); 
+template Mesh Modify::surface<glm::vec2>(const std::vector<std::vector<glm::vec2>>&); 
+template Mesh Modify::surface<glm::vec3>(const std::vector<std::vector<glm::vec3>>&); 
 
 template <typename T>
-Mesh Builder::extrude(const std::vector<std::vector<T>>& _polygon, float _maxHeight, float _minHeight) {
+Mesh Modify::extrude(const std::vector<std::vector<T>>& _polygon, float _maxHeight, float _minHeight) {
     Mesh mesh;
     
     static const glm::vec3 upVector(0.0f, 0.0f, 1.0f);
@@ -133,11 +133,11 @@ Mesh Builder::extrude(const std::vector<std::vector<T>>& _polygon, float _maxHei
     return mesh;
 }
 
-template Mesh Builder::extrude<glm::vec2>(const std::vector<std::vector<glm::vec2>>&, float, float); 
-template Mesh Builder::extrude<glm::vec3>(const std::vector<std::vector<glm::vec3>>&, float, float); 
+template Mesh Modify::extrude<glm::vec2>(const std::vector<std::vector<glm::vec2>>&, float, float); 
+template Mesh Modify::extrude<glm::vec3>(const std::vector<std::vector<glm::vec3>>&, float, float); 
 
 // From Tangram
-// https://github.com/tangrams/tangram-es/blob/e4a323afeb310520456aec49e338614120a7ffa2/core/src/util/builders.cpp
+// https://github.com/tangrams/tangram-es/blob/e4a323afeb310520456aec49e338614120a7ffa2/core/src/util/Modifys.cpp
 
 // Get 2D perpendicular of two points
 
@@ -248,7 +248,7 @@ void addCap(const glm::vec2& _coord, const glm::vec2& _normal, int _numCorners, 
 }
 
 template <typename T>
-Mesh Builder::spline(const std::vector<T>& _polyline, float _width, JoinType _join, CapType _cap, float _miterLimit) { //}, bool _close) {;
+Mesh Modify::spline(const std::vector<T>& _polyline, float _width, JoinType _join, CapType _cap, float _miterLimit) { //}, bool _close) {;
 
     Mesh mesh;
     size_t startIndex = 0;
@@ -376,7 +376,7 @@ Mesh Builder::spline(const std::vector<T>& _polyline, float _width, JoinType _jo
     return mesh;
 }
 
-template Mesh Builder::spline<glm::vec2>(const std::vector<glm::vec2>&, float, JoinType, CapType, float);
-template Mesh Builder::spline<glm::vec3>(const std::vector<glm::vec3>&, float, JoinType, CapType, float);
+template Mesh Modify::spline<glm::vec2>(const std::vector<glm::vec2>&, float, JoinType, CapType, float);
+template Mesh Modify::spline<glm::vec3>(const std::vector<glm::vec3>&, float, JoinType, CapType, float);
 
 }
