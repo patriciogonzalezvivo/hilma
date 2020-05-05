@@ -1,4 +1,5 @@
 %module hilma
+
 %include <typemaps.i>
 %include <std_vector.i>
 %include <std_string.i>
@@ -31,6 +32,7 @@
     #include "hilma/io/tiny_obj_loader.h"
 %}
 
+%include "glm.i"
 %include "numpy.i"
 %init %{
     import_array();

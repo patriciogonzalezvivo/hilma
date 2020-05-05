@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 #include "hilma/types/Material.h"
 #include "hilma/types/BoundingBox.h"
@@ -29,6 +30,7 @@ public:
 
     Mesh();
     Mesh(const Mesh& _mother);
+    Mesh(const std::string& _name);
     virtual ~Mesh();
 
     void        clear();
@@ -36,6 +38,10 @@ public:
 
     void        setMode(PrimitiveMode _mode = TRIANGLES, bool _compute = false);
     PrimitiveMode    getMode() const { return m_mode; };
+    
+    void        setName(const std::string& _name) { m_name = _name; }
+    std::string getName() const { return m_name; }
+
 
     // Vertices
     void        addVertex(const glm::vec3& _point);
@@ -44,8 +50,10 @@ public:
 
     void        addVertices(const float* _array2D, int _m, int _n);
 
-    void        clearVertices() { m_vertices.clear(); }
     bool        hasVertices() const { return !m_vertices.empty(); };
+    void        clearVertices() { m_vertices.clear(); }
+
+    glm::vec3   getVertex(size_t _index) const { return m_vertices[_index]; }
     size_t      getVerticesTotal() const { return m_vertices.size(); }
     std::vector<glm::vec3> getVertices() const { return m_vertices; }
 
@@ -84,11 +92,12 @@ public:
     void        addTexCoord(const glm::vec2& _uv);
     void        addTexCoord(float _tX, float _tY);
     void        addTexCoord(const float* _array1D, int _n);
-
     void        addTexCoords(const float* _array2D, int _m, int _n);
 
     const bool  hasTexCoords() const { return !m_texcoords.empty(); }
+
     size_t      getTexCoordsTotal() const { return m_texcoords.size(); }
+    glm::vec2   getTexCoord(size_t _index) const { return m_texcoords[_index]; }
     std::vector<glm::vec2> getTexCoords() const { return m_texcoords; }
     void        clearTexCoords() { m_texcoords.clear(); }
 
@@ -135,10 +144,12 @@ private:
     // std::vector<INDEX_TYPE> m_edge_indices;
     // std::vector<glm::vec4>  m_edge_colors;
 
-    PrimitiveMode                m_mode;
+
+    std::string             m_name;
+    PrimitiveMode           m_mode;
 
     friend bool loadPly( const std::string&, Mesh& );
-    friend bool savePly( const std::string&, Mesh&, bool);
+    friend bool savePly( const std::string&, Mesh&, bool, bool);
     friend bool saveObj( const std::string&, Mesh& );
 
     friend void scale(Mesh&, float );

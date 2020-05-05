@@ -5,13 +5,16 @@
 
 using namespace hilma;
 
-Mesh::Mesh() : m_mode(TRIANGLES) {
-
+Mesh::Mesh() : m_name("undefined"), m_mode(TRIANGLES) {
 }
 
-Mesh::Mesh(const Mesh& _mother): m_mode(_mother.getMode()) {
+Mesh::Mesh(const std::string& _name) : m_name(_name), m_mode(TRIANGLES)  {
+}
+
+Mesh::Mesh(const Mesh& _mother): m_name(_mother.m_name), m_mode(_mother.m_mode) {
     append(_mother);
 }
+
 
 Mesh::~Mesh() {
 

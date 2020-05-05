@@ -155,7 +155,7 @@ bool loadPly( const std::string& _filename, Mesh& _mesh ) {
     return true;
 }
 
-bool savePly( const std::string& _filename, Mesh& _mesh, bool _binnary  ) {
+bool savePly( const std::string& _filename, Mesh& _mesh, bool _binnary, bool _colorAsChar ) {
 
     std::filebuf fb;
     fb.open(_filename.c_str(), std::ios::out | std::ios::binary);
@@ -164,12 +164,33 @@ bool savePly( const std::string& _filename, Mesh& _mesh, bool _binnary  ) {
 
     tinyply::PlyFile file;
 
-    file.add_properties_to_element("vertex", { "x", "y", "z" }, 
+    file.add_properties_to_element("vertex", { "x", "y", "z" },
         tinyply::Type::FLOAT32, _mesh.m_vertices.size(), reinterpret_cast<uint8_t*>(_mesh.m_vertices.data()), tinyply::Type::INVALID, 0);
 
-    if (_mesh.hasColors())
-        file.add_properties_to_element("vertex", { "r", "g", "b", "a" },
-        tinyply::Type::FLOAT32, _mesh.m_colors.size(), reinterpret_cast<uint8_t*>(_mesh.m_colors.data()), tinyply::Type::INVALID, 0);
+    if (_mesh.hasColors()) {
+        if (_colorAsChar) {
+
+            struct Color8Bit { uint8_t red, green, blue, alpha; };
+
+            size_t total = _mesh.m_colors.size();
+            std::vector<Color8Bit> colors;
+            Color8Bit c;
+            for (size_t i = 0; i < total; i++) {
+                c.red = _mesh.m_colors[i].x * 255;
+                c.green = _mesh.m_colors[i].y * 255;
+                c.blue = _mesh.m_colors[i].z * 255;
+                c.alpha = _mesh.m_colors[i].w * 255;
+                colors.push_back(c);
+            }
+
+            file.add_properties_to_element("vertex", { "red", "green", "blue", "alpha" },
+            tinyply::Type::UINT8 , total, reinterpret_cast<uint8_t*>(colors.data()), tinyply::Type::INVALID, 0);
+        }
+        else 
+            file.add_properties_to_element("vertex", { "r", "g", "b", "a" },
+            tinyply::Type::FLOAT32, _mesh.m_colors.size(), reinterpret_cast<uint8_t*>(_mesh.m_colors.data()), tinyply::Type::INVALID, 0);
+        
+    }
 
     if (_mesh.hasNormals())
         file.add_properties_to_element("vertex", { "nx", "ny", "nz" },
