@@ -379,8 +379,14 @@ Mesh Modify::spline(const std::vector<T>& _polyline, float _width, JoinType _joi
 template Mesh Modify::spline<glm::vec2>(const std::vector<glm::vec2>&, float, JoinType, CapType, float);
 template Mesh Modify::spline<glm::vec3>(const std::vector<glm::vec3>&, float, JoinType, CapType, float);
 
-Mesh tube(const Polyline& _polyline, float _width, int _resolution) {
+Mesh tube(const Polyline& _polyline, float _width, int _resolution, bool _caps) {
     Mesh mesh;
+    size_t offset = 0;
+
+    if ( !_polyline.isClosed() && _caps) {
+        mesh.addVertex(_polyline.getVertices()[0]);
+        offset = 1;
+    }
     
     for (size_t i = 0; i < _polyline.size(); i++) {
         const glm::vec3& p0 = _polyline.getVertices()[i];
@@ -405,12 +411,11 @@ Mesh tube(const Polyline& _polyline, float _width, int _resolution) {
     }
 
     //--------------------------------------------------------------------------
-    // std::vector<glm::vec3>& verts = mesh.points;
-    size_t numOfVerts = mesh.getVerticesTotal();
-    size_t i0, i1, i2;
-    bool bLeftToRight;
-    bool bRingEnd;
-    int k;
+    if ( !_polyline.isClosed() && _caps) {
+        for (size_t i = 0; i < _resolution-1; i++)
+            mesh.addTriangle( 0, i + 2, i + 1);
+        mesh.addTriangle( 0, 1, _resolution);
+    }
     
     size_t numOfTubeSections = _polyline.size();
     for (size_t y = 0; y < numOfTubeSections - 1; y++) {
@@ -419,30 +424,31 @@ Mesh tube(const Polyline& _polyline, float _width, int _resolution) {
         // | \ |
         // 0 - 1
 
-        for(int x = 0; x < _resolution; x++) {
-            mesh.addIndex( y * _resolution + x);
-
-            if (x+1 > _resolution-1)
-                mesh.addIndex( y * _resolution + x+1 - _resolution);
-            else
-                mesh.addIndex( y * _resolution + x+1);
-
-            mesh.addIndex( (y+1) * _resolution + x);
-
-            // mesh.addIndex( (y)*_resolution + x+1 );
-            if (x+1 > _resolution-1)
-                mesh.addIndex( y * _resolution + x+1 - _resolution);
-            else
-                mesh.addIndex( y*_resolution + x+1 );
-
-            // mesh.addIndex( (y+1)*_resolution + x+1 );
-            if (x+1 > _resolution-1)
-                mesh.addIndex( (y+1) * _resolution + x+1 - _resolution);
-            else
-                mesh.addIndex( (y+1) * _resolution + x+1);
-
-            mesh.addIndex( (y+1)*_resolution + x );
+        for(int x = 0; x < _resolution-1; x++) {
+            mesh.addTriangle(   y * _resolution + x + offset,
+                                y * _resolution + x+1 + offset,
+                                (y+1) * _resolution + x + offset);
+            mesh.addTriangle(   y*_resolution + x+1 + offset,
+                                (y+1) * _resolution + x+1 + offset,
+                                (y+1)*_resolution + x + offset);
         }
+
+        mesh.addTriangle(   y * _resolution + (_resolution-1) + offset,
+                            y * _resolution + offset,
+                            (y+1) * _resolution + (_resolution-1) + offset);
+        mesh.addTriangle(   y * _resolution + offset,
+                            (y+1) * _resolution + offset,
+                            (y+1)*_resolution + (_resolution-1) + offset);
+    }
+
+    if ( !_polyline.isClosed() && _caps) {
+        size_t vertsN = mesh.getVerticesTotal();
+        mesh.addVertex(_polyline.getVertices()[_polyline.size()-1]);
+
+        for (size_t i = 0; i < _resolution; i++)
+            mesh.addTriangle( vertsN, vertsN - i - 2, vertsN - i - 1);
+
+        mesh.addTriangle( vertsN, vertsN - 1 , vertsN - _resolution);
     }
 
     return mesh;

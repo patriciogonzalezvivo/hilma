@@ -58,6 +58,6 @@ inline Mesh spline(const Polyline& _polyline, float _width, JoinType _join = Joi
     return spline(_polyline.getVertices(), _width, _join, _cap, _miterLimit);
 }
 
-Mesh tube(const Polyline& _polyline, float _width, int _resolution);
+Mesh tube(const Polyline& _polyline, float _width, int _resolution, bool _caps = true);
 
 }

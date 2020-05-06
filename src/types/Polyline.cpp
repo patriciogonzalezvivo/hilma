@@ -8,7 +8,7 @@
 using namespace hilma;
 
 //----------------------------------------------------------
-Polyline::Polyline(){
+Polyline::Polyline() {
     setRightVector();
     clear();
 }
@@ -1000,9 +1000,16 @@ void Polyline::calcData(int index, glm::vec3& tangent, float &angle, glm::vec3& 
         noSegmentHasZeroLength = true;
 
     if ( noSegmentHasZeroLength) {
-        tangent  = glm::length2(v2 - v1) > 0 ? glm::normalize(v2 - v1) : -v1;
-        if (index == 0 || index == points.size()-1)
-            tangent = glm::vec3(0.0, -1.0, 0.0);
+        if (index == 0) {
+            tangent = normalize(points[index+1] - points[index]);
+        }
+        else if (index == points.size()-1){
+            tangent = normalize(points[index] - points[index-1]);
+        }
+        else {
+            tangent  = glm::length2(v2 - v1) > 0 ? glm::normalize(v2 - v1) : -v1;
+        }
+
         normal   = glm::normalize( glm::cross( rightVector , tangent ) );
         rotation = glm::cross( v1, v2 );
         angle    = glm::pi<float>() - acosf( clamp( glm::dot( v1, v2 ), -1.f, 1.f ) );
