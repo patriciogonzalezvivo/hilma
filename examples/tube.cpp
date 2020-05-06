@@ -11,13 +11,14 @@
 int main(int argc, char **argv) {
 
     hilma::Polyline polyline;
-    for (int i = 0; i < 1000; i++) {
-        float a = glm::radians(i/360.0f);
-        polyline.addVertex(glm::vec3(cos(a*3.)*10., sin(a*2.)*6., cos(a*3.2) * sin(a*1.2) * 10.));
+    int total = 10000;
+    for (int i = 0; i < total; i++) {
+        float a = glm::radians(i * 1.6f);
+        polyline.addVertex(glm::vec3(cos(a*1.2), sin(a*2.), -cos(a*3.2) * sin(a*1.5)) * 10.0f);
     }
-    // polyline.setClosed(true);
+    polyline.setClosed(true);
 
-    hilma::Mesh mesh = hilma::tube(polyline, 1.0, 12);
+    hilma::Mesh mesh = hilma::tube(polyline, 1.0, 18);
     hilma::savePly("tube.ply", mesh, false);
 
     return 1;
