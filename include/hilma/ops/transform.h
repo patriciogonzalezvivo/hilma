@@ -2,9 +2,15 @@
 
 #include "hilma/types/Mesh.h"
 
+#include <glm/gtc/quaternion.hpp>
+
 namespace hilma {
 
 // points
+void transform(std::vector<glm::vec3>& _points, const glm::quat& _mat);
+void transform(std::vector<glm::vec3>& _points, const glm::mat3& _mat);
+void transform(std::vector<glm::vec3>& _points, const glm::mat4& _mat);
+
 void scale(std::vector<glm::vec3>& _points, float _v);
 void scaleX(std::vector<glm::vec3>& _points, float _x);
 void scaleY(std::vector<glm::vec3>& _points, float _y);

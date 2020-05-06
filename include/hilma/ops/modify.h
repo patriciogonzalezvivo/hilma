@@ -14,6 +14,7 @@ struct Modify {
 
     template<typename T>
     static Mesh spline(const std::vector<T>& _polyline, float _width, JoinType _join = JoinType::MITER, CapType _cap = CapType::BUTT, float _miterLimit = 3.0);// , bool _close = false);
+
 };
 
 template<typename T>
@@ -23,9 +24,9 @@ inline Mesh surface(const std::vector<T>& _contour) {
     return Modify::surface<T>(polygon);
 }
 
-// inline Mesh surface(const Polyline& _polyline) {
-//     return surface(_polyline.getVertices());
-// }
+inline Mesh surface(const Polyline& _polyline) {
+    return surface(_polyline.getVertices());
+}
 
 template<typename T>
 inline Mesh surface(const std::vector<std::vector<T>>& _polygon) {
@@ -39,9 +40,9 @@ inline Mesh extrude(const std::vector<T>& _contour, float _maxHeight, float _min
     return Modify::extrude<T>(polygon, _maxHeight, _minHeight);
 }
 
-// inline Mesh extrude(const Polyline& _polyline, float _maxHeight, float _minHeight = 0.0)  {
-//     return extrude(_polyline.getVertices(), _maxHeight, _minHeight);
-// }
+inline Mesh extrude(const Polyline& _polyline, float _maxHeight, float _minHeight = 0.0)  {
+    return extrude(_polyline.getVertices(), _maxHeight, _minHeight);
+}
 
 template<typename T>
 inline Mesh extrude(const std::vector<std::vector<T>>& _polygon, float _maxHeight, float _minHeight = 0.0f) {
@@ -53,8 +54,10 @@ inline Mesh spline(const std::vector<T>& _polyline, float _width, JoinType _join
     return Modify::spline<T>(_polyline, _width, _join, _cap, _miterLimit);
 }
 
-// inline Mesh spline(const Polyline& _polyline, float _width, JoinType _join = JoinType::MITER, CapType _cap = CapType::BUTT, float _miterLimit = 3.0)  {
-//     return spline(_polyline.getVertices(), _width, _join, _cap, _miterLimit);
-// }
+inline Mesh spline(const Polyline& _polyline, float _width, JoinType _join = JoinType::MITER, CapType _cap = CapType::BUTT, float _miterLimit = 3.0)  {
+    return spline(_polyline.getVertices(), _width, _join, _cap, _miterLimit);
+}
+
+Mesh tube(const Polyline& _polyline, float _width, int _resolution);
 
 }

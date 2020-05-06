@@ -577,332 +577,332 @@ Mesh icosphere(float _radius, size_t _iterations) {
 }
 
 Mesh cylinder( float _radius, float _height, int _radiusSegments, int _heightSegments, int _numCapSegments, bool _bCapped, PrimitiveMode _mode ) {
-	Mesh mesh;
-	if (_mode != TRIANGLE_STRIP && _mode != TRIANGLES)
-		_mode = TRIANGLE_STRIP;
-	
-	mesh.setMode(_mode, false);
+    Mesh mesh;
+    if (_mode != TRIANGLE_STRIP && _mode != TRIANGLES)
+        _mode = TRIANGLE_STRIP;
+        
+    mesh.setMode(_mode, false);
 
-	_radiusSegments = _radiusSegments+1;
-	int capSegs = _numCapSegments;
-	capSegs = capSegs+1;
-	_heightSegments = _heightSegments+1;
-	if (_heightSegments < 2) _heightSegments = 2;
-	if ( capSegs < 2 ) _bCapped = false;
-	if (!_bCapped) capSegs=1;
+    _radiusSegments = _radiusSegments+1;
+    int capSegs = _numCapSegments;
+    capSegs = capSegs+1;
+    _heightSegments = _heightSegments+1;
+    if (_heightSegments < 2) _heightSegments = 2;
+    if ( capSegs < 2 ) _bCapped = false;
+    if (!_bCapped) capSegs=1;
 
-	float angleIncRadius = -1 * (TAU/((float)_radiusSegments-1.f));
-	float heightInc = _height/((float)_heightSegments-1.f);
-	float halfH = _height*.5f;
+    float angleIncRadius = -1 * (TAU/((float)_radiusSegments-1.f));
+    float heightInc = _height/((float)_heightSegments-1.f);
+    float halfH = _height*.5f;
 
-	float newRad;
-	glm::vec3 vert;
-	glm::vec2 tcoord;
-	glm::vec3 normal;
-	glm::vec3 up(0,1,0);
+    float newRad;
+    glm::vec3 vert;
+    glm::vec2 tcoord;
+    glm::vec3 normal;
+    glm::vec3 up(0,1,0);
 
-	std::size_t vertOffset = 0;
+    std::size_t vertOffset = 0;
 
-	float maxTexY   = _heightSegments-1.f;
-	if (capSegs > 0)
-		maxTexY += (capSegs*2)-2.f;
-	
-	float maxTexYNormalized = (capSegs-1.f) / maxTexY;
+    float maxTexY   = _heightSegments-1.f;
+    if (capSegs > 0)
+        maxTexY += (capSegs*2)-2.f;
+        
+    float maxTexYNormalized = (capSegs-1.f) / maxTexY;
 
-	// add the top cap //
-	if (_bCapped && capSegs > 0) {
-		normal = {0.f, -1.f, 0.f};
-		for (int iy = 0; iy < capSegs; iy++) {
-			for (int ix = 0; ix < _radiusSegments; ix++) {
-				newRad = mapValue((float)iy, 0, capSegs-1, 0.0, _radius, true);
-				vert.x = cos((float)ix*angleIncRadius) * newRad;
-				vert.z = sin((float)ix*angleIncRadius) * newRad;
-				vert.y = -halfH;
+    // add the top cap //
+    if (_bCapped && capSegs > 0) {
+        normal = {0.f, -1.f, 0.f};
+        for (int iy = 0; iy < capSegs; iy++) {
+            for (int ix = 0; ix < _radiusSegments; ix++) {
+                newRad = mapValue((float)iy, 0, capSegs-1, 0.0, _radius, true);
+                vert.x = cos((float)ix*angleIncRadius) * newRad;
+                vert.z = sin((float)ix*angleIncRadius) * newRad;
+                vert.y = -halfH;
 
-				tcoord.x = (float)ix/((float)_radiusSegments-1.f);
-				tcoord.y = 1.f - mapValue(iy, 0, capSegs-1, 0, maxTexYNormalized, true);
+                tcoord.x = (float)ix/((float)_radiusSegments-1.f);
+                tcoord.y = 1.f - mapValue(iy, 0, capSegs-1, 0, maxTexYNormalized, true);
 
-				mesh.addTexCoord( tcoord );
-				mesh.addVertex( vert );
-				mesh.addNormal( normal );
-			}
-		}
+                mesh.addTexCoord( tcoord );
+                mesh.addVertex( vert );
+                mesh.addNormal( normal );
+            }
+        }
 
-		if (_mode == TRIANGLES) {
-			for (int y = 0; y < capSegs-1; y++) {
-				for (int x = 0; x < _radiusSegments-1; x++) {
-					if (y > 0) {
-						// first triangle //
-						mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
-						mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
-						mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
-					}
+        if (_mode == TRIANGLES) {
+            for (int y = 0; y < capSegs-1; y++) {
+                for (int x = 0; x < _radiusSegments-1; x++) {
+                    if (y > 0) {
+                        // first triangle //
+                        mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
+                        mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
+                        mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+                    }
 
-					// second triangle //
-					mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
-					mesh.addIndex( (y+1)*_radiusSegments + x+1 + vertOffset);
-					mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
-				}
-			}
-		} else {
-			for (int y = 0; y < capSegs-1; y++) {
-				for (int x = 0; x < _radiusSegments; x++) {
-					mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
-					mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
-				}
-			}
-		}
+                    // second triangle //
+                    mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
+                    mesh.addIndex( (y+1)*_radiusSegments + x+1 + vertOffset);
+                    mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+                }
+            }
+        } else {
+            for (int y = 0; y < capSegs-1; y++) {
+                for (int x = 0; x < _radiusSegments; x++) {
+                    mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
+                    mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+                }
+            }
+        }
 
-		vertOffset = mesh.getVerticesTotal();
+        vertOffset = mesh.getVerticesTotal();
 
-	}
+    }
 
-	//maxTexY			 = _heightSegments-1.f + capSegs-1.f;
-	float minTexYNormalized = 0;
-	if (_bCapped) minTexYNormalized = maxTexYNormalized;
-	maxTexYNormalized   = 1.f;
-	if (_bCapped) maxTexYNormalized = (_heightSegments) / maxTexY;
+    //maxTexY            = _heightSegments-1.f + capSegs-1.f;
+    float minTexYNormalized = 0;
+    if (_bCapped) minTexYNormalized = maxTexYNormalized;
+    maxTexYNormalized   = 1.f;
+    if (_bCapped) maxTexYNormalized = (_heightSegments) / maxTexY;
 
-	// cylinder vertices //
-	for (int iy = 0; iy < _heightSegments; iy++) {
-		normal = {1.f, 0.f, 0.f};
-		for (int ix = 0; ix < _radiusSegments; ix++) {
+    // cylinder vertices //
+    for (int iy = 0; iy < _heightSegments; iy++) {
+        normal = {1.f, 0.f, 0.f};
+        for (int ix = 0; ix < _radiusSegments; ix++) {
 
-			//newRad = mapValue((float)iy, 0, _heightSegments-1, 0.0, radius);
-			vert.x = cos(ix*angleIncRadius) * _radius;
-			vert.y = heightInc*float(iy) - halfH;
-			vert.z = sin(ix*angleIncRadius) * _radius;
+            //newRad = mapValue((float)iy, 0, _heightSegments-1, 0.0, radius);
+            vert.x = cos(ix*angleIncRadius) * _radius;
+            vert.y = heightInc*float(iy) - halfH;
+            vert.z = sin(ix*angleIncRadius) * _radius;
 
-			tcoord.x = float(ix)/(float(_radiusSegments)-1.f);
-			tcoord.y = 1.f - mapValue(iy, 0, _heightSegments-1, minTexYNormalized, maxTexYNormalized, true );
+            tcoord.x = float(ix)/(float(_radiusSegments)-1.f);
+            tcoord.y = 1.f - mapValue(iy, 0, _heightSegments-1, minTexYNormalized, maxTexYNormalized, true );
 
-			mesh.addTexCoord( tcoord );
-			mesh.addVertex( vert );
-			mesh.addNormal( normal );
+            mesh.addTexCoord( tcoord );
+            mesh.addVertex( vert );
+            mesh.addNormal( normal );
 
-			normal = glm::rotate(normal, -angleIncRadius, up);
+            normal = glm::rotate(normal, -angleIncRadius, up);
 
-		}
-	}
+        }
+    }
 
-	if (_mode == TRIANGLES) {
-		for (int y = 0; y < _heightSegments-1; y++) {
-			for (int x = 0; x < _radiusSegments-1; x++) {
-				// first triangle //
-				mesh.addIndex( (y)*_radiusSegments + x + vertOffset);
-				mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset );
-				mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset );
+    if (_mode == TRIANGLES) {
+        for (int y = 0; y < _heightSegments-1; y++) {
+            for (int x = 0; x < _radiusSegments-1; x++) {
+                // first triangle //
+                mesh.addIndex( (y)*_radiusSegments + x + vertOffset);
+                mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset );
+                mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset );
 
-				// second triangle //
-				mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset );
-				mesh.addIndex( (y+1)*_radiusSegments + x+1 + vertOffset );
-				mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset );
-			}
-		}
-	} else {
-		for (int y = 0; y < _heightSegments-1; y++) {
-			for (int x = 0; x < _radiusSegments; x++) {
-				mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
-				mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset );
-			}
-		}
-	}
+                // second triangle //
+                mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset );
+                mesh.addIndex( (y+1)*_radiusSegments + x+1 + vertOffset );
+                mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset );
+            }
+        }
+    } else {
+        for (int y = 0; y < _heightSegments-1; y++) {
+            for (int x = 0; x < _radiusSegments; x++) {
+                mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
+                mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset );
+            }
+        }
+    }
 
-	vertOffset = mesh.getVerticesTotal();
+    vertOffset = mesh.getVerticesTotal();
 
-	// add the bottom cap
-	if (_bCapped && capSegs > 0) {
-		minTexYNormalized = maxTexYNormalized;
-		maxTexYNormalized   = 1.f;
+    // add the bottom cap
+    if (_bCapped && capSegs > 0) {
+        minTexYNormalized = maxTexYNormalized;
+        maxTexYNormalized   = 1.f;
 
-		normal = {0.f, 1.f, 0.f};
-		for (int iy = 0; iy < capSegs; iy++) {
-			for (int ix = 0; ix < _radiusSegments; ix++) {
-				newRad = mapValue((float)iy, 0, capSegs-1, _radius, 0.0, true);
-				vert.x = cos((float)ix*angleIncRadius) * newRad;
-				vert.z = sin((float)ix*angleIncRadius) * newRad;
-				vert.y = halfH;
+        normal = {0.f, 1.f, 0.f};
+        for (int iy = 0; iy < capSegs; iy++) {
+            for (int ix = 0; ix < _radiusSegments; ix++) {
+                newRad = mapValue((float)iy, 0, capSegs-1, _radius, 0.0, true);
+                vert.x = cos((float)ix*angleIncRadius) * newRad;
+                vert.z = sin((float)ix*angleIncRadius) * newRad;
+                vert.y = halfH;
 
-				tcoord.x = (float)ix/((float)_radiusSegments-1.f);
-				tcoord.y = 1.f - mapValue(iy, 0, capSegs-1, minTexYNormalized, maxTexYNormalized, true);
+                tcoord.x = (float)ix/((float)_radiusSegments-1.f);
+                tcoord.y = 1.f - mapValue(iy, 0, capSegs-1, minTexYNormalized, maxTexYNormalized, true);
 
-				mesh.addTexCoord( tcoord );
-				mesh.addVertex( vert );
-				mesh.addNormal( normal );
-			}
-		}
+                mesh.addTexCoord( tcoord );
+                mesh.addVertex( vert );
+                mesh.addNormal( normal );
+            }
+        }
 
-		if (_mode == TRIANGLES) {
-			for (int y = 0; y < capSegs-1; y++) {
-				for (int x = 0; x < _radiusSegments-1; x++) {
-					// first triangle //
-					mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
-					mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
-					mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+        if (_mode == TRIANGLES) {
+            for (int y = 0; y < capSegs-1; y++) {
+                for (int x = 0; x < _radiusSegments-1; x++) {
+                    // first triangle //
+                    mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
+                    mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
+                    mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
 
-					if (y < capSegs -1 && capSegs > 2) {
-						// second triangle //
-						mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
-						mesh.addIndex( (y+1)*_radiusSegments + x+1 + vertOffset);
-						mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
-					}
-				}
-			}
-		} else {
-			for (int y = 0; y < capSegs-1; y++) {
-				for (int x = 0; x < _radiusSegments; x++) {
-					mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
-					mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
-				}
-			}
-		}
+                    if (y < capSegs -1 && capSegs > 2) {
+                        // second triangle //
+                        mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
+                        mesh.addIndex( (y+1)*_radiusSegments + x+1 + vertOffset);
+                        mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+                    }
+                }
+            }
+        } else {
+            for (int y = 0; y < capSegs-1; y++) {
+                for (int x = 0; x < _radiusSegments; x++) {
+                    mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
+                    mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+                }
+            }
+        }
 
-		vertOffset = mesh.getVerticesTotal();
+        vertOffset = mesh.getVerticesTotal();
 
-	}
+    }
 
-	return mesh;
+    return mesh;
 }
 
 Mesh cone( float radius, float _height, int _radiusSegments, int _heightSegments, int _capSegments, PrimitiveMode _mode ) {
-	Mesh mesh;
-	if (_mode != TRIANGLE_STRIP && _mode != TRIANGLES)
-		_mode = TRIANGLE_STRIP;
+    Mesh mesh;
+    if (_mode != TRIANGLE_STRIP && _mode != TRIANGLES)
+        _mode = TRIANGLE_STRIP;
 
-	mesh.setMode(_mode);
+    mesh.setMode(_mode);
 
-	_radiusSegments = _radiusSegments+1;
-	_capSegments = _capSegments+1;
-	_heightSegments = _heightSegments+1;
-	if (_heightSegments < 2) _heightSegments = 2;
-	int capSegs = _capSegments;
-	if ( capSegs < 2 )
-		capSegs = 0;
+    _radiusSegments = _radiusSegments+1;
+    _capSegments = _capSegments+1;
+    _heightSegments = _heightSegments+1;
+    if (_heightSegments < 2) _heightSegments = 2;
+    int capSegs = _capSegments;
+    if ( capSegs < 2 )
+        capSegs = 0;
 
-	float angleIncRadius = -1.f * ((TAU/((float)_radiusSegments-1.f)));
-	float heightInc = _height/((float)_heightSegments-1);
-	float halfH = _height*.5f;
+    float angleIncRadius = -1.f * ((TAU/((float)_radiusSegments-1.f)));
+    float heightInc = _height/((float)_heightSegments-1);
+    float halfH = _height*.5f;
 
-	float newRad;
-	glm::vec3 vert;
-	glm::vec3 normal;
-	glm::vec2 tcoord;
-	glm::vec3 up(0.0,1.0,0.0);
+    float newRad;
+    glm::vec3 vert;
+    glm::vec3 normal;
+    glm::vec2 tcoord;
+    glm::vec3 up(0.0,1.0,0.0);
 
-	std::size_t vertOffset = 0;
+    std::size_t vertOffset = 0;
 
-	float maxTexY = _heightSegments-1.f;
-	if (capSegs > 0) 
-		maxTexY += capSegs-1.f;
+    float maxTexY = _heightSegments-1.f;
+    if (capSegs > 0) 
+        maxTexY += capSegs-1.f;
 
-	glm::vec3 startVec(0, -halfH-1.f, 0);
+    glm::vec3 startVec(0, -halfH-1.f, 0);
 
-	// cone vertices //
-	for (int iy = 0; iy < _heightSegments; iy++) {
-		for (int ix = 0; ix < _radiusSegments; ix++) {
+    // cone vertices //
+    for (int iy = 0; iy < _heightSegments; iy++) {
+        for (int ix = 0; ix < _radiusSegments; ix++) {
 
-			newRad = mapValue((float)iy, 0, _heightSegments-1, 0.0, radius, true);
-			vert.x = cos((float)ix*angleIncRadius) * newRad;
-			vert.y = heightInc*((float)iy) - halfH;
-			vert.z = sin((float)ix*angleIncRadius) * newRad;
+            newRad = mapValue((float)iy, 0, _heightSegments-1, 0.0, radius, true);
+            vert.x = cos((float)ix*angleIncRadius) * newRad;
+            vert.y = heightInc*((float)iy) - halfH;
+            vert.z = sin((float)ix*angleIncRadius) * newRad;
 
-			tcoord.x = (float)ix/((float)_radiusSegments-1.f);
-			tcoord.y = 1.f - (float)iy/((float)maxTexY);
+            tcoord.x = (float)ix/((float)_radiusSegments-1.f);
+            tcoord.y = 1.f - (float)iy/((float)maxTexY);
 
-			mesh.addTexCoord( tcoord );
-			mesh.addVertex( vert );
+            mesh.addTexCoord( tcoord );
+            mesh.addVertex( vert );
 
-			if (iy == 0) {
-				newRad = 1.f;
-				vert.x = cos((float)ix*angleIncRadius) * newRad;
-				vert.y = heightInc*((float)iy) - halfH;
-				vert.z = sin((float)ix*angleIncRadius) * newRad;
-			}
+            if (iy == 0) {
+                newRad = 1.f;
+                vert.x = cos((float)ix*angleIncRadius) * newRad;
+                vert.y = heightInc*((float)iy) - halfH;
+                vert.z = sin((float)ix*angleIncRadius) * newRad;
+            }
 
-			glm::vec3 diff = vert - startVec;
-			glm::vec3 crossed = glm::cross(up, vert);
-			normal = glm::cross(crossed, diff);
-			mesh.addNormal( glm::normalize(normal) );
+            glm::vec3 diff = vert - startVec;
+            glm::vec3 crossed = glm::cross(up, vert);
+            normal = glm::cross(crossed, diff);
+            mesh.addNormal( glm::normalize(normal) );
 
-		}
-	}
+        }
+    }
 
-	if (_mode == TRIANGLES) {
-		for (int y = 0; y < _heightSegments-1; y++) {
-			for (int x = 0; x < _radiusSegments-1; x++) {
-				if (y > 0){
-					// first triangle //
-					mesh.addIndex( (y)*_radiusSegments + x );
-					mesh.addIndex( (y)*_radiusSegments + x+1 );
-					mesh.addIndex( (y+1)*_radiusSegments + x );
-				}
+    if (_mode == TRIANGLES) {
+        for (int y = 0; y < _heightSegments-1; y++) {
+            for (int x = 0; x < _radiusSegments-1; x++) {
+                if (y > 0){
+                    // first triangle //
+                    mesh.addIndex( (y)*_radiusSegments + x );
+                    mesh.addIndex( (y)*_radiusSegments + x+1 );
+                    mesh.addIndex( (y+1)*_radiusSegments + x );
+                }
 
-				// second triangle //
-				mesh.addIndex( (y)*_radiusSegments + x+1 );
-				mesh.addIndex( (y+1)*_radiusSegments + x+1 );
-				mesh.addIndex( (y+1)*_radiusSegments + x );
-			}
-		}
-	} else {
-		for (int y = 0; y < _heightSegments-1; y++) {
-			for (int x = 0; x < _radiusSegments; x++) {
-				mesh.addIndex( (y)*_radiusSegments + x );
-				mesh.addIndex( (y+1)*_radiusSegments + x );
-			}
-		}
-	}
+                // second triangle //
+                mesh.addIndex( (y)*_radiusSegments + x+1 );
+                mesh.addIndex( (y+1)*_radiusSegments + x+1 );
+                mesh.addIndex( (y+1)*_radiusSegments + x );
+            }
+        }
+    } else {
+        for (int y = 0; y < _heightSegments-1; y++) {
+            for (int x = 0; x < _radiusSegments; x++) {
+                mesh.addIndex( (y)*_radiusSegments + x );
+                mesh.addIndex( (y+1)*_radiusSegments + x );
+            }
+        }
+    }
 
-	vertOffset = mesh.getVerticesTotal();
-	float maxTexYNormalized = (_heightSegments-1.f) / maxTexY;
+    vertOffset = mesh.getVerticesTotal();
+    float maxTexYNormalized = (_heightSegments-1.f) / maxTexY;
 
-	// add the cap //
-	normal= {0.f,1.f,0.f};
-	for (int iy = 0; iy < capSegs; iy++) {
-		for (int ix = 0; ix < _radiusSegments; ix++) {
-			newRad = mapValue((float)iy, 0, capSegs-1, radius, 0.0, true);
-			vert.x = cos((float)ix*angleIncRadius) * newRad;
-			vert.z = sin((float)ix*angleIncRadius) * newRad;
-			vert.y = halfH;
+    // add the cap //
+    normal= {0.f,1.f,0.f};
+    for (int iy = 0; iy < capSegs; iy++) {
+        for (int ix = 0; ix < _radiusSegments; ix++) {
+            newRad = mapValue((float)iy, 0, capSegs-1, radius, 0.0, true);
+            vert.x = cos((float)ix*angleIncRadius) * newRad;
+            vert.z = sin((float)ix*angleIncRadius) * newRad;
+            vert.y = halfH;
 
-			tcoord.x = (float)ix/((float)_radiusSegments-1.f);
-			tcoord.y = 1.f - mapValue(iy, 0, capSegs-1, maxTexYNormalized, 1.f, true);
+            tcoord.x = (float)ix/((float)_radiusSegments-1.f);
+            tcoord.y = 1.f - mapValue(iy, 0, capSegs-1, maxTexYNormalized, 1.f, true);
 
-			mesh.addTexCoord( tcoord );
-			mesh.addVertex( vert );
-			mesh.addNormal( normal );
-		}
-	}
+            mesh.addTexCoord( tcoord );
+            mesh.addVertex( vert );
+            mesh.addNormal( normal );
+        }
+    }
 
-	if (_mode == TRIANGLES) {
-		if ( capSegs > 0 ) {
-			for (int y = 0; y < capSegs-1; y++) {
-				for (int x = 0; x < _radiusSegments-1; x++) {
-					// first triangle //
-					mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
-					mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
-					mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+    if (_mode == TRIANGLES) {
+        if ( capSegs > 0 ) {
+            for (int y = 0; y < capSegs-1; y++) {
+                for (int x = 0; x < _radiusSegments-1; x++) {
+                    // first triangle //
+                    mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
+                    mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
+                    mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
 
-					if (y < capSegs-1) {
-						// second triangle //
-						mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
-						mesh.addIndex( (y+1)*_radiusSegments + x+1 + vertOffset);
-						mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
-					}
-				}
-			}
-		}
-	} else {
-		if (capSegs > 0 ) {
-			for (int y = 0; y < capSegs-1; y++) {
-				for (int x = 0; x < _radiusSegments; x++) {
-					mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
-					mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
-				}
-			}
-		}
-	}
+                    if (y < capSegs-1) {
+                        // second triangle //
+                        mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
+                        mesh.addIndex( (y+1)*_radiusSegments + x+1 + vertOffset);
+                        mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+                    }
+                }
+            }
+        }
+    } else {
+        if (capSegs > 0 ) {
+            for (int y = 0; y < capSegs-1; y++) {
+                for (int x = 0; x < _radiusSegments; x++) {
+                    mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
+                    mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+                }
+            }
+        }
+    }
 
-	return mesh;
+    return mesh;
 }
 
 }

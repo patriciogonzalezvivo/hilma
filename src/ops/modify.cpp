@@ -379,4 +379,73 @@ Mesh Modify::spline(const std::vector<T>& _polyline, float _width, JoinType _joi
 template Mesh Modify::spline<glm::vec2>(const std::vector<glm::vec2>&, float, JoinType, CapType, float);
 template Mesh Modify::spline<glm::vec3>(const std::vector<glm::vec3>&, float, JoinType, CapType, float);
 
+Mesh tube(const Polyline& _polyline, float _width, int _resolution) {
+    Mesh mesh;
+    
+    for (size_t i = 0; i < _polyline.size(); i++) {
+        const glm::vec3& p0 = _polyline.getVertices()[i];
+        const glm::vec3& n0 = _polyline.getNormalAtIndex(i);
+        const glm::vec3& t0 = _polyline.getTangentAtIndex(i);
+        // float r0 = tubeRadius[i];
+        float r0 = _width;
+
+        glm::vec3 v0;
+        for(int j = 0; j < _resolution; j++) {
+            float p = j / (float)_resolution;
+            float a = p * TAU;
+            v0 = glm::rotate(n0, a, t0);
+            
+            mesh.addNormal(v0);
+            
+            v0 *= r0;
+            v0 += p0;
+            
+            mesh.addVertex(v0);
+        }
+    }
+
+    //--------------------------------------------------------------------------
+    // std::vector<glm::vec3>& verts = mesh.points;
+    size_t numOfVerts = mesh.getVerticesTotal();
+    size_t i0, i1, i2;
+    bool bLeftToRight;
+    bool bRingEnd;
+    int k;
+    
+    size_t numOfTubeSections = _polyline.size();
+    for (size_t y = 0; y < numOfTubeSections - 1; y++) {
+
+        // 2 - 3
+        // | \ |
+        // 0 - 1
+
+        for(int x = 0; x < _resolution; x++) {
+            mesh.addIndex( y * _resolution + x);
+
+            if (x+1 > _resolution-1)
+                mesh.addIndex( y * _resolution + x+1 - _resolution);
+            else
+                mesh.addIndex( y * _resolution + x+1);
+
+            mesh.addIndex( (y+1) * _resolution + x);
+
+            // mesh.addIndex( (y)*_resolution + x+1 );
+            if (x+1 > _resolution-1)
+                mesh.addIndex( y * _resolution + x+1 - _resolution);
+            else
+                mesh.addIndex( y*_resolution + x+1 );
+
+            // mesh.addIndex( (y+1)*_resolution + x+1 );
+            if (x+1 > _resolution-1)
+                mesh.addIndex( (y+1) * _resolution + x+1 - _resolution);
+            else
+                mesh.addIndex( (y+1) * _resolution + x+1);
+
+            mesh.addIndex( (y+1)*_resolution + x );
+        }
+    }
+
+    return mesh;
+}
+
 }

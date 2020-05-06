@@ -33,5 +33,8 @@ target_link_libraries (extrude PRIVATE hilma)
 add_executable (spline spline.cpp)
 target_link_libraries (spline PRIVATE hilma)
 
+add_executable (tube tube.cpp)
+target_link_libraries (tube PRIVATE hilma)
+
 add_executable (load load.cpp)
 target_link_libraries (load PRIVATE hilma)

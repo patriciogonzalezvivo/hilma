@@ -1,28 +1,25 @@
 #include "hilma/ops/transform.h"
 #include "hilma/ops/compute.h"
 
-#define GLM_ENABLE_EXPERIMENTAL 
-#include <glm/gtx/quaternion.hpp>
+// #define GLM_ENABLE_EXPERIMENTAL 
+// #include <glm/gtx/quaternion.hpp>
 
 namespace hilma {
 
-// void scale(Mesh& _mesh, float _v) {
-//     scale(_mesh.m_vertices, _v);
-// }
+void transform(std::vector<glm::vec3>& _points, const glm::quat& _quat) {
+    for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
+        *it = _quat * *it;
+}
 
-// void scaleX(Mesh& _mesh, float _x) {
-//     scaleX(_mesh.m_vertices, _x);
-// }
+void transform(std::vector<glm::vec3>& _points, const glm::mat3& _mat) {
+    for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
+        *it = _mat * (*it);
+}
 
-// void scaleY(Mesh& _mesh, float _y) {
-//     scaleY(_mesh.m_vertices, _y);
-// }
-
-// void scaleZ(Mesh& _mesh, float _z) {
-
-// }
-
-
+void transform(std::vector<glm::vec3>& _points, const glm::mat4& _mat) {
+    for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
+        *it = glm::vec3(_mat * glm::vec4(*it, 0.0));
+}
 
 void scale(std::vector<glm::vec3>& _points, float _v){
     for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
