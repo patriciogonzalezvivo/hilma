@@ -267,7 +267,7 @@ glm::vec3 getCentroid(const std::vector<glm::vec3>& _points) {
 }
 
 BoundingBox getBoundingBox(const Mesh& _mesh) {
-    return getBoundingBox(_mesh.m_vertices);
+    return getBoundingBox(_mesh.vertices);
 }
 
 BoundingBox getBoundingBox(const std::vector<glm::vec2>& _points ) {

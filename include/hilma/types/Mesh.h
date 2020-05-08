@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 
+#include "hilma/types/Line.h"
+#include "hilma/types/Triangle.h"
 #include "hilma/types/Material.h"
 #include "hilma/types/BoundingBox.h"
 
@@ -13,6 +15,7 @@ enum PrimitiveMode {
     POINTS      = 1,
     LINES       = 2,
     TRIANGLES   = 3,
+    QUAD        = 4,
     LINE_STRIP,
     TRIANGLE_STRIP,
     TRIANGLE_FAN
@@ -37,10 +40,10 @@ public:
     void        append(const Mesh& _mesh);
 
     void        setMode(PrimitiveMode _mode = TRIANGLES, bool _compute = false);
-    PrimitiveMode    getMode() const { return m_mode; };
+    PrimitiveMode    getMode() const { return mode; };
     
-    void        setName(const std::string& _name) { m_name = _name; }
-    std::string getName() const { return m_name; }
+    void        setName(const std::string& _name) { name = _name; }
+    std::string getName() const { return name; }
 
 
     // Vertices
@@ -50,18 +53,18 @@ public:
 
     void        addVertices(const float* _array2D, int _m, int _n);
 
-    bool        hasVertices() const { return !m_vertices.empty(); };
-    void        clearVertices() { m_vertices.clear(); }
+    bool        haveVertices() const { return !vertices.empty(); };
+    void        clearVertices() { vertices.clear(); }
 
-    glm::vec3   getVertex(size_t _index) const { return m_vertices[_index]; }
-    size_t      getVerticesTotal() const { return m_vertices.size(); }
-    std::vector<glm::vec3> getVertices() const { return m_vertices; }
+    glm::vec3   getVertex(size_t _index) const { return vertices[_index]; }
+    size_t      getVerticesTotal() const { return vertices.size(); }
+    std::vector<glm::vec3> getVertices() const { return vertices; }
 
     // Colorss
     void        setColor(const glm::vec4& _color);
     void        setColor(const float* _array1D, int _n);
     void        setColor(float _r, float _g, float _b, float _a = 1.0f);
-    void        clearColors() { m_colors.clear(); }
+    void        clearColors() { colors.clear(); }
 
     void        addColor(const glm::vec4& _color);
     void        addColor(const float* _array1D, int _n);
@@ -69,9 +72,9 @@ public:
 
     void        addColors(const float* _array2D, int _m, int _n);
 
-    const bool  hasColors() const { return !m_colors.empty(); }
-    size_t      getColorsTotal() const { return m_colors.size(); }
-    std::vector<glm::vec4> getColors() const { return m_colors; }
+    const bool  haveColors() const { return !colors.empty(); }
+    size_t      getColorsTotal() const { return colors.size(); }
+    std::vector<glm::vec4> getColors() const { return colors; }
 
     // Normals
     void        addNormal(const glm::vec3& _normal);
@@ -80,10 +83,11 @@ public:
 
     void        addNormals(const float* _array2D, int _m, int _n);
 
-    const bool  hasNormals() const { return !m_normals.empty(); }
-    size_t      getNormalsTotal() const { return m_normals.size(); }
-    std::vector<glm::vec3> getNormals() const { return m_normals; }
-    void        clearNormals() { m_normals.clear(); }
+    const bool  haveNormals() const { return !normals.empty(); }
+    glm::vec3   getNormal(size_t _index) const { return normals[_index]; }
+    size_t      getNormalsTotal() const { return normals.size(); }
+    std::vector<glm::vec3> getNormals() const { return normals; }
+    void        clearNormals() { normals.clear(); }
     bool        computeNormals();
     void        invertNormals();
     void        flatNormals();
@@ -94,59 +98,63 @@ public:
     void        addTexCoord(const float* _array1D, int _n);
     void        addTexCoords(const float* _array2D, int _m, int _n);
 
-    const bool  hasTexCoords() const { return !m_texcoords.empty(); }
-
-    size_t      getTexCoordsTotal() const { return m_texcoords.size(); }
-    glm::vec2   getTexCoord(size_t _index) const { return m_texcoords[_index]; }
-    std::vector<glm::vec2> getTexCoords() const { return m_texcoords; }
-    void        clearTexCoords() { m_texcoords.clear(); }
+    const bool  haveTexCoords() const { return !texcoords.empty(); }
+    size_t      getTexCoordsTotal() const { return texcoords.size(); }
+    glm::vec2   getTexCoord(size_t _index) const { return texcoords[_index]; }
+    std::vector<glm::vec2> getTexCoords() const { return texcoords; }
+    void        clearTexCoords() { texcoords.clear(); }
 
     // Tangents
     void        addTangent(const glm::vec4& _tangent);
     void        addTangent(const float* _array1D, int _n);
     void        addTangent(float _x, float _y, float _z, float _w);
 
-    const bool  hasTangents() const { return !m_tangents.empty(); }
-    std::vector<glm::vec4> getTangents() const { return m_tangents; }
+    const bool  haveTangents() const { return !tangents.empty(); }
+    glm::vec4   getTangent(size_t _index) const { return tangents[_index]; }
+    std::vector<glm::vec4> getTangents() const { return tangents; }
     bool        computeTangents();
-    void        clearTangets() { m_tangents.clear(); }
+    void        clearTangets() { tangents.clear(); }
 
     // Indices
     void        addIndex(INDEX_TYPE _i);
     void        addIndices(const INDEX_TYPE* _array1D, int _n);
 
-    const bool  hasIndices() const { return !m_indices.empty(); }
-    size_t      getIndicesTotal() const { return m_indices.size(); }
+    const bool  haveIndices() const { return !indices.empty(); }
+    size_t      getIndicesTotal() const { return indices.size(); }
+    void        clearIndices() { indices.clear(); }
 
     void        addFaces(const INDEX_TYPE* _array2D, int _m, int _n);
+
     void        addLine(INDEX_TYPE _i1, INDEX_TYPE _i2);
+    // void        addTriangle(const Triangle& _tri);
     void        addTriangle(INDEX_TYPE _i1, INDEX_TYPE _i2, INDEX_TYPE _i3);
-    void        clearIndices() { m_indices.clear(); }
+
     void        invertWindingOrder();
     void        mergeDuplicateVertices();
 
-    std::vector<glm::ivec3>  getTriangles() const;
+    std::vector<Triangle>   getTriangles() const;
+    std::vector<glm::ivec3> getTrianglesIndices() const;
 
 
-    // const bool  hasEdgeIndices() const { return !m_edge_indices.empty(); }
-    // const bool  hasEdgeColors() const { return !m_edge_colors.empty(); }
+    // const bool  haveEdgeIndices() const { return !edge_indices.empty(); }
+    // const bool  haveEdgeColors() const { return !edge_colors.empty(); }
 
 private:
-    std::vector<Material>   m_materials;
-    std::vector<glm::vec4>  m_colors;
-    std::vector<glm::vec4>  m_tangents;
-    std::vector<glm::vec3>  m_vertices;
-    std::vector<glm::vec3>  m_normals;
-    std::vector<glm::vec2>  m_texcoords;
-    std::vector<INDEX_TYPE> m_indices;
-    // std::vector<INDEX_TYPE> m_indices_normals;
-    // std::vector<INDEX_TYPE> m_indices_texcoords;
-    // std::vector<INDEX_TYPE> m_edge_indices;
-    // std::vector<glm::vec4>  m_edge_colors;
+    std::vector<Material>   materials;
+    std::vector<glm::vec4>  colors;
+    std::vector<glm::vec4>  tangents;
+    std::vector<glm::vec3>  vertices;
+    std::vector<glm::vec3>  normals;
+    std::vector<glm::vec2>  texcoords;
+    std::vector<INDEX_TYPE> indices;
+    // std::vector<INDEX_TYPE> indices_normals;
+    // std::vector<INDEX_TYPE> indices_texcoords;
+    // std::vector<INDEX_TYPE> edge_indices;
+    // std::vector<glm::vec4>  edge_colors;
 
 
-    std::string             m_name;
-    PrimitiveMode           m_mode;
+    std::string             name;
+    PrimitiveMode           mode;
 
     friend bool loadPly( const std::string&, Mesh& );
     friend bool savePly( const std::string&, Mesh&, bool, bool);

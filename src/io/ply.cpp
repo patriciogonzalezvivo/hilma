@@ -92,8 +92,8 @@ bool loadPly( const std::string& _filename, Mesh& _mesh ) {
         if (vertices) {
             const size_t numVerticesBytes = vertices->buffer.size_bytes();
 
-            _mesh.m_vertices.resize(vertices->count);
-            std::memcpy(_mesh.m_vertices.data(), vertices->buffer.get(), numVerticesBytes);
+            _mesh.vertices.resize(vertices->count);
+            std::memcpy(_mesh.vertices.data(), vertices->buffer.get(), numVerticesBytes);
 
             if (colors) {
                 size_t numChannels = colors_names.size();
@@ -129,16 +129,16 @@ bool loadPly( const std::string& _filename, Mesh& _mesh ) {
             if (normals) {
                 if (normals->t == tinyply::Type::FLOAT32) {
                     const size_t numNormalsBytes = normals->buffer.size_bytes();
-                    _mesh.m_normals.resize(normals->count);
-                    std::memcpy(_mesh.m_normals.data(), normals->buffer.get(), numNormalsBytes);
+                    _mesh.normals.resize(normals->count);
+                    std::memcpy(_mesh.normals.data(), normals->buffer.get(), numNormalsBytes);
                 }
             }
 
             if (texcoords) {
                 if (texcoords->t == tinyply::Type::FLOAT32) {
                     const size_t numTexcoordsBytes = texcoords->buffer.size_bytes();
-                    _mesh.m_texcoords.resize(texcoords->count);
-                    std::memcpy(_mesh.m_texcoords.data(), texcoords->buffer.get(), numTexcoordsBytes);
+                    _mesh.texcoords.resize(texcoords->count);
+                    std::memcpy(_mesh.texcoords.data(), texcoords->buffer.get(), numTexcoordsBytes);
                 }
             }
 
@@ -165,21 +165,25 @@ bool savePly( const std::string& _filename, Mesh& _mesh, bool _binnary, bool _co
     tinyply::PlyFile file;
 
     file.add_properties_to_element("vertex", { "x", "y", "z" },
-        tinyply::Type::FLOAT32, _mesh.m_vertices.size(), reinterpret_cast<uint8_t*>(_mesh.m_vertices.data()), tinyply::Type::INVALID, 0);
+        tinyply::Type::FLOAT32, _mesh.vertices.size(), reinterpret_cast<uint8_t*>(_mesh.vertices.data()), tinyply::Type::INVALID, 0);
 
-    if (_mesh.hasColors()) {
+    if (_mesh.haveNormals())
+        file.add_properties_to_element("vertex", { "nx", "ny", "nz" },
+        tinyply::Type::FLOAT32, _mesh.normals.size(), reinterpret_cast<uint8_t*>(_mesh.normals.data()), tinyply::Type::INVALID, 0);
+
+    if (_mesh.haveColors()) {
         if (_colorAsChar) {
 
             struct Color8Bit { uint8_t red, green, blue, alpha; };
 
-            size_t total = _mesh.m_colors.size();
+            size_t total = _mesh.colors.size();
             std::vector<Color8Bit> colors;
             Color8Bit c;
             for (size_t i = 0; i < total; i++) {
-                c.red = _mesh.m_colors[i].x * 255;
-                c.green = _mesh.m_colors[i].y * 255;
-                c.blue = _mesh.m_colors[i].z * 255;
-                c.alpha = _mesh.m_colors[i].w * 255;
+                c.red = _mesh.colors[i].x * 255;
+                c.green = _mesh.colors[i].y * 255;
+                c.blue = _mesh.colors[i].z * 255;
+                c.alpha = _mesh.colors[i].w * 255;
                 colors.push_back(c);
             }
 
@@ -188,26 +192,21 @@ bool savePly( const std::string& _filename, Mesh& _mesh, bool _binnary, bool _co
         }
         else 
             file.add_properties_to_element("vertex", { "r", "g", "b", "a" },
-            tinyply::Type::FLOAT32, _mesh.m_colors.size(), reinterpret_cast<uint8_t*>(_mesh.m_colors.data()), tinyply::Type::INVALID, 0);
-        
+            tinyply::Type::FLOAT32, _mesh.colors.size(), reinterpret_cast<uint8_t*>(_mesh.colors.data()), tinyply::Type::INVALID, 0);
     }
 
-    if (_mesh.hasNormals())
-        file.add_properties_to_element("vertex", { "nx", "ny", "nz" },
-        tinyply::Type::FLOAT32, _mesh.m_normals.size(), reinterpret_cast<uint8_t*>(_mesh.m_normals.data()), tinyply::Type::INVALID, 0);
-
-    if (_mesh.hasTexCoords())
+    if (_mesh.haveTexCoords())
         file.add_properties_to_element("vertex", { "texture_u", "texture_v" },
-        tinyply::Type::FLOAT32, _mesh.m_texcoords.size() , reinterpret_cast<uint8_t*>(_mesh.m_texcoords.data()), tinyply::Type::INVALID, 0);
+        tinyply::Type::FLOAT32, _mesh.texcoords.size() , reinterpret_cast<uint8_t*>(_mesh.texcoords.data()), tinyply::Type::INVALID, 0);
 
-    if (_mesh.hasIndices()) {
+    if (_mesh.haveIndices()) {
 
         if (_mesh.getMode() == TRIANGLES ) {
             file.add_properties_to_element("face", { "vertex_indices" },
 #if defined(PLATFORM_RPI)
-            tinyply::Type::UINT16, _mesh.m_indices.size()/3 , reinterpret_cast<uint8_t*>(_mesh.m_indices.data()), tinyply::Type::UINT8, 3);
+            tinyply::Type::UINT16, _mesh.indices.size()/3 , reinterpret_cast<uint8_t*>(_mesh.indices.data()), tinyply::Type::UINT8, 3);
 #else
-            tinyply::Type::UINT32, _mesh.m_indices.size()/3 , reinterpret_cast<uint8_t*>(_mesh.m_indices.data()), tinyply::Type::UINT8, 3);
+            tinyply::Type::UINT32, _mesh.indices.size()/3 , reinterpret_cast<uint8_t*>(_mesh.indices.data()), tinyply::Type::UINT8, 3);
 #endif
         }
 

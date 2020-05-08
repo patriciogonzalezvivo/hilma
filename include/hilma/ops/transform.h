@@ -34,18 +34,18 @@ void center(std::vector<glm::vec3>& _points);
 
 // Mesh
 //
-inline void scale(Mesh& _mesh, float _v) { scale(_mesh.m_vertices, _v); };
-inline void scaleX(Mesh& _mesh, float _x) { scaleX(_mesh.m_vertices, _x); };
-inline void scaleY(Mesh& _mesh, float _y) { scaleY(_mesh.m_vertices, _y); };
-inline void scaleZ(Mesh& _mesh, float _z) { scaleZ(_mesh.m_vertices, _z); };
-inline void scale(Mesh& _mesh, const glm::vec3& _v) { scale(_mesh.m_vertices, _v); };
-inline void scale(Mesh& _mesh, float _x, float _y, float _z) { scale(_mesh.m_vertices, _x, _y, _z); };
+inline void scale(Mesh& _mesh, float _v) { scale(_mesh.vertices, _v); };
+inline void scaleX(Mesh& _mesh, float _x) { scaleX(_mesh.vertices, _x); };
+inline void scaleY(Mesh& _mesh, float _y) { scaleY(_mesh.vertices, _y); };
+inline void scaleZ(Mesh& _mesh, float _z) { scaleZ(_mesh.vertices, _z); };
+inline void scale(Mesh& _mesh, const glm::vec3& _v) { scale(_mesh.vertices, _v); };
+inline void scale(Mesh& _mesh, float _x, float _y, float _z) { scale(_mesh.vertices, _x, _y, _z); };
 
-inline void translateX(Mesh& _mesh, float _x) { translateX(_mesh.m_vertices, _x); };
-inline void translateY(Mesh& _mesh, float _y) { translateY(_mesh.m_vertices, _y); };
-inline void translateZ(Mesh& _mesh, float _z) { translateZ(_mesh.m_vertices, _z); };
-inline void translate(Mesh& _mesh, const glm::vec3& _v) { translate(_mesh.m_vertices, _v); };
-inline void translate(Mesh& _mesh, float _x, float _y, float _z) { translate(_mesh.m_vertices, _x, _y, _z);};
+inline void translateX(Mesh& _mesh, float _x) { translateX(_mesh.vertices, _x); };
+inline void translateY(Mesh& _mesh, float _y) { translateY(_mesh.vertices, _y); };
+inline void translateZ(Mesh& _mesh, float _z) { translateZ(_mesh.vertices, _z); };
+inline void translate(Mesh& _mesh, const glm::vec3& _v) { translate(_mesh.vertices, _v); };
+inline void translate(Mesh& _mesh, float _x, float _y, float _z) { translate(_mesh.vertices, _x, _y, _z);};
 
 void rotateX(Mesh& _mesh, float _rad);
 void rotateY(Mesh& _mesh, float _rad);
@@ -53,6 +53,6 @@ void rotateZ(Mesh& _mesh, float _rad);
 void rotate(Mesh& _mesh, float _rad, const glm::vec3& _axis );
 void rotate(Mesh& _mesh, float _rad, float _x, float _y, float _z );
 
-inline void center(Mesh& _mesh) { center(_mesh.m_vertices); };
+inline void center(Mesh& _mesh) { center(_mesh.vertices); };
 
 }

@@ -105,28 +105,28 @@ void center(std::vector<glm::vec3>& _points){
 }
 
 void rotateX(Mesh& _mesh, float _rad) {
-    rotateX(_mesh.m_vertices, _rad);
-    if (_mesh.hasNormals()) rotateX(_mesh.m_normals, _rad);
+    rotateX(_mesh.vertices, _rad);
+    if (_mesh.haveNormals()) rotateX(_mesh.normals, _rad);
 }
 
 void rotateY(Mesh& _mesh, float _rad) {
-    rotateY(_mesh.m_vertices, _rad);
-    if (_mesh.hasNormals()) rotateY(_mesh.m_normals, _rad);
+    rotateY(_mesh.vertices, _rad);
+    if (_mesh.haveNormals()) rotateY(_mesh.normals, _rad);
 }
 
 void rotateZ(Mesh& _mesh, float _rad) {
-    rotateZ(_mesh.m_vertices, _rad);
-    if (_mesh.hasNormals()) rotateZ(_mesh.m_normals, _rad);
+    rotateZ(_mesh.vertices, _rad);
+    if (_mesh.haveNormals()) rotateZ(_mesh.normals, _rad);
 }
 
 void rotate(Mesh& _mesh, float _rad, const glm::vec3& _axis ) {
-    rotate(_mesh.m_vertices, _rad, _axis);
-    if (_mesh.hasNormals()) rotate(_mesh.m_normals, _rad, _axis);
+    rotate(_mesh.vertices, _rad, _axis);
+    if (_mesh.haveNormals()) rotate(_mesh.normals, _rad, _axis);
 }
 
 void rotate(Mesh& _mesh, float _rad, float _x, float _y, float _z ) {
-    rotate(_mesh.m_vertices, _rad, _x, _y, _z);
-    if (_mesh.hasNormals()) rotate(_mesh.m_normals, _rad, _x, _y, _z);
+    rotate(_mesh.vertices, _rad, _x, _y, _z);
+    if (_mesh.haveNormals()) rotate(_mesh.normals, _rad, _x, _y, _z);
 }
 
 

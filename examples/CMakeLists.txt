@@ -36,5 +36,8 @@ target_link_libraries (spline PRIVATE hilma)
 add_executable (tube tube.cpp)
 target_link_libraries (tube PRIVATE hilma)
 
+add_executable (ring ring.cpp)
+target_link_libraries (ring PRIVATE hilma)
+
 add_executable (load load.cpp)
 target_link_libraries (load PRIVATE hilma)

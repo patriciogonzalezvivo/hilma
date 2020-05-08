@@ -379,21 +379,24 @@ Mesh Modify::spline(const std::vector<T>& _polyline, float _width, JoinType _joi
 template Mesh Modify::spline<glm::vec2>(const std::vector<glm::vec2>&, float, JoinType, CapType, float);
 template Mesh Modify::spline<glm::vec3>(const std::vector<glm::vec3>&, float, JoinType, CapType, float);
 
-Mesh tube(const Polyline& _polyline, float _width, int _resolution, bool _caps) {
+Mesh tube(const Polyline& _polyline, const float* _array1D, int _n, int _resolution, bool _caps) {
     Mesh mesh;
     size_t offset = 0;
 
+
     if ( !_polyline.isClosed() && _caps) {
         mesh.addVertex(_polyline.getVertices()[0]);
+        mesh.addNormal( glm::normalize( _polyline.getVertices()[1] - _polyline.getVertices()[2] ) );
+        mesh.addTexCoord( glm::vec2(0.5, 0.0));
         offset = 1;
     }
     
     for (size_t i = 0; i < _polyline.size(); i++) {
-        const glm::vec3& p0 = _polyline.getVertices()[i];
+        const glm::vec3& p0 = _polyline[i];
         const glm::vec3& n0 = _polyline.getNormalAtIndex(i);
         const glm::vec3& t0 = _polyline.getTangentAtIndex(i);
         // float r0 = tubeRadius[i];
-        float r0 = _width;
+        float r0 = _array1D[i%_n];
 
         glm::vec3 v0;
         for(int j = 0; j < _resolution; j++) {
@@ -401,6 +404,7 @@ Mesh tube(const Polyline& _polyline, float _width, int _resolution, bool _caps) 
             float a = p * TAU;
             v0 = glm::rotate(n0, a, t0);
             
+            mesh.addTexCoord( glm::vec2(p, i/(_polyline.size()-1.0)) );
             mesh.addNormal(v0);
             
             v0 *= r0;
@@ -444,6 +448,8 @@ Mesh tube(const Polyline& _polyline, float _width, int _resolution, bool _caps) 
     if ( !_polyline.isClosed() && _caps) {
         size_t vertsN = mesh.getVerticesTotal();
         mesh.addVertex(_polyline.getVertices()[_polyline.size()-1]);
+        mesh.addTexCoord( glm::vec2(.5, 1.0) );
+        mesh.addNormal( glm::normalize( _polyline.getVertices()[_polyline.size()-2] - _polyline.getVertices()[_polyline.size()-1] ) );
 
         for (size_t i = 0; i < _resolution; i++)
             mesh.addTriangle( vertsN, vertsN - i - 2, vertsN - i - 1);

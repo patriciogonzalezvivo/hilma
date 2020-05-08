@@ -27,6 +27,7 @@ hilma_module = Extension(
     'src/types/Material.cpp',
     'src/types/Mesh.cpp',
     'src/types/Polyline.cpp',
+    'src/types/Triangle.cpp',
     'src/ops/compute.cpp',
     'src/ops/generate.cpp',
     'src/ops/modify.cpp',
