@@ -116,12 +116,12 @@ Mesh Modify::extrude(const std::vector<std::vector<T>>& _polygon, float _maxHeig
 
             // Start the index from the previous state of the vertex Data
             if (lineN == 0) {
-                mesh.addTriangle(vertexN, vertexN + 2, vertexN + 1);
-                mesh.addTriangle(vertexN + 1, vertexN + 2, vertexN + 3);
+                mesh.addTriangleIndices(vertexN, vertexN + 2, vertexN + 1);
+                mesh.addTriangleIndices(vertexN + 1, vertexN + 2, vertexN + 3);
             }
             else {
-                mesh.addTriangle(vertexN, vertexN + 1, vertexN + 2);
-                mesh.addTriangle(vertexN + 1, vertexN + 3, vertexN + 2);
+                mesh.addTriangleIndices(vertexN, vertexN + 1, vertexN + 2);
+                mesh.addTriangleIndices(vertexN + 1, vertexN + 3, vertexN + 2);
             }
 
             vertexN += 4;
@@ -165,13 +165,13 @@ void indexPairs(size_t _nPairs, Mesh& _mesh) {
     size_t nVertices = _mesh.getVerticesTotal();
 
     for (size_t i = 0; i < _nPairs; i++) {
-        _mesh.addTriangle(  nVertices - 2*i - 4,
-                            nVertices - 2*i - 2,
-                            nVertices - 2*i - 3 );
+        _mesh.addTriangleIndices(   nVertices - 2*i - 4,
+                                    nVertices - 2*i - 2,
+                                    nVertices - 2*i - 3 );
 
-        _mesh.addTriangle(  nVertices - 2*i - 3,
-                            nVertices - 2*i - 2,
-                            nVertices - 2*i - 1 );
+        _mesh.addTriangleIndices(   nVertices - 2*i - 3,
+                                    nVertices - 2*i - 2,
+                                    nVertices - 2*i - 1 );
     }
 }
 
@@ -210,7 +210,7 @@ void addFan(const glm::vec2& _pC,
         addPolyLineVertex(_pC, radial, uv, _mesh, _width);
 
         // Add indices
-        _mesh.addTriangle(  startIndex, // center vertex
+        _mesh.addTriangleIndices(  startIndex, // center vertex
                             startIndex + i + (angle > 0 ? 1 : 2),
                             startIndex + i + (angle > 0 ? 2 : 1) );
     }
@@ -417,8 +417,8 @@ Mesh tube(const Polyline& _polyline, const float* _array1D, int _n, int _resolut
     //--------------------------------------------------------------------------
     if ( !_polyline.isClosed() && _caps) {
         for (size_t i = 0; i < _resolution-1; i++)
-            mesh.addTriangle( 0, i + 2, i + 1);
-        mesh.addTriangle( 0, 1, _resolution);
+            mesh.addTriangleIndices( 0, i + 2, i + 1);
+        mesh.addTriangleIndices( 0, 1, _resolution);
     }
     
     size_t numOfTubeSections = _polyline.size();
@@ -429,20 +429,20 @@ Mesh tube(const Polyline& _polyline, const float* _array1D, int _n, int _resolut
         // 0 - 1
 
         for(int x = 0; x < _resolution-1; x++) {
-            mesh.addTriangle(   y * _resolution + x + offset,
-                                y * _resolution + x+1 + offset,
-                                (y+1) * _resolution + x + offset);
-            mesh.addTriangle(   y*_resolution + x+1 + offset,
-                                (y+1) * _resolution + x+1 + offset,
-                                (y+1)*_resolution + x + offset);
+            mesh.addTriangleIndices(y * _resolution + x + offset,
+                                    y * _resolution + x+1 + offset,
+                                    (y+1) * _resolution + x + offset);
+            mesh.addTriangleIndices(y*_resolution + x+1 + offset,
+                                    (y+1) * _resolution + x+1 + offset,
+                                    (y+1)*_resolution + x + offset);
         }
 
-        mesh.addTriangle(   y * _resolution + (_resolution-1) + offset,
-                            y * _resolution + offset,
-                            (y+1) * _resolution + (_resolution-1) + offset);
-        mesh.addTriangle(   y * _resolution + offset,
-                            (y+1) * _resolution + offset,
-                            (y+1)*_resolution + (_resolution-1) + offset);
+        mesh.addTriangleIndices(y * _resolution + (_resolution-1) + offset,
+                                y * _resolution + offset,
+                                (y+1) * _resolution + (_resolution-1) + offset);
+        mesh.addTriangleIndices(y * _resolution + offset,
+                                (y+1) * _resolution + offset,
+                                (y+1)*_resolution + (_resolution-1) + offset);
     }
 
     if ( !_polyline.isClosed() && _caps) {
@@ -452,9 +452,9 @@ Mesh tube(const Polyline& _polyline, const float* _array1D, int _n, int _resolut
         mesh.addNormal( glm::normalize( _polyline.getVertices()[_polyline.size()-2] - _polyline.getVertices()[_polyline.size()-1] ) );
 
         for (size_t i = 0; i < _resolution; i++)
-            mesh.addTriangle( vertsN, vertsN - i - 2, vertsN - i - 1);
+            mesh.addTriangleIndices( vertsN, vertsN - i - 2, vertsN - i - 1);
 
-        mesh.addTriangle( vertsN, vertsN - 1 , vertsN - _resolution);
+        mesh.addTriangleIndices( vertsN, vertsN - 1 , vertsN - _resolution);
     }
 
     return mesh;

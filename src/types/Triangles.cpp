@@ -3,7 +3,7 @@
 using namespace hilma;
 
 
-Triangle::Triangle(): colors(nullptr), normals(nullptr), texcoords(nullptr) { 
+Triangle::Triangle() { 
 
 }
 
@@ -12,9 +12,6 @@ Triangle::Triangle(const glm::vec3 &_p0, const glm::vec3 &_p1, const glm::vec3 &
 }
 
 Triangle::~Triangle() {
-    // if (colors != nullptr) delete[] colors;
-    // if (normals != nullptr) delete[] normals;
-    // if (texcoords != nullptr) delete[] texcoords;
 }
 
 void Triangle::set(const glm::vec3 &_p0, const glm::vec3 &_p1, const glm::vec3 &_p2) {
@@ -25,21 +22,21 @@ void Triangle::set(const glm::vec3 &_p0, const glm::vec3 &_p1, const glm::vec3 &
 }
 
 void Triangle::setColors(const glm::vec4 &_p0, const glm::vec4 &_p1, const glm::vec4 &_p2) {
-    colors = new glm::vec4[3];
+    colors.resize(3);
     colors[0] = _p0;
     colors[1] = _p1;
     colors[2] = _p2;
 }
 
 void Triangle::setNormals(const glm::vec3 &_p0, const glm::vec3 &_p1, const glm::vec3 &_p2) {
-    normals = new glm::vec3[3];
+    normals.resize(3);
     normals[0] = _p0;
     normals[1] = _p1;
     normals[2] = _p2;
 }
 
 void Triangle::setTexCoords(const glm::vec2 &_p0, const glm::vec2 &_p1, const glm::vec2 &_p2) {
-    texcoords = new glm::vec2[3];
+    texcoords.resize(3);
     texcoords[0] = _p0;
     texcoords[1] = _p1;
     texcoords[2] = _p2;

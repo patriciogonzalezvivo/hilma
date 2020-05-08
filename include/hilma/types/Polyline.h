@@ -122,8 +122,8 @@ public:
     glm::vec3& operator[] (int index);
 
     /// \brief Gets a vector of vertices that the line contains
-    std::vector<glm::vec3> & getVertices();
-    const std::vector<glm::vec3> & getVertices() const;
+    std::vector<glm::vec3>& getVertices();
+    const std::vector<glm::vec3>& getVertices() const;
 
     typename std::vector<glm::vec3>::iterator begin();
     typename std::vector<glm::vec3>::const_iterator begin() const;

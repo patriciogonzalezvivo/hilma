@@ -43,8 +43,8 @@ mesh_E.addVertex( [-half, -half, 0.0] )
 mesh_E.addVertex( [-half, half, 0.0] ) 
 mesh_E.addVertex( [half, half, 0.0] )
 mesh_E.addVertex( [half, -half, 0.0] )
-mesh_E.addTriangle( 1, 0, 3 )
-mesh_E.addTriangle( 1, 3, 2 )
+mesh_E.addTriangleIndices( 1, 0, 3 )
+mesh_E.addTriangleIndices( 1, 3, 2 )
 savePly("rect_E.ply", mesh_E, False)
 
 

@@ -39,12 +39,11 @@ public:
     void        clear();
     void        append(const Mesh& _mesh);
 
-    void        setMode(PrimitiveMode _mode = TRIANGLES, bool _compute = false);
-    PrimitiveMode    getMode() const { return mode; };
+    void            setMode(PrimitiveMode _mode = TRIANGLES, bool _compute = false);
+    PrimitiveMode   getMode() const { return mode; };
     
-    void        setName(const std::string& _name) { name = _name; }
-    std::string getName() const { return name; }
-
+    void            setName(const std::string& _name) { name = _name; }
+    std::string     getName() const { return name; }
 
     // Vertices
     void        addVertex(const glm::vec3& _point);
@@ -56,9 +55,9 @@ public:
     bool        haveVertices() const { return !vertices.empty(); };
     void        clearVertices() { vertices.clear(); }
 
-    glm::vec3   getVertex(size_t _index) const { return vertices[_index]; }
-    size_t      getVerticesTotal() const { return vertices.size(); }
-    std::vector<glm::vec3> getVertices() const { return vertices; }
+    const glm::vec3& getVertex(size_t _index) const { return vertices[_index]; }
+    size_t          getVerticesTotal() const { return vertices.size(); }
+    const  std::vector<glm::vec3>& getVertices() const { return vertices; }
 
     // Colorss
     void        setColor(const glm::vec4& _color);
@@ -74,7 +73,7 @@ public:
 
     const bool  haveColors() const { return !colors.empty(); }
     size_t      getColorsTotal() const { return colors.size(); }
-    std::vector<glm::vec4> getColors() const { return colors; }
+    const std::vector<glm::vec4>& getColors() const { return colors; }
 
     // Normals
     void        addNormal(const glm::vec3& _normal);
@@ -84,9 +83,9 @@ public:
     void        addNormals(const float* _array2D, int _m, int _n);
 
     const bool  haveNormals() const { return !normals.empty(); }
-    glm::vec3   getNormal(size_t _index) const { return normals[_index]; }
+    const glm::vec3&   getNormal(size_t _index) const { return normals[_index]; }
     size_t      getNormalsTotal() const { return normals.size(); }
-    std::vector<glm::vec3> getNormals() const { return normals; }
+    const std::vector<glm::vec3>& getNormals() const { return normals; }
     void        clearNormals() { normals.clear(); }
     bool        computeNormals();
     void        invertNormals();
@@ -100,8 +99,8 @@ public:
 
     const bool  haveTexCoords() const { return !texcoords.empty(); }
     size_t      getTexCoordsTotal() const { return texcoords.size(); }
-    glm::vec2   getTexCoord(size_t _index) const { return texcoords[_index]; }
-    std::vector<glm::vec2> getTexCoords() const { return texcoords; }
+    const glm::vec2&   getTexCoord(size_t _index) const { return texcoords[_index]; }
+    const std::vector<glm::vec2>& getTexCoords() const { return texcoords; }
     void        clearTexCoords() { texcoords.clear(); }
 
     // Tangents
@@ -110,8 +109,8 @@ public:
     void        addTangent(float _x, float _y, float _z, float _w);
 
     const bool  haveTangents() const { return !tangents.empty(); }
-    glm::vec4   getTangent(size_t _index) const { return tangents[_index]; }
-    std::vector<glm::vec4> getTangents() const { return tangents; }
+    const glm::vec4&   getTangent(size_t _index) const { return tangents[_index]; }
+    const std::vector<glm::vec4>& getTangents() const { return tangents; }
     bool        computeTangents();
     void        clearTangets() { tangents.clear(); }
 
@@ -126,8 +125,8 @@ public:
     void        addFaces(const INDEX_TYPE* _array2D, int _m, int _n);
 
     void        addLine(INDEX_TYPE _i1, INDEX_TYPE _i2);
-    // void        addTriangle(const Triangle& _tri);
-    void        addTriangle(INDEX_TYPE _i1, INDEX_TYPE _i2, INDEX_TYPE _i3);
+    void        addTriangle(const Triangle& _tri);
+    void        addTriangleIndices(INDEX_TYPE _i1, INDEX_TYPE _i2, INDEX_TYPE _i3);
 
     void        invertWindingOrder();
     void        mergeDuplicateVertices();

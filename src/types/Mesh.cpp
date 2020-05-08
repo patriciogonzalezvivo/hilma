@@ -208,7 +208,7 @@ void Mesh::addFaces(const INDEX_TYPE* _data, int _m, int _n) {
     }
     else if (_n == 3) {
         for (int i = 0; i < _m; i++)
-            addTriangle(_data[i*_n], _data[i*_n+1], _data[i*_n+2]);
+            addTriangleIndices(_data[i*_n], _data[i*_n+1], _data[i*_n+2]);
     }
 }
 void Mesh::addLine( INDEX_TYPE _index1, INDEX_TYPE _index2 ){
@@ -216,44 +216,44 @@ void Mesh::addLine( INDEX_TYPE _index1, INDEX_TYPE _index2 ){
     addIndex(_index2);
 }
 
-void Mesh::addTriangle(INDEX_TYPE _index1, INDEX_TYPE _index2, INDEX_TYPE _index3) {
+void Mesh::addTriangleIndices(INDEX_TYPE _index1, INDEX_TYPE _index2, INDEX_TYPE _index3) {
     addIndex(_index1);
     addIndex(_index2);
     addIndex(_index3);
 }
 
-// void Mesh::addTriangle(const Triangle& _tri) {
-//     INDEX_TYPE index = vertices.size();
+void Mesh::addTriangle(const Triangle& _tri) {
+    INDEX_TYPE index = vertices.size();
 
-//     addVertex(_tri[0]);
-//     addVertex(_tri[1]);
-//     addVertex(_tri[2]);
+    addVertex(_tri[0]);
+    addVertex(_tri[1]);
+    addVertex(_tri[2]);
 
-//     if (_tri.haveColor()) {
-//         addColor(_tri.getColor(0));
-//         addColor(_tri.getColor(1));
-//         addColor(_tri.getColor(2));
-//     }
+    if (_tri.haveColors()) {
+        addColor(_tri.getColor(0));
+        addColor(_tri.getColor(1));
+        addColor(_tri.getColor(2));
+    }
 
-//     if (_tri.haveNormal()) {
-//         addNormal(_tri.getNormal(0));
-//         addNormal(_tri.getNormal(1));
-//         addNormal(_tri.getNormal(2));
-//     }
-//     else {
-//         addNormal(_tri.getNormal());
-//         addNormal(_tri.getNormal());
-//         addNormal(_tri.getNormal());
-//     }
+    if (_tri.haveNormals()) {
+        addNormal(_tri.getNormal(0));
+        addNormal(_tri.getNormal(1));
+        addNormal(_tri.getNormal(2));
+    }
+    else {
+        addNormal(_tri.getNormal());
+        addNormal(_tri.getNormal());
+        addNormal(_tri.getNormal());
+    }
 
-//     if (_tri.haveTexCoords()) {
-//         addTexCoord(_tri.getTexCoords(0));
-//         addTexCoord(_tri.getTexCoords(1));
-//         addTexCoord(_tri.getTexCoords(2));
-//     }
+    if (_tri.haveTexCoords()) {
+        addTexCoord(_tri.getTexCoord(0));
+        addTexCoord(_tri.getTexCoord(1));
+        addTexCoord(_tri.getTexCoord(2));
+    }
 
-//     addTriangle(index, index+1, index+2);
-// }
+    addTriangleIndices(index, index+1, index+2);
+}
 
 std::vector<glm::ivec3> Mesh::getTrianglesIndices() const {
     std::vector<glm::ivec3> faces;
@@ -315,7 +315,7 @@ void Mesh::setMode(PrimitiveMode _mode, bool _compute) {
         }
         else if (_mode == TRIANGLES) {
             for (size_t j = 0; j < vertices.size(); j += 3)
-                addTriangle(j, j + 1, j + 2);
+                addTriangleIndices(j, j + 1, j + 2);
         }
     }
 }

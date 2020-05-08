@@ -43,8 +43,8 @@ int main(int argc, char **argv) {
     mesh_D.addVertex( glm::vec3(-half, half, 0.0) );
     mesh_D.addVertex( glm::vec3(half, half, 0.0) );
     mesh_D.addVertex( glm::vec3(half, -half, 0.0) );
-    mesh_D.addTriangle( 1, 0, 3 );
-    mesh_D.addTriangle( 1, 3, 2 );
+    mesh_D.addTriangleIndices( 1, 0, 3 );
+    mesh_D.addTriangleIndices( 1, 3, 2 );
     hilma::savePly("rect_D.ply", mesh_D, false);
 
 
