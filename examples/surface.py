@@ -12,6 +12,6 @@ import numpy as np
 polylineA = Polyline( [[100, 0], [100, 100], [0, 100], [0, 0]] )
 polylineB = Polyline( np.array([[75, 25], [75, 75], [25, 75], [25, 25]], dtype=np.float32) )
 
-mesh = surface( polylineA )
+mesh = toSurface( polylineA )
 
 savePly("surface.ply", mesh, False)

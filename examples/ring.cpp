@@ -5,7 +5,7 @@
 
 #include "hilma/types/Mesh.h"
 #include "hilma/types/Polyline.h"
-#include "hilma/ops/modify.h"
+#include "hilma/ops/convert.h"
 #include "hilma/ops/transform.h"
 #include "hilma/io/ply.h"
 
@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
     }
     polyline.close();
     
-    hilma::Mesh mesh = hilma::tube(polyline, 1.0, 36, true);
+    hilma::Mesh mesh = hilma::toTube(polyline, 1.0, 36, true);
 
     scaleZ(mesh, 2.);
     mesh.computeNormals();

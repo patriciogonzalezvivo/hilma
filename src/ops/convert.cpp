@@ -1,4 +1,4 @@
-#include "hilma/ops/modify.h"
+#include "hilma/ops/convert.h"
 #include "hilma/ops/earcut.h"
 
 #include "hilma/math.h"
@@ -34,7 +34,7 @@ struct nth<1, glm::vec3> {
 namespace hilma {
 
 template <typename T>
-Mesh Modify::surface(const std::vector<std::vector<T>>& _polygon) {
+Mesh Convert::toSurface(const std::vector<std::vector<T>>& _polygon) {
     Mesh mesh;
 
     BoundingBox bb;
@@ -60,11 +60,11 @@ Mesh Modify::surface(const std::vector<std::vector<T>>& _polygon) {
     return mesh;
 }
 
-template Mesh Modify::surface<glm::vec2>(const std::vector<std::vector<glm::vec2>>&); 
-template Mesh Modify::surface<glm::vec3>(const std::vector<std::vector<glm::vec3>>&); 
+template Mesh Convert::toSurface<glm::vec2>(const std::vector<std::vector<glm::vec2>>&); 
+template Mesh Convert::toSurface<glm::vec3>(const std::vector<std::vector<glm::vec3>>&); 
 
 template <typename T>
-Mesh Modify::extrude(const std::vector<std::vector<T>>& _polygon, float _maxHeight, float _minHeight) {
+Mesh Convert::toWall(const std::vector<std::vector<T>>& _polygon, float _maxHeight, float _minHeight) {
     Mesh mesh;
     
     static const glm::vec3 upVector(0.0f, 0.0f, 1.0f);
@@ -133,8 +133,8 @@ Mesh Modify::extrude(const std::vector<std::vector<T>>& _polygon, float _maxHeig
     return mesh;
 }
 
-template Mesh Modify::extrude<glm::vec2>(const std::vector<std::vector<glm::vec2>>&, float, float); 
-template Mesh Modify::extrude<glm::vec3>(const std::vector<std::vector<glm::vec3>>&, float, float); 
+template Mesh Convert::toWall<glm::vec2>(const std::vector<std::vector<glm::vec2>>&, float, float); 
+template Mesh Convert::toWall<glm::vec3>(const std::vector<std::vector<glm::vec3>>&, float, float); 
 
 // From Tangram
 // https://github.com/tangrams/tangram-es/blob/e4a323afeb310520456aec49e338614120a7ffa2/core/src/util/Modifys.cpp
@@ -248,7 +248,7 @@ void addCap(const glm::vec2& _coord, const glm::vec2& _normal, int _numCorners, 
 }
 
 template <typename T>
-Mesh Modify::spline(const std::vector<T>& _polyline, float _width, JoinType _join, CapType _cap, float _miterLimit) { //}, bool _close) {;
+Mesh Convert::toSpline(const std::vector<T>& _polyline, float _width, JoinType _join, CapType _cap, float _miterLimit) { //}, bool _close) {;
 
     Mesh mesh;
     size_t startIndex = 0;
@@ -376,10 +376,10 @@ Mesh Modify::spline(const std::vector<T>& _polyline, float _width, JoinType _joi
     return mesh;
 }
 
-template Mesh Modify::spline<glm::vec2>(const std::vector<glm::vec2>&, float, JoinType, CapType, float);
-template Mesh Modify::spline<glm::vec3>(const std::vector<glm::vec3>&, float, JoinType, CapType, float);
+template Mesh Convert::toSpline<glm::vec2>(const std::vector<glm::vec2>&, float, JoinType, CapType, float);
+template Mesh Convert::toSpline<glm::vec3>(const std::vector<glm::vec3>&, float, JoinType, CapType, float);
 
-Mesh tube(const Polyline& _polyline, const float* _array1D, int _n, int _resolution, bool _caps) {
+Mesh toTube(const Polyline& _polyline, const float* _array1D, int _n, int _resolution, bool _caps) {
     Mesh mesh;
     size_t offset = 0;
 
@@ -395,7 +395,6 @@ Mesh tube(const Polyline& _polyline, const float* _array1D, int _n, int _resolut
         const glm::vec3& p0 = _polyline[i];
         const glm::vec3& n0 = _polyline.getNormalAtIndex(i);
         const glm::vec3& t0 = _polyline.getTangentAtIndex(i);
-        // float r0 = tubeRadius[i];
         float r0 = _array1D[i%_n];
 
         glm::vec3 v0;

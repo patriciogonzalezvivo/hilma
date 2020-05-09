@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "hilma/types/Mesh.h"
-#include "hilma/ops/modify.h"
+#include "hilma/ops/convert.h"
 #include "hilma/io/ply.h"
 
 int main(int argc, char **argv) {
@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
     // Following polylines define holes.
     polygon.push_back({{75, 25}, {75, 75}, {25, 75}, {25, 25}});
 
-    hilma::Mesh mesh = hilma::surface(polygon);
+    hilma::Mesh mesh = hilma::toSurface(polygon);
     hilma::savePly("surface.ply", mesh, false);
 
     return 1;

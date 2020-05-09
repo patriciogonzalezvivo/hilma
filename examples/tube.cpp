@@ -5,7 +5,7 @@
 
 #include "hilma/types/Mesh.h"
 #include "hilma/types/Polyline.h"
-#include "hilma/ops/modify.h"
+#include "hilma/ops/convert.h"
 #include "hilma/io/ply.h"
 
 int main(int argc, char **argv) {
@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 
     float width[] = {1.f, 1.1f, 1.2f, 1.1f, 1.f, 1.1f, 1.2f, 1.3f, 1.2f, 1.1f,
                      1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f, 1.f };
-    hilma::Mesh mesh = hilma::tube(polyline, width, 20, 18, true);
+    hilma::Mesh mesh = hilma::toTube(polyline, width, 20, 18, true);
 
     mesh.computeNormals();
     hilma::savePly("tube.ply", mesh, false);
