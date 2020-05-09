@@ -204,16 +204,32 @@ void Mesh::addIndices(const INDEX_TYPE* _data, int _n) {
 void Mesh::addFaces(const INDEX_TYPE* _data, int _m, int _n) {
     if (_n == 2) {
         for (int i = 0; i < _m; i++)
-            addLine(_data[i*_n], _data[i*_n+1]);
+            addLineIndices(_data[i*_n], _data[i*_n+1]);
     }
     else if (_n == 3) {
         for (int i = 0; i < _m; i++)
             addTriangleIndices(_data[i*_n], _data[i*_n+1], _data[i*_n+2]);
     }
+    else if (_n == 4) {
+        for (int i = 0; i < _m; i++)
+            addQuadIndices(_data[i*_n], _data[i*_n+1], _data[i*_n+2], _data[i*_n+3]);
+    }
 }
-void Mesh::addLine( INDEX_TYPE _index1, INDEX_TYPE _index2 ){
+
+void Mesh::addLineIndices( INDEX_TYPE _index1, INDEX_TYPE _index2 ){
     addIndex(_index1);
     addIndex(_index2);
+    // TODO
+}
+
+void Mesh::addLine(const Line& _line) {
+    // TODO
+    INDEX_TYPE index = vertices.size();
+
+    addVertex(_line[0]);
+    addVertex(_line[1]);
+
+    addLineIndices( index+0, index+1);
 }
 
 void Mesh::addTriangleIndices(INDEX_TYPE _index1, INDEX_TYPE _index2, INDEX_TYPE _index3) {
@@ -255,8 +271,15 @@ void Mesh::addTriangle(const Triangle& _tri) {
     addTriangleIndices(index, index+1, index+2);
 }
 
+void Mesh::addQuadIndices(INDEX_TYPE _index1, INDEX_TYPE _index2, INDEX_TYPE _index3, INDEX_TYPE _index4) {
+    addIndex(_index1);
+    addIndex(_index2);
+    addIndex(_index3);
+    addIndex(_index4);
+}
+
 std::vector<glm::ivec3> Mesh::getTrianglesIndices() const {
-    std::vector<glm::ivec3> faces;
+    std::vector<glm::ivec3> triangles;
 
     if (getMode() == TRIANGLES) {
         if (haveIndices()) {
@@ -264,7 +287,7 @@ std::vector<glm::ivec3> Mesh::getTrianglesIndices() const {
                 glm::ivec3 tri;
                 for (int k = 0; k < 3; k++)
                     tri[k] = indices[j+k];
-                faces.push_back(tri);
+                triangles.push_back(tri);
             }
         }
         else {
@@ -272,7 +295,55 @@ std::vector<glm::ivec3> Mesh::getTrianglesIndices() const {
                 glm::ivec3 tri;
                 for (int k = 0; k < 3; k++)
                     tri[k] = j+k;
-                faces.push_back(tri);
+                triangles.push_back(tri);
+            }
+        }
+    }
+    else if (getMode() == TRIANGLE_STRIP) {
+        if (indices.size() > 2) {
+            int a = int(indices[0]);
+            int b = int(indices[1]);
+            int c;
+            bool CCW = true;
+            for (size_t j = 2; j < indices.size(); j++) {
+                c = int(indices[j]);
+                // Account for degenerate triangles
+                if (a != b && b != c && c != a) {
+                    if (CCW) triangles.push_back(glm::ivec3(a, c, b));
+                    else triangles.push_back(glm::ivec3(a, b, c));
+                }
+                a = b;
+                b = c;
+                CCW = !CCW;
+            }
+        }
+        else {
+            int a = 0;
+            int b = 1;
+            int c;
+            bool CCW = true;
+            for (size_t c = 2; c < vertices.size(); c++) {
+                if (CCW) triangles.push_back(glm::ivec3(a, c, b));
+                else triangles.push_back(glm::ivec3(a, b, c));
+                a = b;
+                b = c;
+                CCW = !CCW;
+            }
+        }
+        
+    }
+    else if (getMode() == QUAD) {
+        if (haveIndices()) {
+            for (size_t j = 0; j < indices.size(); j += 4) {
+                triangles.push_back(glm::ivec3(indices[j], indices[j+1], indices[j+2]));
+                triangles.push_back(glm::ivec3(indices[j+2], indices[j+3], indices[j]));
+            }
+        }
+        else {
+            for (size_t j = 0; j < vertices.size(); j += 4) {
+                std::cout << "j " << j << std::endl;
+                triangles.push_back(glm::ivec3(j, j+1, j+2));
+                triangles.push_back(glm::ivec3(j+2, j+3, j));
             }
         }
     }
@@ -282,7 +353,7 @@ std::vector<glm::ivec3> Mesh::getTrianglesIndices() const {
         std::cout << "ERROR: getTriangles(): Mesh only add TRIANGLES for NOW !!" << std::endl;
     }
 
-    return faces;
+    return triangles;
 }
 
 std::vector<Triangle> Mesh::getTriangles() const {
@@ -311,7 +382,7 @@ void Mesh::setMode(PrimitiveMode _mode, bool _compute) {
 
         if (_mode == LINES) {
             for (size_t j = 0; j < vertices.size(); j += 2)
-                addLine(j, j + 1);
+                addLineIndices(j, j + 1);
         }
         else if (_mode == TRIANGLES) {
             for (size_t j = 0; j < vertices.size(); j += 3)

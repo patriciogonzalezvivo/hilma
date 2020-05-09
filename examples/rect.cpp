@@ -48,6 +48,16 @@ int main(int argc, char **argv) {
     hilma::savePly("rect_D.ply", mesh_D, false);
 
 
+    hilma::Mesh mesh_E;
+    mesh_E.setMode(hilma::QUAD);
+    mesh_E.addVertex( glm::vec3(-half, -half, 0.0) );
+    mesh_E.addVertex( glm::vec3(-half, half, 0.0) );
+    mesh_E.addVertex( glm::vec3(half, half, 0.0) );
+    mesh_E.addVertex( glm::vec3(half, -half, 0.0) );
+    mesh_E.addQuadIndices(0, 1, 2, 3);
+    hilma::savePly("rect_E.ply", mesh_E, false);
+
+
 
     return 1;
 }

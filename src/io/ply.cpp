@@ -199,7 +199,7 @@ bool savePly( const std::string& _filename, Mesh& _mesh, bool _binnary, bool _co
         file.add_properties_to_element("vertex", { "texture_u", "texture_v" },
         tinyply::Type::FLOAT32, _mesh.texcoords.size() , reinterpret_cast<uint8_t*>(_mesh.texcoords.data()), tinyply::Type::INVALID, 0);
 
-    if (_mesh.haveIndices()) {
+    if (_mesh.getMode() != UNKNOWN && _mesh.getMode() != POINTS) {
 
         if (_mesh.getMode() == TRIANGLES ) {
             file.add_properties_to_element("face", { "vertex_indices" },
@@ -207,6 +207,15 @@ bool savePly( const std::string& _filename, Mesh& _mesh, bool _binnary, bool _co
             tinyply::Type::UINT16, _mesh.indices.size()/3 , reinterpret_cast<uint8_t*>(_mesh.indices.data()), tinyply::Type::UINT8, 3);
 #else
             tinyply::Type::UINT32, _mesh.indices.size()/3 , reinterpret_cast<uint8_t*>(_mesh.indices.data()), tinyply::Type::UINT8, 3);
+#endif
+        }
+        else if (_mesh.getMode() == TRIANGLE_STRIP || _mesh.getMode() == QUAD ) {
+            std::vector<glm::ivec3> triangles = _mesh.getTrianglesIndices(); 
+            file.add_properties_to_element("face", { "vertex_indices" },
+#if defined(PLATFORM_RPI)
+            tinyply::Type::UINT16, triangles.size(), reinterpret_cast<uint8_t*>(triangles.data()), tinyply::Type::UINT8, 3);
+#else
+            tinyply::Type::UINT32 , triangles.size(), reinterpret_cast<uint8_t*>(triangles.data()), tinyply::Type::UINT8, 3);
 #endif
         }
 

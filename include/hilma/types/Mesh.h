@@ -124,9 +124,13 @@ public:
 
     void        addFaces(const INDEX_TYPE* _array2D, int _m, int _n);
 
-    void        addLine(INDEX_TYPE _i1, INDEX_TYPE _i2);
+    void        addLine(const Line& _line);
+    void        addLineIndices(INDEX_TYPE _i1, INDEX_TYPE _i2);
+
     void        addTriangle(const Triangle& _tri);
     void        addTriangleIndices(INDEX_TYPE _i1, INDEX_TYPE _i2, INDEX_TYPE _i3);
+
+    void        addQuadIndices(INDEX_TYPE _i1, INDEX_TYPE _i2, INDEX_TYPE _i3, INDEX_TYPE _i4);
 
     void        invertWindingOrder();
     void        mergeDuplicateVertices();
