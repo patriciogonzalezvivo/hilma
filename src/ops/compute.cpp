@@ -1,6 +1,9 @@
 #include "hilma/ops/compute.h"
 
 #include <algorithm>
+#include <map>
+
+#include "hilma/text.h"
 
 namespace hilma {
 
@@ -84,11 +87,11 @@ std::vector<glm::vec2> getSimplify(const std::vector<glm::vec2>& _points, float 
 
 void simplify(std::vector<glm::vec2>& _points, float _tolerance) {
 
-    if(_points.size() < 2) return;
+    if (_points.size() < 2) return;
 
     int n = _points.size();
 
-    if(n == 0) {
+    if (n == 0) {
         return;
     }
 
@@ -123,7 +126,7 @@ void simplify(std::vector<glm::vec2>& _points, float _tolerance) {
     }
 
     //get rid of the unused points
-    if( m < (int)sV.size() ) {
+    if ( m < (int)sV.size() ) {
         _points.assign( sV.begin(),sV.begin()+m );
     }else{
         _points = sV;
@@ -225,7 +228,7 @@ std::vector<glm::vec2> getConvexHull(const std::vector<glm::vec2>& _points) {
         currentPoint += direction;
 
         if (hull.front()==hull.back()) {
-            if(currentPoint == 3 && direction == 1) {
+            if (currentPoint == 3 && direction == 1) {
                 currentPoint = 4;
             } else {
                 break;
@@ -241,7 +244,7 @@ std::vector<glm::vec2> getConvexHull(const std::vector<glm::vec2>& _points) {
 float getArea(const std::vector<glm::vec2>& _points) {
     float area = 0.0;
 
-    for(int i=0;i<(int)_points.size()-1;i++) {
+    for (int i=0;i<(int)_points.size()-1;i++) {
         area += _points[i].x * _points[i+1].y - _points[i+1].x * _points[i].y;
     }
     area += _points[_points.size()-1].x * _points[0].y - _points[0].x * _points[_points.size()-1].y;
@@ -273,7 +276,7 @@ BoundingBox getBoundingBox(const Mesh& _mesh) {
 BoundingBox getBoundingBox(const std::vector<glm::vec2>& _points ) {
     BoundingBox bbox;
 
-    for(std::vector<glm::vec2>::const_iterator it = _points.begin(); it != _points.end(); ++it)
+    for (std::vector<glm::vec2>::const_iterator it = _points.begin(); it != _points.end(); ++it)
         bbox.expand(*it);
     
     return bbox;
@@ -282,10 +285,135 @@ BoundingBox getBoundingBox(const std::vector<glm::vec2>& _points ) {
 BoundingBox getBoundingBox(const std::vector<glm::vec3>& _points ) {
     BoundingBox bbox;
 
-    for(std::vector<glm::vec3>::const_iterator it = _points.begin(); it != _points.end(); ++it)
+    for (std::vector<glm::vec3>::const_iterator it = _points.begin(); it != _points.end(); ++it)
         bbox.expand(*it);
     
     return bbox;
+}
+
+
+
+// void computeSmoothingNormals(const Mesh& _mesh) {
+//     std::vector<glm::vec3> smoothVertexNormals;
+
+//     std::map<int, glm::vec3>::iterator iter;
+//     for (size_t f = 0; f < _shape.mesh.indices.size() / 3; f++) {
+//         // Get the three indexes of the face (all faces are triangular)
+//         tinyobj::index_t idx0 = _shape.mesh.indices[3 * f + 0];
+//         tinyobj::index_t idx1 = _shape.mesh.indices[3 * f + 1];
+//         tinyobj::index_t idx2 = _shape.mesh.indices[3 * f + 2];
+
+//         // Get the three vertex indexes and coordinates
+//         int vi[3];      // indexes
+//         vi[0] = idx0.vertex_index;
+//         vi[1] = idx1.vertex_index;
+//         vi[2] = idx2.vertex_index;
+
+//         glm::vec3 v[3];  // coordinates
+//         for (size_t i = 0; i < 3; i++)
+//             v[i] = getVertex(_attrib, vi[i]);
+
+//         // Compute the normal of the face
+//         glm::vec3 normal;
+//         calcNormal(v[0], v[1], v[2], normal);
+
+//         // Add the normal to the three vertexes
+//         for (size_t i = 0; i < 3; ++i) {
+//             iter = smoothVertexNormals.find(vi[i]);
+//             // add
+//             if (iter != smoothVertexNormals.end())
+//                 iter->second += normal;
+//             else
+//                 smoothVertexNormals[vi[i]] = normal;
+//         }
+//     }  // f
+
+//     // Normalize the normals, that is, make them unit vectors
+//     for (iter = smoothVertexNormals.begin(); iter != smoothVertexNormals.end(); iter++) {
+//         iter->second = glm::normalize(iter->second);
+//     }
+// }
+
+
+Mesh getSmoothNormals(const Mesh& _mesh, float _angle) {
+    Mesh rta;
+
+    std::vector<Triangle> triangles = _mesh.getTriangles();
+    std::vector<glm::vec3> verts;
+    for (size_t i = 0; i < triangles.size(); i++)
+        for (size_t j = 0; j < 3; j++) 
+            verts.push_back( triangles[i][j] );
+
+    std::map<int, int> removeIds;
+    float epsilon = .01f;
+    for (size_t i = 0; i < verts.size()-1; i++) {
+        for (size_t j = i+1; j < verts.size(); j++) {
+            if (i != j) {
+                const glm::vec3& v1 = verts[i];
+                const glm::vec3& v2 = verts[j];
+                if ( glm::distance(v1, v2) <= epsilon ) {
+                    // average the location //
+                    verts[i] = (v1+v2)/2.f;
+                    verts[j] = verts[i];
+                    removeIds[j] = 1;
+                }
+            }
+        }
+    }
+
+    std::map<std::string, std::vector<int> > vertHash;
+    std::string xStr, yStr, zStr;
+
+    for (size_t i = 0; i < verts.size(); i++ ) {
+        xStr = "x" + toString(verts[i].x == -0 ? 0: verts[i].x);
+        yStr = "y" + toString(verts[i].y == -0 ? 0: verts[i].y);
+        zStr = "z" + toString(verts[i].z == -0 ? 0: verts[i].z);
+        std::string vstring = xStr+yStr+zStr;
+
+        if (vertHash.find(vstring) == vertHash.end())
+            for (size_t j = 0; j < triangles.size(); j++) 
+                for (size_t k = 0; k < 3; k++) 
+                    if (verts[i].x == triangles[j][k].x)
+                        if (verts[i].y == triangles[j][k].y) 
+                            if (verts[i].z == triangles[j][k].z)
+                                vertHash[vstring].push_back( j );
+    }
+
+    glm::vec3 vert;
+    glm::vec3 normal;
+    float angleCos = cos(glm::radians(_angle));
+    float numNormals = 0.0f;
+
+    for (size_t j = 0; j < triangles.size(); j++) {
+        for (size_t k = 0; k < 3; k++) {
+            vert = triangles[j][k];
+            xStr = "x" + toString(vert.x==-0?0:vert.x);
+            yStr = "y" + toString(vert.y==-0?0:vert.y);
+            zStr = "z" + toString(vert.z==-0?0:vert.z);
+
+            std::string vstring = xStr+yStr+zStr;
+            numNormals=0;
+            normal = {0.f,0.f,0.f};
+            if (vertHash.find(vstring) != vertHash.end()) {
+                for (size_t i = 0; i < vertHash[vstring].size(); i++) {
+                    glm::vec3 f1 = triangles[j].getNormal();
+                    glm::vec3 f2 = triangles[vertHash[vstring][i]].getNormal();
+                    if (glm::dot(f1, f2) >= angleCos ) {
+                        normal += f2;
+                        numNormals+=1.f;
+                    }
+                }
+                //normal /= (float)vertHash[vstring].size();
+                normal /= numNormals;
+
+                triangles[j].setNormal(k, normal);
+            }
+        }
+    }
+
+    rta.addTriangles( triangles.data(), triangles.size() );
+
+    return rta;
 }
 
 }

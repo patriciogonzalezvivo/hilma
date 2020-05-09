@@ -216,10 +216,9 @@ void Mesh::addFaces(const INDEX_TYPE* _data, int _m, int _n) {
     }
 }
 
-void Mesh::addLineIndices( INDEX_TYPE _index1, INDEX_TYPE _index2 ){
+void Mesh::addLineIndices( INDEX_TYPE _index1, INDEX_TYPE _index2 ) {
     addIndex(_index1);
     addIndex(_index2);
-    // TODO
 }
 
 void Mesh::addLine(const Line& _line) {
@@ -320,7 +319,6 @@ std::vector<glm::ivec3> Mesh::getTrianglesIndices() const {
         else {
             int a = 0;
             int b = 1;
-            int c;
             bool CCW = true;
             for (size_t c = 2; c < vertices.size(); c++) {
                 if (CCW) triangles.push_back(glm::ivec3(a, c, b));
@@ -354,6 +352,11 @@ std::vector<glm::ivec3> Mesh::getTrianglesIndices() const {
     }
 
     return triangles;
+}
+
+void Mesh::addTriangles(const Triangle* _array1D, int _n) {
+    for (int i = 0; i < _n; i++)
+        addTriangle(_array1D[i]);
 }
 
 std::vector<Triangle> Mesh::getTriangles() const {

@@ -21,23 +21,27 @@ public :
     
     
     // Getters:
-    const glm::vec3& getPoint(size_t _index) const { return points[_index]; }
-    const glm::vec3& operator[] (size_t _index) const { return points[_index]; }
+    const glm::vec3& operator[] (size_t _index) const { return vertices[_index]; }
+    void                setVertex(size_t _index, const glm::vec3& _vertex);
+    const glm::vec3&    getVertex(size_t _index) const { return vertices[_index]; }
 
-    glm::vec3   getCentroid() const { return (points[0] + points[1] + points[2]) * 0.3333333333333f; }
-    const glm::vec3& getNormal() const { return normal; }
+    glm::vec3   getCentroid() const { return (vertices[0] + vertices[1] + vertices[2]) * 0.3333333333333f; }
+    const glm::vec3&    getNormal() const { return normal; }
     
     bool        haveColors() const { return !colors.empty(); }
-    const glm::vec4&  getColor(size_t _index) const { return colors[_index]; }
+    void                setColor(size_t _index, const glm::vec4& _color);
+    const glm::vec4&    getColor(size_t _index) const { return colors[_index]; }
 
     bool        haveNormals() const { return !normals.empty(); }
-    const glm::vec3&  getNormal(size_t _index) const { return normals[_index]; }
+    void                setNormal(size_t _index, const glm::vec3& _normal);
+    const glm::vec3&    getNormal(size_t _index) const { return normals[_index]; }
 
     bool        haveTexCoords() const { return !texcoords.empty(); }
-    const glm::vec2&  getTexCoord(size_t _index) const { return texcoords[_index]; }
+    void                setTexCoord(size_t _index, const glm::vec2& _texcoord);
+    const glm::vec2&    getTexCoord(size_t _index) const { return texcoords[_index]; }
     
 private:
-    glm::vec3   points[3];
+    glm::vec3   vertices[3];
     glm::vec3   normal;
 
     std::vector<glm::vec4>  colors;

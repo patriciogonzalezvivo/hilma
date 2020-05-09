@@ -11,14 +11,16 @@
 namespace hilma {
 
 enum PrimitiveMode {
-    UNKNOWN     = 0,
-    POINTS      = 1,
+    POINTS      = 0,
+
+    LINE_STRIP  = 1,
     LINES       = 2,
+
     TRIANGLES   = 3,
-    QUAD        = 4,
-    LINE_STRIP,
     TRIANGLE_STRIP,
-    TRIANGLE_FAN
+    TRIANGLE_FAN,
+
+    QUAD
 };
 
 #if defined(PLATFORM_RPI)
@@ -135,6 +137,7 @@ public:
     void        invertWindingOrder();
     void        mergeDuplicateVertices();
 
+    void        addTriangles(const Triangle* _array1D, int _n);
     std::vector<Triangle>   getTriangles() const;
     std::vector<glm::ivec3> getTrianglesIndices() const;
 
@@ -152,9 +155,6 @@ private:
     std::vector<INDEX_TYPE> indices;
     // std::vector<INDEX_TYPE> indices_normals;
     // std::vector<INDEX_TYPE> indices_texcoords;
-    // std::vector<INDEX_TYPE> edge_indices;
-    // std::vector<glm::vec4>  edge_colors;
-
 
     std::string             name;
     PrimitiveMode           mode;

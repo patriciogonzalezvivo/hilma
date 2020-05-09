@@ -21,6 +21,8 @@ BoundingBox             getBoundingBox(const std::vector<glm::vec3>& _points);
 glm::vec2               getCentroid(const std::vector<glm::vec2>& _points);
 glm::vec3               getCentroid(const std::vector<glm::vec3>& _points);
 
-// // 3D
+// 3D
+
+Mesh                    getSmoothNormals(const Mesh& _mesh, float _angle);
 
 }

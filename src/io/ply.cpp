@@ -199,7 +199,7 @@ bool savePly( const std::string& _filename, Mesh& _mesh, bool _binnary, bool _co
         file.add_properties_to_element("vertex", { "texture_u", "texture_v" },
         tinyply::Type::FLOAT32, _mesh.texcoords.size() , reinterpret_cast<uint8_t*>(_mesh.texcoords.data()), tinyply::Type::INVALID, 0);
 
-    if (_mesh.getMode() != UNKNOWN && _mesh.getMode() != POINTS) {
+    if (_mesh.getMode() != POINTS) {
 
         if (_mesh.getMode() == TRIANGLES ) {
             file.add_properties_to_element("face", { "vertex_indices" },

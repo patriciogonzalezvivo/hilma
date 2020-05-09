@@ -57,7 +57,13 @@ int main(int argc, char **argv) {
     mesh_E.addQuadIndices(0, 1, 2, 3);
     hilma::savePly("rect_E.ply", mesh_E, false);
 
-
+    hilma::Mesh mesh_F;
+    mesh_F.setMode(hilma::TRIANGLE_STRIP);
+    mesh_F.addVertex( glm::vec3(-half, -half, 0.0) );
+    mesh_F.addVertex( glm::vec3(-half, half, 0.0) );
+    mesh_F.addVertex( glm::vec3(half, half, 0.0) );
+    mesh_F.addVertex( glm::vec3(half, -half, 0.0) );
+    hilma::savePly("rect_F.ply", mesh_F, false);
 
     return 1;
 }

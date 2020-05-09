@@ -15,10 +15,41 @@ Triangle::~Triangle() {
 }
 
 void Triangle::set(const glm::vec3 &_p0, const glm::vec3 &_p1, const glm::vec3 &_p2) {
-    points[0] = _p0;
-    points[1] = _p1;
-    points[2] = _p2;
-    normal = glm::normalize( glm::cross(points[0] - points[2], points[1] - points[0]) );
+    vertices[0] = _p0;
+    vertices[1] = _p1;
+    vertices[2] = _p2;
+    normal = glm::normalize( glm::cross(vertices[0] - vertices[2], vertices[1] - vertices[0]) );
+}
+
+void Triangle::setVertex(size_t _index, const glm::vec3& _vertex) {
+    vertices[_index] = _vertex;
+}
+
+void Triangle::setColor(size_t _index, const glm::vec4& _color) {
+    if (colors.empty()) {
+        colors.resize(3);
+        std::fill(colors.begin(),colors.begin()+3, _color);
+    }
+    else
+        colors[_index] = _color;
+}
+
+void Triangle::setNormal(size_t _index, const glm::vec3& _normal) {
+        if (normals.empty()) {
+        normals.resize(3);
+        std::fill(normals.begin(),normals.begin()+3, _normal);
+    }
+    else
+        normals[_index] = _normal;
+}
+
+void Triangle::setTexCoord(size_t _index, const glm::vec2& _texcoord) {
+    if (texcoords.empty()) {
+        texcoords.resize(3);
+        std::fill(texcoords.begin(),texcoords.begin()+3, _texcoord);
+    }
+    else
+        texcoords[_index] = _texcoord;
 }
 
 void Triangle::setColors(const glm::vec4 &_p0, const glm::vec4 &_p1, const glm::vec4 &_p2) {
@@ -43,9 +74,9 @@ void Triangle::setTexCoords(const glm::vec2 &_p0, const glm::vec2 &_p1, const gl
 }
 
 bool Triangle::containsPoint(const glm::vec3 &_p){
-    glm::vec3 v0 = points[2] - points[0];
-    glm::vec3 v1 = points[1] - points[0];
-    glm::vec3 v2 = _p - points[0];
+    glm::vec3 v0 = vertices[2] - vertices[0];
+    glm::vec3 v1 = vertices[1] - vertices[0];
+    glm::vec3 v2 = _p - vertices[0];
     
     // Compute dot products
     float dot00 = glm::dot(v0, v0);
