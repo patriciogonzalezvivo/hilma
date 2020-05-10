@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
 
     hilma::Mesh mesh;
 
-    hilma::loadPly("cube.ply", mesh);
+    hilma::loadPly("head.ply", mesh);
 
     std::cout << "vertices: " << mesh.getVerticesTotal() << std::endl;
     std::cout << "normals: " << mesh.getNormalsTotal() << std::endl;
@@ -21,9 +21,9 @@ int main(int argc, char **argv) {
 
     hilma::savePly("out.ply", mesh, false);
     hilma::savePly("out_bin.ply", mesh, true);
-    
-    hilma::saveStl("out.ply", mesh, false);
-    hilma::saveStl("out_bin.ply", mesh, true);
+
+    hilma::saveStl("out.stl", mesh, false);
+    hilma::saveStl("out_bin.stl", mesh, true);
 
     return 1;
 }
