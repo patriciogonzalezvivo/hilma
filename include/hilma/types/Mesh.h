@@ -141,10 +141,6 @@ public:
     std::vector<Triangle>   getTriangles() const;
     std::vector<glm::ivec3> getTrianglesIndices() const;
 
-
-    // const bool  haveEdgeIndices() const { return !edge_indices.empty(); }
-    // const bool  haveEdgeColors() const { return !edge_colors.empty(); }
-
 private:
     std::vector<Material>   materials;
     std::vector<glm::vec4>  colors;
@@ -153,8 +149,6 @@ private:
     std::vector<glm::vec3>  normals;
     std::vector<glm::vec2>  texcoords;
     std::vector<INDEX_TYPE> indices;
-    // std::vector<INDEX_TYPE> indices_normals;
-    // std::vector<INDEX_TYPE> indices_texcoords;
 
     std::string             name;
     PrimitiveMode           mode;

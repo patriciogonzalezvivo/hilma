@@ -5,9 +5,6 @@
 
 namespace hilma {
 
-// 2D
-bool                    isInside(const std::vector<glm::vec2> _points, const glm::vec2 _v);
-
 void                    simplify(std::vector<glm::vec2>& _points, float _tolerance=0.3f);
 std::vector<glm::vec2>  getSimplify(const std::vector<glm::vec2>& _points, float _tolerance=0.3f);
 std::vector<glm::vec2>  getConvexHull(const std::vector<glm::vec2>& _points);

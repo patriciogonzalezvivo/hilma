@@ -133,36 +133,6 @@ void simplify(std::vector<glm::vec2>& _points, float _tolerance) {
     }
 }
 
-// http://www.geeksforgeeks.org/how-to-check-if-a-given-point-lies-inside-a-polygon/
-//
-bool isInside(const std::vector<glm::vec2> _points, const glm::vec2 _v) {
-    int counter = 0;
-    double xinters;
-    glm::vec2 p1,p2;
-
-    size_t N = _points.size();
-    p1 = _points[0];
-    for (size_t i = 1; i <= N; i++) {
-        p2 = _points[i % N];
-        if (_v.y > std::min(p1.y, p2.y)) {
-            if (_v.y <= std::max(p1.y, p2.y)) {
-                if (_v.x <= std::max(p1.x, p2.x)) {
-                    if (p1.y != p2.y) {
-                        xinters = (_v.y - p1.y) * (p2.x - p1.x) / (p2.y - p1.y) + p1.x;
-                        if (p1.x == p2.x || _v.x <= xinters)
-                            counter++;
-                    }
-                }
-            }
-        }
-        p1 = p2;
-    }
-
-    if (counter % 2 == 0) return false;
-    else return true;
-}
-
-
 bool lexicalComparison(const glm::vec2& _v1, const glm::vec2& _v2) {
     if (_v1.x > _v2.x) return true;
     else if (_v1.x < _v2.x) return false;

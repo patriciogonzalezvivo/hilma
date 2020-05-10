@@ -225,7 +225,8 @@ void addCap(const glm::vec2& _coord, const glm::vec2& _normal, int _numCorners, 
     if (_numCorners < 1) {
         // "Butt" cap needs no extra vertices
         return;
-    } else if (_numCorners == 2) {
+    } 
+    else if (_numCorners == 2) {
         // "Square" cap needs two extra vertices
         glm::vec2 tangent(-_normal.y, _normal.x);
         addPolyLineVertex(_coord, _normal + tangent, {0.f, v}, _mesh, _width);

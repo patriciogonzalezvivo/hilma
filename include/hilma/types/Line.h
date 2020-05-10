@@ -18,8 +18,10 @@ public:
     }
     
     const glm::vec3& operator[] (size_t _index) const { return points[_index]; }
-    float       getMagintude() const { return glm::length(vec); }
-    glm::vec3   getVector() const { return vec; }
+    const glm::vec3& getVertex(size_t _index) const { return points[_index]; }
+
+    float           getMagintude() const { return glm::length(vec); }
+    glm::vec3       getVector() const { return vec; }
 
 private:
     glm::vec3   points[2];

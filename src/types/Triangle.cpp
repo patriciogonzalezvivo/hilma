@@ -25,6 +25,17 @@ void Triangle::setVertex(size_t _index, const glm::vec3& _vertex) {
     vertices[_index] = _vertex;
 }
 
+void Triangle::setColor(const glm::vec4 &_color) {
+    if (colors.empty())
+        colors.resize(3);
+
+    std::fill(colors.begin(),colors.begin()+3, _color);
+}
+
+void Triangle::setColor(float _r, float _g, float _b, float _a) {
+    setColor(glm::vec4(_r, _g, _b, _a));
+}
+
 void Triangle::setColor(size_t _index, const glm::vec4& _color) {
     if (colors.empty()) {
         colors.resize(3);

@@ -2,6 +2,7 @@
 
 #include "glm/glm.hpp"
 
+#include <algorithm> 
 #include <iostream>
 #include <sstream>
 
@@ -47,7 +48,7 @@ inline std::string getLower(const std::string &_str ){
     return std;
 }
 
-std::vector<std::string> splitString(const std::string &_source, const std::string &_delimiter = "", bool _ignoreEmpty = false) {
+inline std::vector<std::string> splitString(const std::string &_source, const std::string &_delimiter = "", bool _ignoreEmpty = false) {
     std::vector<std::string> result;
     if (_delimiter.empty()) {
         result.push_back(_source);
@@ -55,7 +56,7 @@ std::vector<std::string> splitString(const std::string &_source, const std::stri
     }
     std::string::const_iterator substart = _source.begin(), subend;
     while (true) {
-        subend = search(substart, _source.end(), _delimiter.begin(), _delimiter.end());
+        subend = std::search(substart, _source.end(), _delimiter.begin(), _delimiter.end());
         std::string sub(substart, subend);
         
         if (!_ignoreEmpty || !sub.empty()) {

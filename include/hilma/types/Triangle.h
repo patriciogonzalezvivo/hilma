@@ -29,6 +29,8 @@ public :
     const glm::vec3&    getNormal() const { return normal; }
     
     bool        haveColors() const { return !colors.empty(); }
+    void                setColor(const glm::vec4 &_color);
+    void                setColor(float _r, float _g, float _b, float _a = 1.0f);
     void                setColor(size_t _index, const glm::vec4& _color);
     const glm::vec4&    getColor(size_t _index) const { return colors[_index]; }
 

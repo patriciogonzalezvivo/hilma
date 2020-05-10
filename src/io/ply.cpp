@@ -201,7 +201,7 @@ bool savePly( const std::string& _filename, Mesh& _mesh, bool _binnary, bool _co
 
     if (_mesh.getMode() != POINTS) {
 
-        if (_mesh.getMode() == TRIANGLES ) {
+        if (_mesh.getMode() == TRIANGLES && _mesh.haveIndices() ) {
             file.add_properties_to_element("face", { "vertex_indices" },
 #if defined(PLATFORM_RPI)
             tinyply::Type::UINT16, _mesh.indices.size()/3 , reinterpret_cast<uint8_t*>(_mesh.indices.data()), tinyply::Type::UINT8, 3);
@@ -209,8 +209,18 @@ bool savePly( const std::string& _filename, Mesh& _mesh, bool _binnary, bool _co
             tinyply::Type::UINT32, _mesh.indices.size()/3 , reinterpret_cast<uint8_t*>(_mesh.indices.data()), tinyply::Type::UINT8, 3);
 #endif
         }
-        else if (_mesh.getMode() == TRIANGLE_STRIP || _mesh.getMode() == QUAD ) {
-            std::vector<glm::ivec3> triangles = _mesh.getTrianglesIndices(); 
+        else if ( (_mesh.getMode() == TRIANGLES && !_mesh.haveIndices()) || _mesh.getMode() == TRIANGLE_STRIP || _mesh.getMode() == QUAD ) {
+            std::vector<glm::ivec3> triangles = _mesh.getTrianglesIndices();
+            // size_t indicesTotal = triangles.size()*3;
+            // std::vector<int> indices;
+            // indices.resize(indicesTotal);
+            // memcpy(indices.data(), triangles.data(), indicesTotal * sizeof(int));
+
+            // for (int i = 0; i < indicesTotal; i++)
+            //     std::cout << indices[i] << " ";
+
+            // std::cout << std::endl;
+
             file.add_properties_to_element("face", { "vertex_indices" },
 #if defined(PLATFORM_RPI)
             tinyply::Type::UINT16, triangles.size(), reinterpret_cast<uint8_t*>(triangles.data()), tinyply::Type::UINT8, 3);
