@@ -31,10 +31,11 @@
     #include "hilma/ops/intersection.h"
     #include "hilma/ops/transform.h"
     #include "hilma/ops/earcut.h"
-    #include "hilma/io/obj.h"
     #include "hilma/io/ply.h"
     #include "hilma/io/tinyply.h"
+    #include "hilma/io/stl.h"
     #include "hilma/io/tiny_obj_loader.h"
+    #include "hilma/io/obj.h"
 %}
 
 %include "glm.i"
@@ -81,6 +82,7 @@
 %include "include/hilma/ops/intersection.h"
 %include "include/hilma/ops/transform.h"
 %include "include/hilma/io/ply.h"
+%include "include/hilma/io/stl.h"
 // %include "include/hilma/io/obj.h"
 
 using namespace hilma;

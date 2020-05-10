@@ -5,6 +5,7 @@
 
 #include "hilma/types/Mesh.h"
 #include "hilma/io/ply.h"
+#include "hilma/io/stl.h"
 
 int main(int argc, char **argv) {
 
@@ -19,6 +20,10 @@ int main(int argc, char **argv) {
     std::cout << "indices: " << mesh.getFaceIndicesTotal() << std::endl;
 
     hilma::savePly("out.ply", mesh, false);
+    hilma::savePly("out_bin.ply", mesh, true);
+    
+    hilma::saveStl("out.ply", mesh, false);
+    hilma::saveStl("out_bin.ply", mesh, true);
 
     return 1;
 }
