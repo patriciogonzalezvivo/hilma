@@ -55,7 +55,7 @@ Mesh Convert::toSurface(const std::vector<std::vector<T>>& _polygon) {
 
     std::vector<uint32_t> indices = mapbox::earcut<uint32_t>(_polygon);
     for (size_t i = 0; i < indices.size(); i++)
-        mesh.addIndex(indices[i]);
+        mesh.addFaceIndex(indices[i]);
 
     return mesh;
 }

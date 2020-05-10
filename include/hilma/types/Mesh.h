@@ -3,6 +3,8 @@
 #include <vector>
 #include <string>
 
+
+#include "hilma/types/Ray.h"
 #include "hilma/types/Line.h"
 #include "hilma/types/Triangle.h"
 #include "hilma/types/Material.h"
@@ -10,17 +12,17 @@
 
 namespace hilma {
 
-enum PrimitiveMode {
-    POINTS      = 0,
+enum FaceType {
+    POINTS          = 0,
+    TRIANGLE_STRIP  = 1,
+    TRIANGLE_FAN    = 2,
+    TRIANGLES       = 3,
+    QUAD            = 4
+};
 
-    LINE_STRIP  = 1,
-    LINES       = 2,
-
-    TRIANGLES   = 3,
-    TRIANGLE_STRIP,
-    TRIANGLE_FAN,
-
-    QUAD
+enum EdgeType {
+    LINE_STRIP  = 0,
+    LINES       = 1
 };
 
 #if defined(PLATFORM_RPI)
@@ -41,8 +43,11 @@ public:
     void        clear();
     void        append(const Mesh& _mesh);
 
-    void            setMode(PrimitiveMode _mode = TRIANGLES, bool _compute = false);
-    PrimitiveMode   getMode() const { return mode; };
+    void        setFaceType(FaceType _mode = TRIANGLES, bool _compute = false);
+    FaceType    getFaceType() const { return faceMode; };
+
+    void        setEdgeType(EdgeType _mode = LINES, bool _compute = false);
+    EdgeType    getEdgeType() const { return edgeMode;};
     
     void            setName(const std::string& _name) { name = _name; }
     std::string     getName() const { return name; }
@@ -116,30 +121,42 @@ public:
     bool        computeTangents();
     void        clearTangets() { tangents.clear(); }
 
-    // Indices
-    void        addIndex(INDEX_TYPE _i);
-    void        addIndices(const INDEX_TYPE* _array1D, int _n);
-
-    const bool  haveIndices() const { return !indices.empty(); }
-    size_t      getIndicesTotal() const { return indices.size(); }
-    void        clearIndices() { indices.clear(); }
-
-    void        addFaces(const INDEX_TYPE* _array2D, int _m, int _n);
-
-    void        addLine(const Line& _line);
-    void        addLineIndices(INDEX_TYPE _i1, INDEX_TYPE _i2);
-
-    void        addTriangle(const Triangle& _tri);
-    void        addTriangleIndices(INDEX_TYPE _i1, INDEX_TYPE _i2, INDEX_TYPE _i3);
-
-    void        addQuadIndices(INDEX_TYPE _i1, INDEX_TYPE _i2, INDEX_TYPE _i3, INDEX_TYPE _i4);
-
-    void        invertWindingOrder();
+    void        addIndices(const INDEX_TYPE* _array2D, int _m, int _n);
     void        mergeDuplicateVertices();
 
+    // FACES
+    void        addTriangle(const Triangle& _tri);
+    void        addTriangleIndices(INDEX_TYPE _i1, INDEX_TYPE _i2, INDEX_TYPE _i3);
+    void        addQuadIndices(INDEX_TYPE _i1, INDEX_TYPE _i2, INDEX_TYPE _i3, INDEX_TYPE _i4);
+
+    void        addFaceIndex(INDEX_TYPE _i);
+    void        addFaceIndices(const INDEX_TYPE* _array1D, int _n);
+
     void        addTriangles(const Triangle* _array1D, int _n);
+
     std::vector<Triangle>   getTriangles() const;
     std::vector<glm::ivec3> getTrianglesIndices() const;
+    
+    const bool  haveFaceIndices() const { return !faceIndices.empty(); }
+    size_t      getFaceIndicesTotal() const { return faceIndices.size(); }
+    void        clearFaceIndices() { faceIndices.clear(); }
+    void        invertWindingOrder();
+
+    // EDGES
+    void        addEdgeIndex(INDEX_TYPE _i);
+    void        addEdgeIndices(const INDEX_TYPE* _array1D, int _n);
+
+    void        addEdge(const Ray& _ray);
+    void        addEdge(const Line& _line);
+    void        addEdgeIndices(INDEX_TYPE _i1, INDEX_TYPE _i2);
+
+    const bool  haveEdgeIndices() const { return !edgeIndices.empty(); }
+    size_t      getEdgeIndicesTotal() const { return edgeIndices.size(); }
+    void        clearEdgeIndices() { edgeIndices.clear(); }
+
+    std::vector<Line> getLinesEdges() const;
+    std::vector<glm::ivec2> getLinesIndices() const;
+
 
 private:
     std::vector<Material>   materials;
@@ -148,10 +165,13 @@ private:
     std::vector<glm::vec3>  vertices;
     std::vector<glm::vec3>  normals;
     std::vector<glm::vec2>  texcoords;
-    std::vector<INDEX_TYPE> indices;
+
+    std::vector<INDEX_TYPE> faceIndices;
+    std::vector<INDEX_TYPE> edgeIndices;
 
     std::string             name;
-    PrimitiveMode           mode;
+    FaceType                faceMode;
+    EdgeType                edgeMode;
 
     friend bool loadPly( const std::string&, Mesh& );
     friend bool savePly( const std::string&, Mesh&, bool, bool);

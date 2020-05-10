@@ -16,7 +16,7 @@ int main(int argc, char **argv) {
     std::cout << "normals: " << mesh.getNormalsTotal() << std::endl;
     std::cout << "colors: " << mesh.getColorsTotal() << std::endl;
     std::cout << "texcoords: " << mesh.getTexCoordsTotal() << std::endl;
-    std::cout << "indices: " << mesh.getIndicesTotal() << std::endl;
+    std::cout << "indices: " << mesh.getFaceIndicesTotal() << std::endl;
 
     hilma::savePly("out.ply", mesh, false);
 

@@ -5,13 +5,13 @@
 
 using namespace hilma;
 
-Mesh::Mesh() : name("undefined"), mode(TRIANGLES) {
+Mesh::Mesh() : name("undefined"), faceMode(TRIANGLES), edgeMode(LINES) {
 }
 
-Mesh::Mesh(const std::string& _name) : name(_name), mode(TRIANGLES)  {
+Mesh::Mesh(const std::string& _name) : name(_name), faceMode(TRIANGLES), edgeMode(LINES)  {
 }
 
-Mesh::Mesh(const Mesh& _mother): name(_mother.name), mode(_mother.mode) {
+Mesh::Mesh(const Mesh& _mother): name(_mother.name), faceMode(_mother.faceMode), edgeMode(_mother.edgeMode) {
     append(_mother);
 }
 
@@ -27,11 +27,12 @@ void Mesh::clear() {
     if (!normals.empty()) normals.clear();
     if (!texcoords.empty()) texcoords.clear();
     if (!tangents.empty()) tangents.clear();
-    if (!indices.empty()) indices.clear();
+    if (!faceIndices.empty()) faceIndices.clear();
+    if (!edgeIndices.empty()) edgeIndices.clear();
     // if (!indices_normals.empty()) indices_normals.clear();
     // if (!indices_texcoords.empty()) indices_texcoords.clear();
     // if (!edge_colors.empty()) edge_colors.clear();
-    // if (!edge_indices.empty()) edge_indices.clear();
+    // if (!edge_faceIndices.empty()) edge_faceIndices.clear();
 }
 
 void Mesh::append(const Mesh& _mesh) {
@@ -49,16 +50,24 @@ void Mesh::append(const Mesh& _mesh) {
     if (_mesh.haveNormals())
 		normals.insert(normals.end(),_mesh.normals.begin(),_mesh.normals.end());
 
-    if (_mesh.getMode() != mode) {
-        std::cout << "INCOMPATIBLE DRAW MODES" << std::endl;
+    if (_mesh.getFaceType() != faceMode) {
+        std::cout << "INCOMPATIBLE FACEMODES" << std::endl;
         return;
     }
 
-	if (_mesh.haveIndices())
-        for (size_t i = 0; i < _mesh.indices.size(); i++)
-            addIndex(indexOffset+_mesh.indices[i]);
-}
+    if (_mesh.getEdgeType() != edgeMode) {
+        std::cout << "INCOMPATIBLE FACEMODES" << std::endl;
+        return;
+    }
 
+	if (_mesh.haveFaceIndices())
+        for (size_t i = 0; i < _mesh.faceIndices.size(); i++)
+            addFaceIndex(indexOffset + _mesh.faceIndices[i]);
+
+    if (_mesh.haveEdgeIndices())
+        for (size_t i = 0; i < _mesh.edgeIndices.size(); i++)
+            addEdgeIndex(indexOffset + _mesh.edgeIndices[i]);
+}
 
 // Vertices
 //
@@ -76,12 +85,6 @@ void Mesh::addVertex(const float* _data, int _n) {
     else if (_n == 2)
         addVertex(_data[0], _data[1], 0.0);
 }
-
-// void Mesh::addVertices(const float* _data, int _n) {
-    // size_t tail = vertices.size();
-    // vertices.resize(tail+_n/3);
-    // std::memcpy(&vertices[tail], _data, sizeof(float) * _n);
-// }
 
 void Mesh::addVertices(const float* _data, int _m, int _n) {
     for (int i = 0; i < _m; i++)
@@ -188,221 +191,15 @@ void Mesh::addTexCoords(const float* _data, int _m, int _n) {
 }
 
 
-// Indices
-//
-void Mesh::addIndex(INDEX_TYPE _i) {
-    indices.push_back(_i);
-}
-
-void Mesh::addIndices(const INDEX_TYPE* _data, int _n) {
-    indices.insert(indices.end(),_data,_data+_n);
-}
-
-
-// Faces Grouping
-//
-void Mesh::addFaces(const INDEX_TYPE* _data, int _m, int _n) {
-    if (_n == 2) {
-        for (int i = 0; i < _m; i++)
-            addLineIndices(_data[i*_n], _data[i*_n+1]);
-    }
-    else if (_n == 3) {
-        for (int i = 0; i < _m; i++)
-            addTriangleIndices(_data[i*_n], _data[i*_n+1], _data[i*_n+2]);
-    }
-    else if (_n == 4) {
-        for (int i = 0; i < _m; i++)
-            addQuadIndices(_data[i*_n], _data[i*_n+1], _data[i*_n+2], _data[i*_n+3]);
-    }
-}
-
-void Mesh::addLineIndices( INDEX_TYPE _index1, INDEX_TYPE _index2 ) {
-    addIndex(_index1);
-    addIndex(_index2);
-}
-
-void Mesh::addLine(const Line& _line) {
-    // TODO
-    INDEX_TYPE index = vertices.size();
-
-    addVertex(_line[0]);
-    addVertex(_line[1]);
-
-    addLineIndices( index+0, index+1);
-}
-
-void Mesh::addTriangleIndices(INDEX_TYPE _index1, INDEX_TYPE _index2, INDEX_TYPE _index3) {
-    addIndex(_index1);
-    addIndex(_index2);
-    addIndex(_index3);
-}
-
-void Mesh::addTriangle(const Triangle& _tri) {
-    INDEX_TYPE index = vertices.size();
-
-    addVertex(_tri[0]);
-    addVertex(_tri[1]);
-    addVertex(_tri[2]);
-
-    if (_tri.haveColors()) {
-        addColor(_tri.getColor(0));
-        addColor(_tri.getColor(1));
-        addColor(_tri.getColor(2));
-    }
-
-    if (_tri.haveNormals()) {
-        addNormal(_tri.getNormal(0));
-        addNormal(_tri.getNormal(1));
-        addNormal(_tri.getNormal(2));
-    }
-    else {
-        addNormal(_tri.getNormal());
-        addNormal(_tri.getNormal());
-        addNormal(_tri.getNormal());
-    }
-
-    if (_tri.haveTexCoords()) {
-        addTexCoord(_tri.getTexCoord(0));
-        addTexCoord(_tri.getTexCoord(1));
-        addTexCoord(_tri.getTexCoord(2));
-    }
-
-    addTriangleIndices(index, index+1, index+2);
-}
-
-void Mesh::addQuadIndices(INDEX_TYPE _index1, INDEX_TYPE _index2, INDEX_TYPE _index3, INDEX_TYPE _index4) {
-    addIndex(_index1);
-    addIndex(_index2);
-    addIndex(_index3);
-    addIndex(_index4);
-}
-
-std::vector<glm::ivec3> Mesh::getTrianglesIndices() const {
-    std::vector<glm::ivec3> triangles;
-
-    if (getMode() == TRIANGLES) {
-        if (haveIndices()) {
-            for (size_t j = 0; j < indices.size(); j += 3) {
-                glm::ivec3 tri;
-                for (int k = 0; k < 3; k++)
-                    tri[k] = indices[j+k];
-                triangles.push_back(tri);
-            }
-        }
-        else {
-            for (size_t j = 0; j < vertices.size(); j += 3) {
-                glm::ivec3 tri;
-                for (int k = 0; k < 3; k++)
-                    tri[k] = j+k;
-                triangles.push_back(tri);
-            }
-        }
-    }
-    else if (getMode() == TRIANGLE_STRIP) {
-        if (indices.size() > 2) {
-            int a = int(indices[0]);
-            int b = int(indices[1]);
-            int c;
-            bool CCW = true;
-            for (size_t j = 2; j < indices.size(); j++) {
-                c = int(indices[j]);
-                // Account for degenerate triangles
-                if (a != b && b != c && c != a) {
-                    if (CCW) triangles.push_back(glm::ivec3(a, c, b));
-                    else triangles.push_back(glm::ivec3(a, b, c));
-                }
-                a = b;
-                b = c;
-                CCW = !CCW;
-            }
-        }
-        else {
-            int a = 0;
-            int b = 1;
-            bool CCW = true;
-            for (size_t c = 2; c < vertices.size(); c++) {
-                if (CCW) triangles.push_back(glm::ivec3(a, c, b));
-                else triangles.push_back(glm::ivec3(a, b, c));
-                a = b;
-                b = c;
-                CCW = !CCW;
-            }
-        }
-        
-    }
-    else if (getMode() == QUAD) {
-        if (haveIndices()) {
-            for (size_t j = 0; j < indices.size(); j += 4) {
-                triangles.push_back(glm::ivec3(indices[j], indices[j+1], indices[j+2]));
-                triangles.push_back(glm::ivec3(indices[j+2], indices[j+3], indices[j]));
-            }
-        }
-        else {
-            for (size_t j = 0; j < vertices.size(); j += 4) {
-                std::cout << "j " << j << std::endl;
-                triangles.push_back(glm::ivec3(j, j+1, j+2));
-                triangles.push_back(glm::ivec3(j+2, j+3, j));
-            }
-        }
-    }
-    else {
-        //  TODO
-        //
-        std::cout << "ERROR: getTriangles(): Mesh only add TRIANGLES for NOW !!" << std::endl;
-    }
-
-    return triangles;
-}
-
-void Mesh::addTriangles(const Triangle* _array1D, int _n) {
-    for (int i = 0; i < _n; i++)
-        addTriangle(_array1D[i]);
-}
-
-std::vector<Triangle> Mesh::getTriangles() const {
-    std::vector<glm::ivec3> triIndices = getTrianglesIndices();
-    std::vector<Triangle> triangles;
-
-    for (std::vector<glm::ivec3>::iterator it = triIndices.begin(); it != triIndices.end(); ++it) {
-        Triangle tri = Triangle(vertices[it->x], vertices[it->y], vertices[it->z]);
-        if (haveColors()) tri.setColors(colors[it->x], colors[it->y], colors[it->z]);
-        if (haveNormals()) tri.setNormals(normals[it->x], normals[it->y], normals[it->z]);
-        if (haveTexCoords()) tri.setTexCoords(texcoords[it->x], texcoords[it->y], texcoords[it->z]);
-        triangles.push_back( tri );
-    }
-
-    return triangles;
-}
-
-void Mesh::setMode(PrimitiveMode _mode, bool _compute) {
-    mode = _mode;
-
-    if (!haveVertices())
-        return;
-
-    if (_compute) {
-        indices.clear();
-
-        if (_mode == LINES) {
-            for (size_t j = 0; j < vertices.size(); j += 2)
-                addLineIndices(j, j + 1);
-        }
-        else if (_mode == TRIANGLES) {
-            for (size_t j = 0; j < vertices.size(); j += 3)
-                addTriangleIndices(j, j + 1, j + 2);
-        }
-    }
-}
-
 bool Mesh::computeNormals() {
-    if (getMode() != TRIANGLES) 
+    if (getFaceType() != TRIANGLES) 
         return false;
 
     //The number of the vertices
     size_t nV = vertices.size();
 
     //The number of the triangles
-    size_t nT = indices.size() / 3;
+    size_t nT = faceIndices.size() / 3;
 
     std::vector<glm::vec3> norm( nV ); //Array for the normals
 
@@ -411,9 +208,9 @@ bool Mesh::computeNormals() {
     for (size_t t=0; t < nT; t++) {
 
         //Get indices of the triangle t
-        INDEX_TYPE i1 = indices[ 3 * t ];
-        INDEX_TYPE i2 = indices[ 3 * t + 1 ];
-        INDEX_TYPE i3 = indices[ 3 * t + 2 ];
+        INDEX_TYPE i1 = faceIndices[ 3 * t ];
+        INDEX_TYPE i2 = faceIndices[ 3 * t + 1 ];
+        INDEX_TYPE i3 = faceIndices[ 3 * t + 2 ];
 
         //Get vertices of the triangle
         const glm::vec3 &v1 = vertices[ i1 ];
@@ -438,12 +235,12 @@ bool Mesh::computeNormals() {
 }
 
 void Mesh::invertWindingOrder() {
-    if ( getMode() == TRIANGLES) {
+    if ( getFaceType() == TRIANGLES) {
         int tmp;
-        for (size_t i = 0; i < indices.size(); i += 3) {
-            tmp = indices[i+1];
-            indices[i+1] = indices[i+2];
-            indices[i+2] = tmp;
+        for (size_t i = 0; i < faceIndices.size(); i += 3) {
+            tmp = faceIndices[i+1];
+            faceIndices[i+1] = faceIndices[i+2];
+            faceIndices[i+2] = tmp;
         }
     }
 }
@@ -454,11 +251,11 @@ void Mesh::invertNormals() {
 }
 
 void Mesh::flatNormals() {
-    if ( getMode() == TRIANGLES) {
+    if ( getFaceType() == TRIANGLES) {
         
         // get copy original mesh data
-        size_t numIndices = indices.size();
-        std::vector<INDEX_TYPE> indices = indices;
+        size_t numIndices = faceIndices.size();
+        std::vector<INDEX_TYPE> indices = faceIndices;
         std::vector<glm::vec3> verts = vertices;
         std::vector<glm::vec4> colors = colors;
         std::vector<glm::vec2> texCoords = texcoords;
@@ -479,7 +276,7 @@ void Mesh::flatNormals() {
                 normal = glm::normalize(glm::cross(e1, e2));
             }
     
-            addIndex(i);
+            addFaceIndex(i);
             addNormal(normal);
             if (indexCurr < texCoords.size()) addTexCoord(texCoords[indexCurr]);
             if (indexCurr < verts.size()) addVertex(verts[indexCurr]);
@@ -495,11 +292,11 @@ bool Mesh::computeTangents() {
 
     if (texcoords.size() != nV || 
         normals.size() != nV || 
-        getMode() != TRIANGLES)
+        getFaceType() != TRIANGLES)
         return false;
 
     //The number of the triangles
-    size_t nT = indices.size() / 3;
+    size_t nT = faceIndices.size() / 3;
 
     std::vector<glm::vec3> tan1( nV );
     std::vector<glm::vec3> tan2( nV );
@@ -509,9 +306,9 @@ bool Mesh::computeTangents() {
     for (size_t t = 0; t < nT; t++) {
 
         //Get indices of the triangle t
-        INDEX_TYPE i1 = indices[ 3 * t ];
-        INDEX_TYPE i2 = indices[ 3 * t + 1 ];
-        INDEX_TYPE i3 = indices[ 3 * t + 2 ];
+        INDEX_TYPE i1 = faceIndices[ 3 * t ];
+        INDEX_TYPE i2 = faceIndices[ 3 * t + 1 ];
+        INDEX_TYPE i3 = faceIndices[ 3 * t + 2 ];
 
         //Get vertices of the triangle
         const glm::vec3 &v1 = vertices[ i1 ];
@@ -569,14 +366,289 @@ bool Mesh::computeTangents() {
     return true;
 }
 
+
+// Indices
+//
+void Mesh::addIndices(const INDEX_TYPE* _data, int _m, int _n) {
+    if (_n == 2) {
+        for (int i = 0; i < _m; i++)
+            addEdgeIndices(_data[i*_n], _data[i*_n+1]);
+    }
+    else if (_n == 3) {
+        for (int i = 0; i < _m; i++)
+            addTriangleIndices(_data[i*_n], _data[i*_n+1], _data[i*_n+2]);
+    }
+    else if (_n == 4) {
+        for (int i = 0; i < _m; i++)
+            addQuadIndices(_data[i*_n], _data[i*_n+1], _data[i*_n+2], _data[i*_n+3]);
+    }
+}
+
+// FACE GROUPING
+//
+void Mesh::setFaceType(FaceType _mode, bool _compute) {
+    faceMode = _mode;
+
+    if (!haveVertices())
+        return;
+
+    if (_compute) {
+        faceIndices.clear();
+        
+        if (_mode == TRIANGLES) {
+            for (size_t j = 0; j < vertices.size(); j += 3)
+                addTriangleIndices(j, j + 1, j + 2);
+        }
+    }
+}
+
+void Mesh::addFaceIndex(INDEX_TYPE _i) {
+    faceIndices.push_back(_i);
+}
+
+void Mesh::addFaceIndices(const INDEX_TYPE* _array1D, int _n) {
+    faceIndices.insert(faceIndices.end(),_array1D,_array1D+_n);
+}
+
+void Mesh::addTriangleIndices(INDEX_TYPE _index1, INDEX_TYPE _index2, INDEX_TYPE _index3) {
+    addFaceIndex(_index1);
+    addFaceIndex(_index2);
+    addFaceIndex(_index3);
+}
+
+void Mesh::addTriangle(const Triangle& _tri) {
+    INDEX_TYPE index = vertices.size();
+
+    addVertex(_tri[0]);
+    addVertex(_tri[1]);
+    addVertex(_tri[2]);
+
+    if (_tri.haveColors()) {
+        addColor(_tri.getColor(0));
+        addColor(_tri.getColor(1));
+        addColor(_tri.getColor(2));
+    }
+
+    if (_tri.haveNormals()) {
+        addNormal(_tri.getNormal(0));
+        addNormal(_tri.getNormal(1));
+        addNormal(_tri.getNormal(2));
+    }
+    else {
+        addNormal(_tri.getNormal());
+        addNormal(_tri.getNormal());
+        addNormal(_tri.getNormal());
+    }
+
+    if (_tri.haveTexCoords()) {
+        addTexCoord(_tri.getTexCoord(0));
+        addTexCoord(_tri.getTexCoord(1));
+        addTexCoord(_tri.getTexCoord(2));
+    }
+
+    addTriangleIndices(index, index+1, index+2);
+}
+
+void Mesh::addQuadIndices(INDEX_TYPE _index1, INDEX_TYPE _index2, INDEX_TYPE _index3, INDEX_TYPE _index4) {
+    addFaceIndex(_index1);
+    addFaceIndex(_index2);
+    addFaceIndex(_index3);
+    addFaceIndex(_index4);
+}
+
+std::vector<glm::ivec3> Mesh::getTrianglesIndices() const {
+    std::vector<glm::ivec3> triangles;
+
+    if (getFaceType() == TRIANGLES) {
+        if (haveFaceIndices()) {
+            for (size_t j = 0; j < faceIndices.size(); j += 3) {
+                glm::ivec3 tri;
+                for (int k = 0; k < 3; k++)
+                    tri[k] = faceIndices[j+k];
+                triangles.push_back(tri);
+            }
+        }
+        else {
+            for (size_t j = 0; j < vertices.size(); j += 3) {
+                glm::ivec3 tri;
+                for (int k = 0; k < 3; k++)
+                    tri[k] = j+k;
+                triangles.push_back(tri);
+            }
+        }
+    }
+    else if (getFaceType() == TRIANGLE_STRIP) {
+        if (faceIndices.size() > 2) {
+            int a = int(faceIndices[0]);
+            int b = int(faceIndices[1]);
+            int c;
+            bool CCW = true;
+            for (size_t j = 2; j < faceIndices.size(); j++) {
+                c = int(faceIndices[j]);
+                // Account for degenerate triangles
+                if (a != b && b != c && c != a) {
+                    if (CCW) triangles.push_back(glm::ivec3(a, c, b));
+                    else triangles.push_back(glm::ivec3(a, b, c));
+                }
+                a = b;
+                b = c;
+                CCW = !CCW;
+            }
+        }
+        else {
+            int a = 0;
+            int b = 1;
+            bool CCW = true;
+            for (size_t c = 2; c < vertices.size(); c++) {
+                if (CCW) triangles.push_back(glm::ivec3(a, c, b));
+                else triangles.push_back(glm::ivec3(a, b, c));
+                a = b;
+                b = c;
+                CCW = !CCW;
+            }
+        }
+        
+    }
+    else if (getFaceType() == QUAD) {
+        if (haveFaceIndices()) {
+            for (size_t j = 0; j < faceIndices.size(); j += 4) {
+                triangles.push_back(glm::ivec3(faceIndices[j], faceIndices[j+2], faceIndices[j+1]));
+                triangles.push_back(glm::ivec3(faceIndices[j+2], faceIndices[j], faceIndices[j+3]));
+            }
+        }
+        else {
+            for (size_t j = 0; j < vertices.size(); j += 4) {
+                std::cout << "j " << j << std::endl;
+                triangles.push_back(glm::ivec3(j, j+2, j+1));
+                triangles.push_back(glm::ivec3(j+2, j, j+3));
+            }
+        }
+    }
+    else {
+        //  TODO
+        //
+        std::cout << "ERROR: getTriangles(): Mesh only add TRIANGLES for NOW !!" << std::endl;
+    }
+
+    return triangles;
+}
+
+void Mesh::addTriangles(const Triangle* _array1D, int _n) {
+    for (int i = 0; i < _n; i++)
+        addTriangle(_array1D[i]);
+}
+
+std::vector<Triangle> Mesh::getTriangles() const {
+    std::vector<glm::ivec3> triIndices = getTrianglesIndices();
+    std::vector<Triangle> triangles;
+
+    for (std::vector<glm::ivec3>::iterator it = triIndices.begin(); it != triIndices.end(); ++it) {
+        Triangle tri = Triangle(vertices[it->x], vertices[it->y], vertices[it->z]);
+        if (haveColors()) tri.setColors(colors[it->x], colors[it->y], colors[it->z]);
+        if (haveNormals()) tri.setNormals(normals[it->x], normals[it->y], normals[it->z]);
+        if (haveTexCoords()) tri.setTexCoords(texcoords[it->x], texcoords[it->y], texcoords[it->z]);
+        triangles.push_back( tri );
+    }
+
+    return triangles;
+}
+
+
+// EDGE GROUPING
+//
+void Mesh::addEdgeIndex(INDEX_TYPE _i) {
+    edgeIndices.push_back(_i);
+}
+
+void Mesh::addEdgeIndices(const INDEX_TYPE* _array1D, int _n) {
+    edgeIndices.insert(edgeIndices.end(), _array1D, _array1D+_n);
+}
+
+void Mesh::addEdgeIndices( INDEX_TYPE _index1, INDEX_TYPE _index2 ) {
+    addEdgeIndex(_index1);
+    addEdgeIndex(_index2);
+}
+
+void Mesh::addEdge(const Line& _line) {
+    // TODO
+    INDEX_TYPE index = vertices.size();
+
+    addVertex(_line[0]);
+    addVertex(_line[1]);
+
+    addEdgeIndices( index+0, index+1);
+}
+
+void Mesh::addEdge(const Ray& _ray) {
+    // TODO
+    INDEX_TYPE index = vertices.size();
+
+    addVertex(_ray.getOrigin());
+    addVertex(_ray.getOrigin() + _ray.getDirection());
+
+    addEdgeIndices( index+0, index+1);
+}
+
+void Mesh::setEdgeType(EdgeType _mode, bool _compute) {
+    edgeMode = _mode;
+
+    if (!haveVertices())
+        return;
+
+    if (_compute) {
+        edgeIndices.clear();
+
+        if (_mode == LINES) {
+            for (size_t j = 0; j < vertices.size(); j += 2)
+                addEdgeIndices(j, j + 1);
+        }
+    }
+}
+
+std::vector<glm::ivec2> Mesh::getLinesIndices() const {
+    std::vector<glm::ivec2> lines;
+
+    if (getEdgeType() == LINES) {
+        if (haveFaceIndices()) {
+            for (size_t j = 0; j < edgeIndices.size(); j += 2) {
+                glm::ivec2 line;
+                for (int k = 0; k < 2; k++)
+                    line[k] = edgeIndices[j+k];
+                lines.push_back(line);
+            }
+        }
+        else {
+            for (size_t j = 0; j < vertices.size(); j += 2) {
+                glm::ivec2 line;
+                for (int k = 0; k < 2; k++)
+                    line[k] = j+k;
+                lines.push_back(line);
+            }
+        }
+    }
+
+    return lines;
+}
+
+std::vector<Line> Mesh::getLinesEdges() const {
+    std::vector<glm::ivec2> linesIndices;
+    std::vector<Line> lines;
+
+    for (std::vector<glm::ivec2>::iterator it = linesIndices.begin(); it != linesIndices.end(); ++it)
+        lines.push_back( Line(vertices[it->x], vertices[it->y]) );
+
+    return lines;
+}
+
+
 void Mesh::mergeDuplicateVertices() {
 
 	std::vector<glm::vec3> verts = vertices;
 	std::vector<INDEX_TYPE> indices = indices;
 
 	//get indexes to share single point - TODO: try j < i
-	for (INDEX_TYPE i = 0; i < indices.size(); i++) {
-		for (INDEX_TYPE j = 0; j < indices.size(); j++ ) {
+	for (INDEX_TYPE i = 0; i < faceIndices.size(); i++) {
+		for (INDEX_TYPE j = 0; j < faceIndices.size(); j++ ) {
 			if (i==j) continue;
 
 			INDEX_TYPE i1 = indices[i];
@@ -606,11 +678,11 @@ void Mesh::mergeDuplicateVertices() {
 	std::vector<glm::vec3> newNormals;
 	std::vector<glm::vec3>& normals =  normals;
 
-	for (INDEX_TYPE i = 0; i < indices.size(); i++){
+	for (INDEX_TYPE i = 0; i < faceIndices.size(); i++){
 		ptCreated[i] = false;
 	}
 
-	for (INDEX_TYPE i = 0; i < indices.size(); i++){
+	for (INDEX_TYPE i = 0; i < faceIndices.size(); i++){
 		INDEX_TYPE index = indices[i];
 		const glm::vec3& p = verts[ index ];
 
@@ -637,11 +709,11 @@ void Mesh::mergeDuplicateVertices() {
 	verts.clear();
 	verts = newPoints;
 
-	indices.clear();
+	faceIndices.clear();
 	indices = newIndexes;
 
-	clearIndices();
-	addIndices(&indices[0], indices.size());
+	clearFaceIndices();
+	addFaceIndices(&indices[0], faceIndices.size());
 	clearVertices();
 	addVertices( &verts[0].x, verts.size(), 3);
 

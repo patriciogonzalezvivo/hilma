@@ -25,6 +25,7 @@ int main(int argc, char **argv) {
 
     hilma::Mesh mesh_target;
     mesh_target.addTriangles( triangles.data(), triangles.size() );
+    mesh_target.addEdge(ray);
 
     hilma::savePly("intersec_head.ply", mesh_target, false);
 

@@ -8,13 +8,13 @@
 
 namespace hilma {
 
-Mesh plane(float _width, float _height, int _columns, int _rows, PrimitiveMode _mode ) {
+Mesh plane(float _width, float _height, int _columns, int _rows, FaceType _mode ) {
     Mesh mesh;
 
     if (_mode != TRIANGLE_STRIP && _mode != TRIANGLES)
         _mode = TRIANGLES;
 
-    mesh.setMode(_mode, false);
+    mesh.setFaceType(_mode, false);
 
     glm::vec3 vert;
     glm::vec3 normal(0.0f, 0.0f, 1.0f); // always facing forward //
@@ -46,19 +46,19 @@ Mesh plane(float _width, float _height, int _columns, int _rows, PrimitiveMode _
             // even _rows //
             if ((y&1)==0) {
                 for (int x = 0; x < _columns; x++) {
-                    mesh.addIndex( (y) * _columns + x );
-                    mesh.addIndex( (y+1) * _columns + x);
+                    mesh.addFaceIndex( (y) * _columns + x );
+                    mesh.addFaceIndex( (y+1) * _columns + x);
                 }
             }
             else {
                 for (int x = _columns-1; x >0; x--) {
-                    mesh.addIndex( (y+1) * _columns + x );
-                    mesh.addIndex( y * _columns + x-1 );
+                    mesh.addFaceIndex( (y+1) * _columns + x );
+                    mesh.addFaceIndex( y * _columns + x-1 );
                 }
             }
         }
 
-        if (_rows%2 != 0) mesh.addIndex(mesh.getVerticesTotal() - _columns);
+        if (_rows%2 != 0) mesh.addFaceIndex(mesh.getVerticesTotal() - _columns);
     }
     else {
 
@@ -66,14 +66,14 @@ Mesh plane(float _width, float _height, int _columns, int _rows, PrimitiveMode _
         for (int y = 0; y < _rows - 1; y++) {
             for (int x = 0; x < _columns - 1; x++) {
                 // first triangle //
-                mesh.addIndex((y) *_columns + x);
-                mesh.addIndex((y) *_columns + x + 1);
-                mesh.addIndex((y + 1) *_columns + x);
+                mesh.addFaceIndex((y) *_columns + x);
+                mesh.addFaceIndex((y) *_columns + x + 1);
+                mesh.addFaceIndex((y + 1) *_columns + x);
 
                 // second triangle //
-                mesh.addIndex((y) * _columns + x+1);
-                mesh.addIndex((y + 1) *_columns + x+1);
-                mesh.addIndex((y + 1) *_columns + x);
+                mesh.addFaceIndex((y) * _columns + x+1);
+                mesh.addFaceIndex((y + 1) *_columns + x+1);
+                mesh.addFaceIndex((y + 1) *_columns + x);
             }
         }
     }
@@ -85,7 +85,7 @@ Mesh box( float _width, float _height, float _depth, int _resX, int _resY, int _
 
     // mesh only available as triangles //
     Mesh mesh;
-    mesh.setMode( TRIANGLES );
+    mesh.setFaceType( TRIANGLES );
 
     _resX = _resX + 1;
     _resY = _resY + 1;
@@ -130,14 +130,14 @@ Mesh box( float _width, float _height, float _depth, int _resX, int _resY, int _
     for (int y = 0; y < _resY-1; y++) {
         for (int x = 0; x < _resX-1; x++) {
             // first triangle //
-            mesh.addIndex((y)*_resX + x + vertOffset);
-            mesh.addIndex((y)*_resX + x+1 + vertOffset);
-            mesh.addIndex((y+1)*_resX + x + vertOffset);
+            mesh.addFaceIndex((y)*_resX + x + vertOffset);
+            mesh.addFaceIndex((y)*_resX + x+1 + vertOffset);
+            mesh.addFaceIndex((y+1)*_resX + x + vertOffset);
 
             // second triangle //
-            mesh.addIndex((y)*_resX + x+1 + vertOffset);
-            mesh.addIndex((y+1)*_resX + x+1 + vertOffset);
-            mesh.addIndex((y+1)*_resX + x + vertOffset);
+            mesh.addFaceIndex((y)*_resX + x+1 + vertOffset);
+            mesh.addFaceIndex((y+1)*_resX + x+1 + vertOffset);
+            mesh.addFaceIndex((y+1)*_resX + x + vertOffset);
         }
     }
 
@@ -167,14 +167,14 @@ Mesh box( float _width, float _height, float _depth, int _resX, int _resY, int _
     for (int y = 0; y < _resY-1; y++) {
         for (int x = 0; x < _resZ-1; x++) {
             // first triangle //
-            mesh.addIndex((y)*_resZ + x + vertOffset);
-            mesh.addIndex((y)*_resZ + x+1 + vertOffset);
-            mesh.addIndex((y+1)*_resZ + x + vertOffset);
+            mesh.addFaceIndex((y)*_resZ + x + vertOffset);
+            mesh.addFaceIndex((y)*_resZ + x+1 + vertOffset);
+            mesh.addFaceIndex((y+1)*_resZ + x + vertOffset);
 
             // second triangle //
-            mesh.addIndex((y)*_resZ + x+1 + vertOffset);
-            mesh.addIndex((y+1)*_resZ + x+1 + vertOffset);
-            mesh.addIndex((y+1)*_resZ + x + vertOffset);
+            mesh.addFaceIndex((y)*_resZ + x+1 + vertOffset);
+            mesh.addFaceIndex((y+1)*_resZ + x+1 + vertOffset);
+            mesh.addFaceIndex((y+1)*_resZ + x + vertOffset);
         }
     }
 
@@ -204,14 +204,14 @@ Mesh box( float _width, float _height, float _depth, int _resX, int _resY, int _
     for (int y = 0; y < _resY-1; y++) {
         for (int x = 0; x < _resZ-1; x++) {
             // first triangle //
-            mesh.addIndex((y)*_resZ + x + vertOffset);
-            mesh.addIndex((y)*_resZ + x+1 + vertOffset);
-            mesh.addIndex((y+1)*_resZ + x + vertOffset);
+            mesh.addFaceIndex((y)*_resZ + x + vertOffset);
+            mesh.addFaceIndex((y)*_resZ + x+1 + vertOffset);
+            mesh.addFaceIndex((y+1)*_resZ + x + vertOffset);
 
             // second triangle //
-            mesh.addIndex((y)*_resZ + x+1 + vertOffset);
-            mesh.addIndex((y+1)*_resZ + x+1 + vertOffset);
-            mesh.addIndex((y+1)*_resZ + x + vertOffset);
+            mesh.addFaceIndex((y)*_resZ + x+1 + vertOffset);
+            mesh.addFaceIndex((y+1)*_resZ + x+1 + vertOffset);
+            mesh.addFaceIndex((y+1)*_resZ + x + vertOffset);
         }
     }
 
@@ -240,14 +240,14 @@ Mesh box( float _width, float _height, float _depth, int _resX, int _resY, int _
     for (int y = 0; y < _resY-1; y++) {
         for (int x = 0; x < _resX-1; x++) {
             // first triangle //
-            mesh.addIndex((y)*_resX + x + vertOffset);
-            mesh.addIndex((y)*_resX + x+1 + vertOffset);
-            mesh.addIndex((y+1)*_resX + x + vertOffset);
+            mesh.addFaceIndex((y)*_resX + x + vertOffset);
+            mesh.addFaceIndex((y)*_resX + x+1 + vertOffset);
+            mesh.addFaceIndex((y+1)*_resX + x + vertOffset);
 
             // second triangle //
-            mesh.addIndex((y)*_resX + x+1 + vertOffset);
-            mesh.addIndex((y+1)*_resX + x+1 + vertOffset);
-            mesh.addIndex((y+1)*_resX + x + vertOffset);
+            mesh.addFaceIndex((y)*_resX + x+1 + vertOffset);
+            mesh.addFaceIndex((y+1)*_resX + x+1 + vertOffset);
+            mesh.addFaceIndex((y+1)*_resX + x + vertOffset);
         }
     }
 
@@ -278,14 +278,14 @@ Mesh box( float _width, float _height, float _depth, int _resX, int _resY, int _
     for (int y = 0; y < _resZ-1; y++) {
         for (int x = 0; x < _resX-1; x++) {
             // first triangle //
-            mesh.addIndex((y)*_resX + x + vertOffset);
-            mesh.addIndex((y+1)*_resX + x + vertOffset);
-            mesh.addIndex((y)*_resX + x+1 + vertOffset);
+            mesh.addFaceIndex((y)*_resX + x + vertOffset);
+            mesh.addFaceIndex((y+1)*_resX + x + vertOffset);
+            mesh.addFaceIndex((y)*_resX + x+1 + vertOffset);
 
             // second triangle //
-            mesh.addIndex((y)*_resX + x+1 + vertOffset);
-            mesh.addIndex((y+1)*_resX + x + vertOffset);
-            mesh.addIndex((y+1)*_resX + x+1 + vertOffset);
+            mesh.addFaceIndex((y)*_resX + x+1 + vertOffset);
+            mesh.addFaceIndex((y+1)*_resX + x + vertOffset);
+            mesh.addFaceIndex((y+1)*_resX + x+1 + vertOffset);
         }
     }
 
@@ -315,14 +315,14 @@ Mesh box( float _width, float _height, float _depth, int _resX, int _resY, int _
     for (int y = 0; y < _resZ-1; y++) {
         for (int x = 0; x < _resX-1; x++) {
             // first triangle //
-            mesh.addIndex((y)*_resX + x + vertOffset);
-            mesh.addIndex((y+1)*_resX + x + vertOffset);
-            mesh.addIndex((y)*_resX + x+1 + vertOffset);
+            mesh.addFaceIndex((y)*_resX + x + vertOffset);
+            mesh.addFaceIndex((y+1)*_resX + x + vertOffset);
+            mesh.addFaceIndex((y)*_resX + x+1 + vertOffset);
 
             // second triangle //
-            mesh.addIndex((y)*_resX + x+1 + vertOffset);
-            mesh.addIndex((y+1)*_resX + x + vertOffset);
-            mesh.addIndex((y+1)*_resX + x+1 + vertOffset);
+            mesh.addFaceIndex((y)*_resX + x+1 + vertOffset);
+            mesh.addFaceIndex((y+1)*_resX + x + vertOffset);
+            mesh.addFaceIndex((y+1)*_resX + x+1 + vertOffset);
         }
     }
 
@@ -333,7 +333,7 @@ Mesh cube( float _size, int _resolution) {
     return box(_size, _size, _size, _resolution, _resolution, _resolution);
 }
 
-Mesh sphere( float _radius, int _resolution, PrimitiveMode _mode ) {
+Mesh sphere( float _radius, int _resolution, FaceType _mode ) {
     Mesh mesh;
 
     float doubleRes = _resolution*2.f;
@@ -342,7 +342,7 @@ Mesh sphere( float _radius, int _resolution, PrimitiveMode _mode ) {
 
     if (_mode != TRIANGLE_STRIP && _mode != TRIANGLES)
         _mode = TRIANGLE_STRIP;
-    mesh.setMode(_mode);
+    mesh.setFaceType(_mode);
 
     glm::vec3 vert;
     glm::vec2 tcoord;
@@ -384,9 +384,9 @@ Mesh sphere( float _radius, int _resolution, PrimitiveMode _mode ) {
                     index2 = (iy+0) * (nr) + (ix+1);
                     index3 = (iy+1) * (nr) + (ix+0);
 
-                    mesh.addIndex(index1);
-                    mesh.addIndex(index2);
-                    mesh.addIndex(index3);
+                    mesh.addFaceIndex(index1);
+                    mesh.addFaceIndex(index2);
+                    mesh.addFaceIndex(index3);
                 }
 
                 if (iy < _resolution - 1 ) {
@@ -395,9 +395,9 @@ Mesh sphere( float _radius, int _resolution, PrimitiveMode _mode ) {
                     index2 = (iy+1) * (nr) + (ix+1);
                     index3 = (iy+1) * (nr) + (ix+0);
 
-                    mesh.addIndex(index1);
-                    mesh.addIndex(index2);
-                    mesh.addIndex(index3);
+                    mesh.addFaceIndex(index1);
+                    mesh.addFaceIndex(index2);
+                    mesh.addFaceIndex(index3);
 
                 }
             }
@@ -407,8 +407,8 @@ Mesh sphere( float _radius, int _resolution, PrimitiveMode _mode ) {
     else {
         for (int y = 0; y < _resolution; y++) {
             for (int x = 0; x <= doubleRes; x++) {
-                mesh.addIndex( (y)*nr + x );
-                mesh.addIndex( (y+1)*nr + x );
+                mesh.addFaceIndex( (y)*nr + x );
+                mesh.addFaceIndex( (y+1)*nr + x );
             }
         }
     }
@@ -571,17 +571,17 @@ Mesh icosphere(float _radius, size_t _iterations) {
         vertices[i] *= _radius;
 
     mesh.addVertices( &vertices[0][0], vertices.size(), 3 );
-    mesh.addIndices( &indices[0], indices.size() );
+    mesh.addFaceIndices( &indices[0], indices.size() );
 
     return  mesh;
 }
 
-Mesh cylinder( float _radius, float _height, int _radiusSegments, int _heightSegments, int _numCapSegments, bool _bCapped, PrimitiveMode _mode ) {
+Mesh cylinder( float _radius, float _height, int _radiusSegments, int _heightSegments, int _numCapSegments, bool _bCapped, FaceType _mode ) {
     Mesh mesh;
     if (_mode != TRIANGLE_STRIP && _mode != TRIANGLES)
         _mode = TRIANGLE_STRIP;
         
-    mesh.setMode(_mode, false);
+    mesh.setFaceType(_mode, false);
 
     _radiusSegments = _radiusSegments+1;
     int capSegs = _numCapSegments;
@@ -633,22 +633,22 @@ Mesh cylinder( float _radius, float _height, int _radiusSegments, int _heightSeg
                 for (int x = 0; x < _radiusSegments-1; x++) {
                     if (y > 0) {
                         // first triangle //
-                        mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
-                        mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
-                        mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+                        mesh.addFaceIndex( (y)*_radiusSegments + x + vertOffset );
+                        mesh.addFaceIndex( (y)*_radiusSegments + x+1 + vertOffset);
+                        mesh.addFaceIndex( (y+1)*_radiusSegments + x + vertOffset);
                     }
 
                     // second triangle //
-                    mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
-                    mesh.addIndex( (y+1)*_radiusSegments + x+1 + vertOffset);
-                    mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+                    mesh.addFaceIndex( (y)*_radiusSegments + x+1 + vertOffset);
+                    mesh.addFaceIndex( (y+1)*_radiusSegments + x+1 + vertOffset);
+                    mesh.addFaceIndex( (y+1)*_radiusSegments + x + vertOffset);
                 }
             }
         } else {
             for (int y = 0; y < capSegs-1; y++) {
                 for (int x = 0; x < _radiusSegments; x++) {
-                    mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
-                    mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+                    mesh.addFaceIndex( (y)*_radiusSegments + x + vertOffset );
+                    mesh.addFaceIndex( (y+1)*_radiusSegments + x + vertOffset);
                 }
             }
         }
@@ -689,21 +689,21 @@ Mesh cylinder( float _radius, float _height, int _radiusSegments, int _heightSeg
         for (int y = 0; y < _heightSegments-1; y++) {
             for (int x = 0; x < _radiusSegments-1; x++) {
                 // first triangle //
-                mesh.addIndex( (y)*_radiusSegments + x + vertOffset);
-                mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset );
-                mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset );
+                mesh.addFaceIndex( (y)*_radiusSegments + x + vertOffset);
+                mesh.addFaceIndex( (y)*_radiusSegments + x+1 + vertOffset );
+                mesh.addFaceIndex( (y+1)*_radiusSegments + x + vertOffset );
 
                 // second triangle //
-                mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset );
-                mesh.addIndex( (y+1)*_radiusSegments + x+1 + vertOffset );
-                mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset );
+                mesh.addFaceIndex( (y)*_radiusSegments + x+1 + vertOffset );
+                mesh.addFaceIndex( (y+1)*_radiusSegments + x+1 + vertOffset );
+                mesh.addFaceIndex( (y+1)*_radiusSegments + x + vertOffset );
             }
         }
     } else {
         for (int y = 0; y < _heightSegments-1; y++) {
             for (int x = 0; x < _radiusSegments; x++) {
-                mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
-                mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset );
+                mesh.addFaceIndex( (y)*_radiusSegments + x + vertOffset );
+                mesh.addFaceIndex( (y+1)*_radiusSegments + x + vertOffset );
             }
         }
     }
@@ -736,23 +736,23 @@ Mesh cylinder( float _radius, float _height, int _radiusSegments, int _heightSeg
             for (int y = 0; y < capSegs-1; y++) {
                 for (int x = 0; x < _radiusSegments-1; x++) {
                     // first triangle //
-                    mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
-                    mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
-                    mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+                    mesh.addFaceIndex( (y)*_radiusSegments + x + vertOffset );
+                    mesh.addFaceIndex( (y)*_radiusSegments + x+1 + vertOffset);
+                    mesh.addFaceIndex( (y+1)*_radiusSegments + x + vertOffset);
 
                     if (y < capSegs -1 && capSegs > 2) {
                         // second triangle //
-                        mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
-                        mesh.addIndex( (y+1)*_radiusSegments + x+1 + vertOffset);
-                        mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+                        mesh.addFaceIndex( (y)*_radiusSegments + x+1 + vertOffset);
+                        mesh.addFaceIndex( (y+1)*_radiusSegments + x+1 + vertOffset);
+                        mesh.addFaceIndex( (y+1)*_radiusSegments + x + vertOffset);
                     }
                 }
             }
         } else {
             for (int y = 0; y < capSegs-1; y++) {
                 for (int x = 0; x < _radiusSegments; x++) {
-                    mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
-                    mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+                    mesh.addFaceIndex( (y)*_radiusSegments + x + vertOffset );
+                    mesh.addFaceIndex( (y+1)*_radiusSegments + x + vertOffset);
                 }
             }
         }
@@ -764,12 +764,12 @@ Mesh cylinder( float _radius, float _height, int _radiusSegments, int _heightSeg
     return mesh;
 }
 
-Mesh cone( float radius, float _height, int _radiusSegments, int _heightSegments, int _capSegments, PrimitiveMode _mode ) {
+Mesh cone( float radius, float _height, int _radiusSegments, int _heightSegments, int _capSegments, FaceType _mode ) {
     Mesh mesh;
     if (_mode != TRIANGLE_STRIP && _mode != TRIANGLES)
         _mode = TRIANGLE_STRIP;
 
-    mesh.setMode(_mode);
+    mesh.setFaceType(_mode);
 
     _radiusSegments = _radiusSegments+1;
     _capSegments = _capSegments+1;
@@ -832,22 +832,22 @@ Mesh cone( float radius, float _height, int _radiusSegments, int _heightSegments
             for (int x = 0; x < _radiusSegments-1; x++) {
                 if (y > 0){
                     // first triangle //
-                    mesh.addIndex( (y)*_radiusSegments + x );
-                    mesh.addIndex( (y)*_radiusSegments + x+1 );
-                    mesh.addIndex( (y+1)*_radiusSegments + x );
+                    mesh.addFaceIndex( (y)*_radiusSegments + x );
+                    mesh.addFaceIndex( (y)*_radiusSegments + x+1 );
+                    mesh.addFaceIndex( (y+1)*_radiusSegments + x );
                 }
 
                 // second triangle //
-                mesh.addIndex( (y)*_radiusSegments + x+1 );
-                mesh.addIndex( (y+1)*_radiusSegments + x+1 );
-                mesh.addIndex( (y+1)*_radiusSegments + x );
+                mesh.addFaceIndex( (y)*_radiusSegments + x+1 );
+                mesh.addFaceIndex( (y+1)*_radiusSegments + x+1 );
+                mesh.addFaceIndex( (y+1)*_radiusSegments + x );
             }
         }
     } else {
         for (int y = 0; y < _heightSegments-1; y++) {
             for (int x = 0; x < _radiusSegments; x++) {
-                mesh.addIndex( (y)*_radiusSegments + x );
-                mesh.addIndex( (y+1)*_radiusSegments + x );
+                mesh.addFaceIndex( (y)*_radiusSegments + x );
+                mesh.addFaceIndex( (y+1)*_radiusSegments + x );
             }
         }
     }
@@ -878,15 +878,15 @@ Mesh cone( float radius, float _height, int _radiusSegments, int _heightSegments
             for (int y = 0; y < capSegs-1; y++) {
                 for (int x = 0; x < _radiusSegments-1; x++) {
                     // first triangle //
-                    mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
-                    mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
-                    mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+                    mesh.addFaceIndex( (y)*_radiusSegments + x + vertOffset );
+                    mesh.addFaceIndex( (y)*_radiusSegments + x+1 + vertOffset);
+                    mesh.addFaceIndex( (y+1)*_radiusSegments + x + vertOffset);
 
                     if (y < capSegs-1) {
                         // second triangle //
-                        mesh.addIndex( (y)*_radiusSegments + x+1 + vertOffset);
-                        mesh.addIndex( (y+1)*_radiusSegments + x+1 + vertOffset);
-                        mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+                        mesh.addFaceIndex( (y)*_radiusSegments + x+1 + vertOffset);
+                        mesh.addFaceIndex( (y+1)*_radiusSegments + x+1 + vertOffset);
+                        mesh.addFaceIndex( (y+1)*_radiusSegments + x + vertOffset);
                     }
                 }
             }
@@ -895,8 +895,8 @@ Mesh cone( float radius, float _height, int _radiusSegments, int _heightSegments
         if (capSegs > 0 ) {
             for (int y = 0; y < capSegs-1; y++) {
                 for (int x = 0; x < _radiusSegments; x++) {
-                    mesh.addIndex( (y)*_radiusSegments + x + vertOffset );
-                    mesh.addIndex( (y+1)*_radiusSegments + x + vertOffset);
+                    mesh.addFaceIndex( (y)*_radiusSegments + x + vertOffset );
+                    mesh.addFaceIndex( (y+1)*_radiusSegments + x + vertOffset);
                 }
             }
         }
