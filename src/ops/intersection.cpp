@@ -208,8 +208,8 @@ IntersectionData intersection(const Line& _line1, const Line& _line2) {
     glm::vec3 p4 = _line2[1];
     
     
-    double d1343,d4321,d1321,d4343,d2121;
-    double numer,denom;
+    double d1343, d4321, d1321, d4343, d2121;
+    double numer, denom;
     double mua, mub;
     glm::vec3 pa, pb;
     
@@ -289,133 +289,107 @@ IntersectionData intersection(const glm::vec3& _point, const Line& _line) {
 }
 
 
-// bool containsValue(std::vector<glm::vec3>* _points, const glm::vec3& _point) {
-//     for (int i = 0; i < _points->size(); i++)
-//         if ((_points->at(i)-_point).length()<EPS )
-//             return true;
-    
-//     return false;
-// }
-
-// glm::vec3 LinePlaneIntersectionFast(const glm::vec3& _p0, const glm::vec3& _p1, const Plane& _plane) {
-//     glm::vec3 vec(_p1-_p0);
-//     float denom = glm::dot(_plane.getNormal(),vec);
-//     float u = glm::dot(_plane.getNormal(),_plane.getOrigin()-_p0)/denom;
-//     return _p0 + vec * u;
-// }
 // /************** Plane  ************/
 
-// IntersectionData PlanePlaneIntersection(const Plane& _plane1, const Plane& _plane2) {
-//     IntersectionData idata;
+IntersectionData intersection(const Plane& _plane1, const Plane& _plane2) {
+    IntersectionData idata;
     
-//     glm::vec3 n1 = _plane1.getNormal();
-//     glm::vec3 n2 = _plane2.getNormal();
-//     float d1 = _plane1.getDCoeff();
-//     float d2 = _plane2.getDCoeff();
+    glm::vec3 n1 = _plane1.getNormal();
+    glm::vec3 n2 = _plane2.getNormal();
+    float d1 = _plane1.getDCoeff();
+    float d2 = _plane2.getDCoeff();
     
-//     // Check if planes are parallel, if so return false:
-//     glm::vec3 dir= glm::cross(_plane1.getNormal(),_plane2.getNormal());
+    // Check if planes are parallel, if so return false:
+    glm::vec3 dir= glm::cross(_plane1.getNormal(),_plane2.getNormal());
     
-//     idata.isIntersectionData = dir.length() < EPS;
+    idata.isIntersection = dir.length() < EPS;
 
-//     if (idata.isIntersection) {
-//         // Direction of intersection is the cross product of the two normals:
-//         dir = glm::normalize(dir);
+    if (idata.isIntersection) {
+        // Direction of intersection is the cross product of the two normals:
+        dir = glm::normalize(dir);
         
-//         // Thank you Toxi!
-//         float offDiagonal = glm::dot(n1,n2);
-//         double det = 1.0 / (1 - offDiagonal * offDiagonal);
-//         double a = (d1 - d2 * offDiagonal) * det;
-//         double b = (d2 - d1 * offDiagonal) * det;
-//         glm::vec3 anchor = getScaled(n1,(float)a) + getScaled(n2,(float)b);
+        // Thank you Toxi!
+        float offDiagonal = glm::dot(n1,n2);
+        double det = 1.0 / (1 - offDiagonal * offDiagonal);
+        double a = (d1 - d2 * offDiagonal) * det;
+        double b = (d2 - d1 * offDiagonal) * det;
+        glm::vec3 anchor = getScaled(n1,(float)a) + getScaled(n2,(float)b);
         
-//         idata.pos = anchor;
-//         idata.dir = dir;
-//     }
+        idata.pos = anchor;
+        idata.dir = dir;
+    }
     
-//     return idata;
-// }
+    return idata;
+}
 
 
+glm::vec3 LinePlaneIntersectionFast(const glm::vec3& _p0, const glm::vec3& _p1, const Plane& _plane) {
+    glm::vec3 vec(_p1-_p0);
+    float denom = glm::dot(_plane.getNormal(),vec);
+    float u = glm::dot(_plane.getNormal(),_plane.getOrigin()-_p0)/denom;
+    return _p0 + vec * u;
+}
 
-// IntersectionData PlanePlanePlaneIntersection(const Plane& _plane1, const Plane& _plane2, const Plane& _plane3) {
+bool containsValue(std::vector<glm::vec3>* _points, const glm::vec3& _point) {
+    for (int i = 0; i < _points->size(); i++)
+        if ((_points->at(i)-_point).length()<EPS )
+            return true;   
+    return false;
+}
 
-//     IntersectionData idata;
+IntersectionData intersection(const Plane& _plane, const Triangle& _triangle) {
     
-//     float d1 = _plane1.getDCoeff();
-//     float d2 = _plane2.getDCoeff();
-//     float d3 = _plane3.getDCoeff();
+    IntersectionData idata;
+    glm::vec3 tp0 = _triangle[0];
+    glm::vec3 tp1 = _triangle[1];
+    glm::vec3 tp2 = _triangle[2];
     
-//     glm::vec3 n1 = _plane1.getNormal();
-//     glm::vec3 n2 = _plane2.getNormal();
-//     glm::vec3 n3 = _plane3.getNormal();
+    float dist1 = PointPlaneDistance(tp0, _plane);
+    float dist2 = PointPlaneDistance(tp1, _plane);
+    float dist3 = PointPlaneDistance(tp2, _plane);
     
-//     glm::vec3 cross1 = glm::cross(n2,n3);
-//     glm::vec3 cross2 = glm::cross(n3,n1);
-//     glm::vec3 cross3 = glm::cross(n1,n2);
+    int pos1 = signValue(dist1);
+    int pos2 = signValue(dist2);
+    int pos3 = signValue(dist3);
     
-//     float det = glm::dot(n1,cross1);
+    if (pos1==pos2 && pos1==pos3) {
+        idata.isIntersection=false;
+        return idata;
+    };
     
-//     idata.isIntersectionData = fabs(det)<EPS;
-//     if (idata.isIntersection)
-//         idata.pos = (d1*cross1+d2*cross2+d3*cross3)/det;
+    std::vector<glm::vec3>ispoints;
+    bool bintersects=false;
+    glm::vec3 ip;
     
-//     return idata;
-// }
-
-// IntersectionData PlaneTriangleIntersection(const Plane& _plane, const Triangle& _triangle) {
+    if (pos1!=pos2) {
+        ip = LinePlaneIntersectionFast(tp0, tp1, _plane);
+        if (!containsValue(&ispoints, ip)) {
+            ispoints.push_back(ip);
+        };
+    }
+    if (pos2!=pos3) {
+        ip = LinePlaneIntersectionFast(tp1, tp2, _plane);
+        if (!containsValue(&ispoints, ip)) {
+            ispoints.push_back(ip);
+        };
+    }
+    if (pos3!=pos1) {
+        ip = LinePlaneIntersectionFast(tp2, tp0, _plane);
+        if (!containsValue(&ispoints, ip)) {
+            ispoints.push_back(ip);
+        };
+    }
     
-//     IntersectionData idata;
-//     glm::vec3 tp0 = _triangle[0];
-//     glm::vec3 tp1 = _triangle[1];
-//     glm::vec3 tp2 = _triangle[2];
+    idata.isIntersection=true;
+    idata.pos = ispoints.at(0);
     
-//     float dist1 = PointPlaneDistance(tp0, _plane);
-//     float dist2 = PointPlaneDistance(tp1, _plane);
-//     float dist3 = PointPlaneDistance(tp2, _plane);
+    if (ispoints.size()==2) {
+        idata.dir = ispoints.at(1);
+        idata.dir-=idata.pos;
+        idata.dist=idata.dir.length();
+    }
     
-//     int pos1 = signValue(dist1);
-//     int pos2 = signValue(dist2);
-//     int pos3 = signValue(dist3);
-    
-//     if (pos1==pos2 && pos1==pos3) {
-//         idata.isIntersection=false;
-//         return idata;
-//     };
-    
-//     std::vector<glm::vec3>ispoints;
-//     bool bintersects=false;
-//     glm::vec3 ip;
-    
-//     if (pos1!=pos2) {
-//         ip = LinePlaneIntersectionFast(tp0, tp1, _plane);
-//         if (!containsValue(&ispoints, ip)) {
-//             ispoints.push_back(ip);
-//         };
-//     }
-//     if (pos2!=pos3) {
-//         ip = LinePlaneIntersectionFast(tp1, tp2, _plane);
-//         if (!containsValue(&ispoints, ip)) {
-//             ispoints.push_back(ip);
-//         };
-//     }
-//     if (pos3!=pos1) {
-//         ip = LinePlaneIntersectionFast(tp2, tp0, _plane);
-//         if (!containsValue(&ispoints, ip)) {
-//             ispoints.push_back(ip);
-//         };
-//     }
-    
-//     idata.isIntersection=true;
-//     idata.pos = ispoints.at(0);
-    
-//     if (ispoints.size()==2) {
-//         idata.dir = ispoints.at(1);
-//         idata.dir-=idata.pos;
-//         idata.dist=idata.dir.length();
-//     }
-    
-//     return idata;
-// }
+    return idata;
+}
 
 }

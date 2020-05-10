@@ -40,16 +40,13 @@ struct IntersectionData {
 IntersectionData intersection(const Ray& _ray, const Plane& _plane);
 IntersectionData intersection(const Ray& _ray, const Triangle& _triangle);
 
-// // Line
+// Line
 IntersectionData intersection(const Line& _line, const Plane& _plane);
 IntersectionData intersection(const Line& _line1, const Line& _line2);
-IntersectionData intersection(glm::vec3& _point, Line& _line);
+IntersectionData intersection(const glm::vec3& _point, const Line& _line);
 
-// // Plane
-// IntersectionData PlanePlaneIntersection(const Plane& _plane1, const Plane& _plane2);
-// IntersectionData PlanePlanePlaneIntersection(const Plane& _plane1, const Plane& _plane2, const Plane& _plane3);
-
-// IntersectionData PlaneTriangleIntersection(const Plane& _plane, const Triangle& _triangle);
-// float   PointPlaneDistance(const glm::vec3& _point, const Plane& _plane);
+// Plane
+IntersectionData intersection(const Plane& _plane1, const Plane& _plane2);
+IntersectionData intersection(const Plane& _plane, const Triangle& _triangle);
 
 }
