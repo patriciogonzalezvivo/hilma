@@ -38,17 +38,17 @@ void Mesh::clear() {
 void Mesh::append(const Mesh& _mesh) {
     int indexOffset = (int)vertices.size();
 
-	if (_mesh.haveVertices())
-		vertices.insert(vertices.end(), _mesh.vertices.begin(), _mesh.vertices.end());
-	
+    if (_mesh.haveVertices())
+        vertices.insert(vertices.end(), _mesh.vertices.begin(), _mesh.vertices.end());
+        
     if (_mesh.haveTexCoords())
-		texcoords.insert(texcoords.end(), _mesh.texcoords.begin(), _mesh.texcoords.end());
-	
+        texcoords.insert(texcoords.end(), _mesh.texcoords.begin(), _mesh.texcoords.end());
+        
     if (_mesh.haveColors())
-		colors.insert(colors.end(),_mesh.colors.begin(),_mesh.colors.end());
-	
+        colors.insert(colors.end(),_mesh.colors.begin(),_mesh.colors.end());
+        
     if (_mesh.haveNormals())
-		normals.insert(normals.end(),_mesh.normals.begin(),_mesh.normals.end());
+        normals.insert(normals.end(),_mesh.normals.begin(),_mesh.normals.end());
 
     if (_mesh.getFaceType() != faceMode) {
         std::cout << "INCOMPATIBLE FACEMODES" << std::endl;
@@ -60,7 +60,7 @@ void Mesh::append(const Mesh& _mesh) {
         return;
     }
 
-	if (_mesh.haveFaceIndices())
+    if (_mesh.haveFaceIndices())
         for (size_t i = 0; i < _mesh.faceIndices.size(); i++)
             addFaceIndex(indexOffset + _mesh.faceIndices[i]);
 
@@ -643,93 +643,91 @@ std::vector<Line> Mesh::getLinesEdges() const {
 
 void Mesh::mergeDuplicateVertices() {
 
-	std::vector<glm::vec3> verts = vertices;
-	std::vector<INDEX_TYPE> indices = indices;
+    std::vector<glm::vec3> verts = vertices;
+    std::vector<INDEX_TYPE> indices = faceIndices;
 
-	//get indexes to share single point - TODO: try j < i
-	for (INDEX_TYPE i = 0; i < faceIndices.size(); i++) {
-		for (INDEX_TYPE j = 0; j < faceIndices.size(); j++ ) {
-			if (i==j) continue;
+    //get indexes to share single point - TODO: try j < i
+    for (INDEX_TYPE i = 0; i < indices.size(); i++) {
+        for (INDEX_TYPE j = 0; j < indices.size(); j++ ) {
+            if (i==j) continue;
 
-			INDEX_TYPE i1 = indices[i];
-			INDEX_TYPE i2 = indices[j];
-			const glm::vec3& v1 = verts[ i1 ];
-			const glm::vec3& v2 = verts[ i2 ];
+            INDEX_TYPE i1 = indices[i];
+            INDEX_TYPE i2 = indices[j];
+            const glm::vec3& v1 = verts[ i1 ];
+            const glm::vec3& v2 = verts[ i2 ];
 
-			if ( v1 == v2 && i1 != i2) {
-				indices[j] = i1;
-				break;
-			}
-		}
-	}
+            if ( v1 == v2 && i1 != i2) {
+                indices[j] = i1;
+                break;
+            }
+        }
+    }
 
-	//indices array now has list of unique points we need
-	//but we need to delete the old points we're not using and that means the index values will change
-	//so we are going to create a new list of points and new indexes - we will use a map to map old index values to the new ones
-	std::vector<glm::vec3> newPoints;
-	std::vector<INDEX_TYPE> newIndexes;
-	std::map<INDEX_TYPE, bool> ptCreated;
-	std::map<INDEX_TYPE, INDEX_TYPE> oldIndexNewIndex;
+    //indices array now has list of unique points we need
+    //but we need to delete the old points we're not using and that means the index values will change
+    //so we are going to create a new list of points and new indexes - we will use a map to map old index values to the new ones
+    std::vector<glm::vec3> newPoints;
+    std::vector<INDEX_TYPE> newIndexes;
+    std::map<INDEX_TYPE, bool> ptCreated;
+    std::map<INDEX_TYPE, INDEX_TYPE> oldIndexNewIndex;
 
-	std::vector<glm::vec4> newColors;
-	std::vector<glm::vec4>& colors = colors;
-	std::vector<glm::vec2> newTCoords;
-	std::vector<glm::vec2>& tcoords = texcoords;
-	std::vector<glm::vec3> newNormals;
-	std::vector<glm::vec3>& normals =  normals;
+    std::vector<glm::vec4> newColors;
+    std::vector<glm::vec4>& colors = colors;
+    std::vector<glm::vec2> newTCoords;
+    std::vector<glm::vec2>& tcoords = texcoords;
+    std::vector<glm::vec3> newNormals;
+    std::vector<glm::vec3>& normals =  normals;
 
-	for (INDEX_TYPE i = 0; i < faceIndices.size(); i++){
-		ptCreated[i] = false;
-	}
+    for (INDEX_TYPE i = 0; i < indices.size(); i++)
+        ptCreated[i] = false;
 
-	for (INDEX_TYPE i = 0; i < faceIndices.size(); i++){
-		INDEX_TYPE index = indices[i];
-		const glm::vec3& p = verts[ index ];
+    for (INDEX_TYPE i = 0; i < indices.size(); i++){
+        INDEX_TYPE index = indices[i];
+        const glm::vec3& p = verts[ index ];
 
-		if ( ptCreated[index] == false ){
-			oldIndexNewIndex[index] = newPoints.size();
-			newPoints.push_back( p );
-			if (haveColors()) {
-				newColors.push_back(colors[index]);
-			}
-			if (haveTexCoords()) {
-				newTCoords.push_back(tcoords[index]);
-			}
-			if (haveNormals()) {
-				newNormals.push_back(normals[index]);
-			}
+        if ( ptCreated[index] == false ){
+            oldIndexNewIndex[index] = newPoints.size();
+            newPoints.push_back( p );
+            if (haveColors())
+                newColors.push_back(colors[index]);
+            
+            if (haveTexCoords())
+                newTCoords.push_back(tcoords[index]);
+            
+            if (haveNormals())
+                newNormals.push_back(normals[index]);
 
-			ptCreated[index] = true;
-		}
+            ptCreated[index] = true;
+        }
 
-		//ofLogNotice("ofMesh") << "[" << i << "]: old " << index << " --> " << oldIndexNewIndex[index];
-		newIndexes.push_back( oldIndexNewIndex[index] );
-	}
+        //ofLogNotice("ofMesh") << "[" << i << "]: old " << index << " --> " << oldIndexNewIndex[index];
+        newIndexes.push_back( oldIndexNewIndex[index] );
+    }
 
-	verts.clear();
-	verts = newPoints;
+    verts.clear();
+    verts = newPoints;
 
-	faceIndices.clear();
-	indices = newIndexes;
+    indices.clear();
+    indices = newIndexes;
 
-	clearFaceIndices();
-	addFaceIndices(&indices[0], faceIndices.size());
-	clearVertices();
-	addVertices( &verts[0].x, verts.size(), 3);
+    clearFaceIndices();
+    addFaceIndices(&indices[0], indices.size());
+    clearVertices();
+    addVertices( &verts[0].x, verts.size(), 3);
 
-	if (haveColors()) {
-		clearColors();
-		addColors( &newColors[0].x, newColors.size(), 4);
-	}
+    if (haveColors()) {
+        clearColors();
+        addColors( &newColors[0].x, newColors.size(), 4);
+    }
 
-	if (haveTexCoords()) {
-		clearTexCoords();
-		addTexCoords( &newTCoords[0].x, newTCoords.size(), 2);
-	}
+    if (haveTexCoords()) {
+        clearTexCoords();
+        addTexCoords( &newTCoords[0].x, newTCoords.size(), 2);
+    }
 
-	if (haveNormals()) {
-		clearNormals();
-		addNormals( &newNormals[0].x, newNormals.size(), 3);
-	}
+    if (haveNormals()) {
+        clearNormals();
+        addNormals( &newNormals[0].x, newNormals.size(), 3);
+    }
 
 }

@@ -6,6 +6,7 @@
 #include "hilma/types/Mesh.h"
 #include "hilma/io/ply.h"
 #include "hilma/io/stl.h"
+#include "hilma/io/obj.h"
 
 int main(int argc, char **argv) {
 
@@ -18,6 +19,8 @@ int main(int argc, char **argv) {
     std::cout << "colors: " << mesh.getColorsTotal() << std::endl;
     std::cout << "texcoords: " << mesh.getTexCoordsTotal() << std::endl;
     std::cout << "indices: " << mesh.getFaceIndicesTotal() << std::endl;
+
+    hilma::saveObj("out.obj", mesh);
 
     hilma::savePly("out.ply", mesh, false);
     hilma::savePly("out_bin.ply", mesh, true);

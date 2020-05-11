@@ -42,5 +42,8 @@ target_link_libraries (ring PRIVATE hilma)
 add_executable (intersec_sphere intersec_sphere.cpp)
 target_link_libraries (intersec_sphere PRIVATE hilma)
 
+add_executable (half_icosphere half_icosphere.cpp)
+target_link_libraries (half_icosphere PRIVATE hilma)
+
 add_executable (load load.cpp)
 target_link_libraries (load PRIVATE hilma)

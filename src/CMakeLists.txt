@@ -38,6 +38,10 @@ if(POLICY CMP0078)
   cmake_policy(SET CMP0078 OLD)
 endif(POLICY CMP0078)
 
+if(POLICY CMP0086)
+  cmake_policy(SET CMP0086 OLD)
+endif(POLICY CMP0086)
+
 find_package(SWIG REQUIRED)
 include(${SWIG_USE_FILE})
 

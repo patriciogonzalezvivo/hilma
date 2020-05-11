@@ -176,7 +176,7 @@ private:
     friend bool loadPly( const std::string&, Mesh& );
     friend bool savePly( const std::string&, Mesh&, bool, bool);
     friend bool loadStl( const std::string&, Mesh& );
-    friend bool saveObj( const std::string&, Mesh& );
+    friend bool saveObj( const std::string&, const Mesh& );
 
     friend void scale(Mesh&, float );
     friend void scaleX(Mesh&, float );
