@@ -28,46 +28,56 @@ inline std::istream& operator>>(std::istream& is, glm::vec3& vec) {
 
 //----------------------------------------  String operations
 
-inline void stringPurifier ( std::string &_s ){
-    for ( std::string::iterator it = _s.begin(), itEnd = _s.end(); it!=itEnd; ++it){
-        if ( static_cast<unsigned int>(*it) < 32 || static_cast<unsigned int>(*it) > 127 ){
-            (*it) = ' ';
-        }
+inline std::string toLower(const std::string& _string) {
+    std::string std = _string;
+    for (int i = 0; _string[i]; i++) {
+        std[i] = tolower(_string[i]);
     }
-}
-
-inline void toLower( std::string &_str ){
-    for (int i = 0; _str[i]; i++) {
-        _str[i] = tolower(_str[i]);
-    }
-}
-
-inline std::string getLower(const std::string &_str ){
-    std::string std = _str;
-    toLower(std);
     return std;
 }
 
-inline std::vector<std::string> splitString(const std::string &_source, const std::string &_delimiter = "", bool _ignoreEmpty = false) {
-    std::vector<std::string> result;
-    if (_delimiter.empty()) {
-        result.push_back(_source);
-        return result;
+inline std::string toUpper(const std::string& _string) {
+    std::string std = _string;
+    for (int i = 0; _string[i]; i++) {
+        std[i] = toupper(_string[i]);
     }
-    std::string::const_iterator substart = _source.begin(), subend;
-    while (true) {
-        subend = std::search(substart, _source.end(), _delimiter.begin(), _delimiter.end());
-        std::string sub(substart, subend);
-        
-        if (!_ignoreEmpty || !sub.empty()) {
-            result.push_back(sub);
+    return std;
+}
+
+inline std::string toUnderscore(const std::string& _string){
+    std::string std = _string;
+    std::replace(std.begin(), std.end(), ' ', '_');
+    return std;
+}
+
+inline std::string purifyString(const std::string& _string) {
+    std::string std = _string;
+    for (std::string::iterator it = std.begin(), itEnd = std.end(); it!=itEnd; ++it) {
+        if (static_cast<uint32_t>(*it) < 32 || 
+            static_cast<uint32_t>(*it) > 127 || 
+            *it == '.' ||
+            *it == '-' ||
+            *it == '\\'||
+            *it == '/' ) {
+            (*it) = '_';
         }
-        if (subend == _source.end()) {
-            break;
-        }
-        substart = subend + _delimiter.size();
     }
-    return result;
+    return std;
+}
+
+inline std::vector<std::string> split(const std::string& _string, char _sep, bool _tolerate_empty) {
+    std::vector<std::string> tokens;
+    std::size_t start = 0, end = 0;
+    while ((end = _string.find(_sep, start)) != std::string::npos) {
+        if (end != start || _tolerate_empty) {
+          tokens.push_back(_string.substr(start, end - start));
+        }
+        start = end + 1;
+    }
+    if (end != start || _tolerate_empty) {
+       tokens.push_back(_string.substr(start));
+    }
+    return tokens;
 }
 
 //---------------------------------------- Conversions
@@ -97,7 +107,7 @@ inline bool toBool(const std::string &_boolString) {
     static const std::string trueString = "true";
     static const std::string falseString = "false";
     
-    std::string lower = getLower(_boolString);
+    std::string lower = toLower(_boolString);
     
     if(lower == trueString) {
         return true;

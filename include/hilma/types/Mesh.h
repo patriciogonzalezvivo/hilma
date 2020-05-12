@@ -1,8 +1,8 @@
 #pragma once
 
-#include <vector>
 #include <string>
-
+#include <vector>
+#include <map>
 
 #include "hilma/types/Ray.h"
 #include "hilma/types/Line.h"
@@ -157,9 +157,9 @@ public:
     std::vector<Line> getLinesEdges() const;
     std::vector<glm::ivec2> getLinesIndices() const;
 
-
+    std::map<std::string, Material> materials;
 private:
-    std::vector<Material>   materials;
+    
     std::vector<glm::vec4>  colors;
     std::vector<glm::vec4>  tangents;
     std::vector<glm::vec3>  vertices;
@@ -176,6 +176,7 @@ private:
     friend bool loadPly( const std::string&, Mesh& );
     friend bool savePly( const std::string&, Mesh&, bool, bool);
     friend bool loadStl( const std::string&, Mesh& );
+    friend bool loadObj( const std::string&, Mesh& );
     friend bool saveObj( const std::string&, const Mesh& );
 
     friend void scale(Mesh&, float );

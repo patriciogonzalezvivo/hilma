@@ -6,6 +6,7 @@
 #include "hilma/types/Mesh.h"
 #include "hilma/ops/generate.h"
 #include "hilma/io/ply.h"
+#include "hilma/io/obj.h"
 
 int main(int argc, char **argv) {
     hilma::Mesh mesh_src = hilma::icosphere(1.0, 6);
@@ -19,6 +20,7 @@ int main(int argc, char **argv) {
     
     mesh_dst.mergeDuplicateVertices();
     hilma::savePly("half_icosphere.ply", mesh_dst, false);
+    hilma::saveObj("half_icosphere.obj", mesh_dst);
 
     return 1;
 }

@@ -25,24 +25,39 @@ public:
     std::string specular_map;       // map_Ks
     glm::vec3   specular;           // Ks
     
-    std::string specular_exp_map;   // map_Ns
-    float       specular_exp;       // Ns
-    
     std::string emissive_map;       // map_Ke
     glm::vec3   emissive;           // Ke
-    
-    std::string opacity_map;        // map_d
-    std::string bump_map;           // map_bump
 
-    float       optical_density;    // Ni
+    std::string roughness_map;
+    float       roughness;
+
+    std::string metallic_map;
+    float       metallic;
+    
+    std::string normal_map;
+    std::string bump_map;           // map_bump
+    std::string displacement_map;
+    
     float       opacity;            // d
+    std::string opacity_map;        // map_d
+
+    float       sheen;
+    std::string sheen_map;
+
+    float       shininess;
+    float       anisotropy;
+    float       anisotropy_rotation;
+    float       clearcoat_roughness;
+    float       clearcoat_thickness;
+    float       ior;
+
+    float       dissolve;
+    float       optical_density;    // Ni
+    glm::vec3   transmittance;
+    std::string reflection_map;
+    std::string specular_highlight_map;
 
     int         illumination_model; // illum
-
-    // TODOs:
-    //      
-    // std::string displacement_map;    // disp
-    // std::string reflection_map;      // refl
 };
 
 }
