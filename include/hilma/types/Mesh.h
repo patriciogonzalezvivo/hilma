@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <utility>
 #include <map>
 
 #include "hilma/types/Ray.h"
@@ -31,6 +32,9 @@ enum EdgeType {
 #define INDEX_TYPE uint32_t
 #endif
 
+typedef std::pair<size_t, MaterialPtr> IndexMaterial;
+typedef std::vector<IndexMaterial> MaterialsByIndices;
+typedef std::map<std::string, MaterialPtr> MaterialsByName;
 
 class Mesh {
 public:
@@ -111,10 +115,6 @@ public:
     void        clearTexCoords() { texcoords.clear(); }
 
     // Tangents
-    void        addTangent(const glm::vec4& _tangent);
-    void        addTangent(const float* _array1D, int _n);
-    void        addTangent(float _x, float _y, float _z, float _w);
-
     const bool  haveTangents() const { return !tangents.empty(); }
     const glm::vec4&   getTangent(size_t _index) const { return tangents[_index]; }
     const std::vector<glm::vec4>& getTangents() const { return tangents; }
@@ -157,8 +157,18 @@ public:
     std::vector<Line> getLinesEdges() const;
     std::vector<glm::ivec2> getLinesIndices() const;
 
-    std::map<std::string, Material> materials;
+    void        addMaterial(const Material& _material);
+    MaterialPtr getMaterial(const std::string& _name);
+    
+    std::vector<std::string> getMaterialsNames() const;
+    MaterialConstPtr getMaterialForFaceIndex(size_t _index) const;
+
+    Mesh        getMeshForIndices(size_t _start, size_t _end) const;
+    std::vector<Mesh>   getMeshesByMaterials() const;
+
 private:
+    MaterialsByName         materialsByName;
+    MaterialsByIndices      materialsByIndices;
     
     std::vector<glm::vec4>  colors;
     std::vector<glm::vec4>  tangents;

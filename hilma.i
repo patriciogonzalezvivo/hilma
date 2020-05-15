@@ -19,10 +19,10 @@
     #include "hilma/math.h"
     #include "hilma/types/Ray.h"
     #include "hilma/types/Line.h"
+    #include "hilma/types/Material.h"
     #include "hilma/types/Triangle.h"
     #include "hilma/types/Plane.h"
     #include "hilma/types/BoundingBox.h"
-    #include "hilma/types/Material.h"
     #include "hilma/types/Mesh.h"
     #include "hilma/types/Polyline.h"
     #include "hilma/ops/compute.h"
@@ -70,10 +70,10 @@
 
 %include "include/hilma/types/Ray.h"
 %include "include/hilma/types/Line.h"
+%include "include/hilma/types/Material.h"
 %include "include/hilma/types/Triangle.h"
 %include "include/hilma/types/Plane.h"
 %include "include/hilma/types/BoundingBox.h"
-%include "include/hilma/types/Material.h"
 %include "include/hilma/types/Mesh.h"
 %include "include/hilma/types/Polyline.h"
 %include "include/hilma/ops/compute.h"
@@ -83,13 +83,14 @@
 %include "include/hilma/ops/transform.h"
 %include "include/hilma/io/ply.h"
 %include "include/hilma/io/stl.h"
-// %include "include/hilma/io/obj.h"
+%include "include/hilma/io/obj.h"
 
 using namespace hilma;
 
 
 namespace std {
-    // %template(VectorInt) vector<int>;
+    %template(VectorString) vector<string>;
     %template(VectorTriangles) vector<Triangle>;
+    %template(VectorMesh) vector<Mesh>;
 };
 

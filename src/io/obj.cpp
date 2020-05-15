@@ -172,32 +172,22 @@ bool loadObj( const std::string& _filename, Mesh& _mesh ) {
         return false;
     }
 
-    for (size_t m = 0; m < materials.size(); m++)
-        if (_mesh.materials.find( materials[m].name ) == _mesh.materials.end())
-            _mesh.materials[ materials[m].name ] = InitMaterial( materials[m] );
-
-    Mesh mesh;
     for (size_t s = 0; s < shapes.size(); s++) {
-        mesh.name = shapes[s].name;;
-
-        // std::string name = shapes[s].name;
         
-        // if (name.empty())
-        //     name = toString(s);
+        std::string name = shapes[s].name;
+        if (name.empty())
+            name = toString(s);
+        _mesh.name = name;
 
         // Check for smoothing group and compute smoothing normals
         std::map<int, glm::vec3> smoothVertexNormals;
         if (hasSmoothingGroup(shapes[s]) > 0)
             computeSmoothingNormals(attrib, shapes[s], smoothVertexNormals);
 
-        // Mesh mesh;
-        // Material mat;
-
         std::map<int, tinyobj::index_t> unique_indices;
         std::map<int, tinyobj::index_t>::iterator iter;
         
         int mi = -1;
-        int mCounter = 0;
         INDEX_TYPE iCounter = 0;
         for (size_t i = 0; i < shapes[s].mesh.indices.size(); i++) {
             int f = (int)floor(i/3);
@@ -207,32 +197,16 @@ bool loadObj( const std::string& _filename, Mesh& _mesh ) {
             int ni = index.normal_index;
             int ti = index.texcoord_index;
 
-            // // Associate w material
-            // if (shapes[s].mesh.material_ids.size() > 0) {
-            //     int material_index = shapes[s].mesh.material_ids[f];
+            // Associate w material with face
+            if (shapes[s].mesh.material_ids.size() > 0) {
+                int material_index = shapes[s].mesh.material_ids[f];
 
-            //     if (mi != material_index) {
-
-            //         // If there is a switch of material start a new mesh
-            //         if (mi != -1 && mesh.getVertices().size() > 0) {
-
-            //             // std::cout << "Adding model " << name  << "_" << toString(mCounter, 3, '0') << " w new material " << mat.name << std::endl;
-                        
-            //             // Add the model to the stack 
-            //             addModel(_models, name + "_"+ toString(mCounter,3,'0'), mesh, mat, _verbose);
-            //             mCounter++;
-
-            //             // Restart the mesh
-            //             iCounter = 0;
-            //             mesh.clear();
-            //             unique_indices.clear();
-            //         }
-
-            //         // assign the current material
-            //         mi = material_index;
-            //         mat = _materials[ materials[material_index].name ];
-            //     }
-            // }
+                // but only when change
+                if (mi != material_index) {
+                    mi = material_index;
+                    _mesh.addMaterial( InitMaterial( materials[mi] ) );
+                }
+            }
 
             bool reuse = false;
             iter = unique_indices.find(vi);
@@ -246,35 +220,33 @@ bool loadObj( const std::string& _filename, Mesh& _mesh ) {
             
             // Re use the vertex
             if (reuse)
-                mesh.addFaceIndex( (INDEX_TYPE)iter->second.vertex_index );
+                _mesh.addFaceIndex( (INDEX_TYPE)iter->second.vertex_index );
+
             // Other wise create a new one
             else {
                 unique_indices[vi].vertex_index = (int)iCounter;
                 unique_indices[vi].normal_index = ni;
                 unique_indices[vi].texcoord_index = ti;
                 
-                mesh.addVertex( getVertex(attrib, vi) );
-                mesh.addColor( getColor(attrib, vi) );
+                _mesh.addVertex( getVertex(attrib, vi) );
+                _mesh.addColor( getColor(attrib, vi) );
 
                 // If there is normals add them
                 if (attrib.normals.size() > 0)
-                    mesh.addNormal( getNormal(attrib, ni) );
+                    _mesh.addNormal( getNormal(attrib, ni) );
 
                 else if (smoothVertexNormals.size() > 0)
                     if ( smoothVertexNormals.find(vi) != smoothVertexNormals.end() )
-                        mesh.addNormal( smoothVertexNormals.at(vi) );
+                        _mesh.addNormal( smoothVertexNormals.at(vi) );
 
                 // If there is texcoords add them
                 if (attrib.texcoords.size() > 0)
-                    mesh.addTexCoord( getTexCoords(attrib, ti) );
+                    _mesh.addTexCoord( getTexCoords(attrib, ti) );
 
-                mesh.addFaceIndex( iCounter++ );
+                _mesh.addFaceIndex( iCounter++ );
             }
+            
         }
-
-        // std::string meshName = name;
-        // if (mCounter > 0)
-        //     meshName = name + "_" + toString(mCounter, 3, '0');
 
     }
 

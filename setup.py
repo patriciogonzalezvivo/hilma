@@ -24,16 +24,17 @@ hilma_module = Extension(
   include_dirs=['include', numpy_include],
   sources= [ 
     'hilma_wrap.cxx',
-    'src/types/Material.cpp',
-    'src/types/Mesh.cpp',
     'src/types/Polyline.cpp',
     'src/types/Triangle.cpp',
+    'src/types/Mesh.cpp',
     'src/ops/compute.cpp',
     'src/ops/generate.cpp',
     'src/ops/convert.cpp',
     'src/ops/transform.cpp',
+    'src/ops/intersection.cpp',
     'src/io/obj.cpp',
     'src/io/ply.cpp',
+    'src/io/stl.cpp',
    ],
    swig_opts = ['-c++']
 )

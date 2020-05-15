@@ -45,5 +45,8 @@ target_link_libraries (intersec_sphere PRIVATE hilma)
 add_executable (half_icosphere half_icosphere.cpp)
 target_link_libraries (half_icosphere PRIVATE hilma)
 
+add_executable (cornell cornell.cpp)
+target_link_libraries (cornell PRIVATE hilma)
+
 add_executable (load load.cpp)
 target_link_libraries (load PRIVATE hilma)

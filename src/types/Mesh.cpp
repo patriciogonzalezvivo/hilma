@@ -21,23 +21,27 @@ Mesh::~Mesh() {
 }
 
 void Mesh::clear() {
+    // Vertex data
     if (!vertices.empty()) vertices.clear();
-    
     if (!colors.empty()) colors.clear();
     if (!normals.empty()) normals.clear();
     if (!texcoords.empty()) texcoords.clear();
     if (!tangents.empty()) tangents.clear();
+
+    // Face data
     if (!faceIndices.empty()) faceIndices.clear();
+    if (!materialsByName.empty()) materialsByName.clear();
+    if (!materialsByIndices.empty()) materialsByIndices.clear();
+
+    // Edges data
     if (!edgeIndices.empty()) edgeIndices.clear();
-    // if (!indices_normals.empty()) indices_normals.clear();
-    // if (!indices_texcoords.empty()) indices_texcoords.clear();
     // if (!edge_colors.empty()) edge_colors.clear();
-    // if (!edge_faceIndices.empty()) edge_faceIndices.clear();
 }
 
 void Mesh::append(const Mesh& _mesh) {
-    int indexOffset = (int)vertices.size();
+    int vertexIndexOffset = (int)vertices.size();
 
+    // Vertex Data
     if (_mesh.haveVertices())
         vertices.insert(vertices.end(), _mesh.vertices.begin(), _mesh.vertices.end());
         
@@ -50,23 +54,36 @@ void Mesh::append(const Mesh& _mesh) {
     if (_mesh.haveNormals())
         normals.insert(normals.end(),_mesh.normals.begin(),_mesh.normals.end());
 
+
+    // Face Data
     if (_mesh.getFaceType() != faceMode) {
         std::cout << "INCOMPATIBLE FACEMODES" << std::endl;
         return;
     }
 
+    if (_mesh.haveFaceIndices()) {
+        std::string lastMaterialName = "";
+        for (size_t i = 0; i < _mesh.faceIndices.size(); i++) {
+            addFaceIndex(vertexIndexOffset + _mesh.faceIndices[i]);
+            MaterialConstPtr material = _mesh.getMaterialForFaceIndex(i);
+            if (material != NULL) {
+                if (material->name != lastMaterialName) {
+                    addMaterial( *material );
+                    lastMaterialName = material->name;
+                }
+            }
+        }
+    }
+
+    // Edge Data
     if (_mesh.getEdgeType() != edgeMode) {
         std::cout << "INCOMPATIBLE FACEMODES" << std::endl;
         return;
     }
 
-    if (_mesh.haveFaceIndices())
-        for (size_t i = 0; i < _mesh.faceIndices.size(); i++)
-            addFaceIndex(indexOffset + _mesh.faceIndices[i]);
-
     if (_mesh.haveEdgeIndices())
         for (size_t i = 0; i < _mesh.edgeIndices.size(); i++)
-            addEdgeIndex(indexOffset + _mesh.edgeIndices[i]);
+            addEdgeIndex(vertexIndexOffset + _mesh.edgeIndices[i]);
 }
 
 // Vertices
@@ -151,23 +168,6 @@ void Mesh::addNormals(const float* _data, int _m, int _n) {
     for (int i = 0; i < _m; i++)
         addNormal(&_data[i*_n], _n);
 }
-
-
-// Tangents
-//
-void  Mesh::addTangent(const glm::vec4& _tangent) {
-    tangents.push_back(_tangent);
-}
-
-void Mesh::addTangent(const float* _data, int _n) {
-    if (_n == 4)
-        addTangent(_data[0], _data[1], _data[2], _data[3]);
-}
-
-void Mesh::addTangent(float _x, float _y, float _z, float _w) {
-    tangents.push_back( glm::vec4(_x, _y, _z, _w) );
-}
-
 
 // TexCoords
 //
@@ -360,7 +360,7 @@ bool Mesh::computeTangents() {
         // Calculate handedness
         float hardedness = (glm::dot( glm::cross(n, t), tan2[i]) < 0.0f) ? -1.0f : 1.0f;
 
-        addTangent(glm::vec4(tangent, hardedness));
+        tangents.push_back(glm::vec4(tangent, hardedness));
     }
 
     return true;
@@ -547,6 +547,7 @@ std::vector<Triangle> Mesh::getTriangles() const {
         if (haveColors()) tri.setColors(colors[it->x], colors[it->y], colors[it->z]);
         if (haveNormals()) tri.setNormals(normals[it->x], normals[it->y], normals[it->z]);
         if (haveTexCoords()) tri.setTexCoords(texcoords[it->x], texcoords[it->y], texcoords[it->z]);
+        tri.material = getMaterialForFaceIndex(it->x);
         triangles.push_back( tri );
     }
 
@@ -642,7 +643,6 @@ std::vector<Line> Mesh::getLinesEdges() const {
 
 
 void Mesh::mergeDuplicateVertices() {
-
     std::vector<glm::vec3> verts = vertices;
     std::vector<INDEX_TYPE> indices = faceIndices;
 
@@ -730,4 +730,99 @@ void Mesh::mergeDuplicateVertices() {
         addNormals( &newNormals[0].x, newNormals.size(), 3);
     }
 
+}
+
+void Mesh::addMaterial(const Material& _material) {
+    size_t currentIndex = faceIndices.size();
+
+    materialsByName[_material.name] = std::make_shared<Material>(_material);
+    IndexMaterial in_mat(currentIndex, materialsByName[_material.name] );
+    materialsByIndices.push_back(in_mat);
+}
+
+MaterialPtr Mesh::getMaterial(const std::string& _name) {
+    return materialsByName[_name];
+}
+
+std::vector<std::string> Mesh::getMaterialsNames() const {
+    std::vector<std::string> names;
+    for (MaterialsByName::const_iterator it = materialsByName.begin(); it != materialsByName.end(); it++ )
+        names.push_back(it->first);
+    
+    return names;
+}
+
+MaterialConstPtr Mesh::getMaterialForFaceIndex(size_t _index) const {
+    for (size_t i = materialsByIndices.size() - 1 ; i >= 0; i--)
+        if (_index >= materialsByIndices[i].first)
+            return std::const_pointer_cast<const Material>(materialsByIndices[i].second);
+    return NULL;
+}
+
+
+Mesh Mesh::getMeshForIndices(size_t _start, size_t _end) const {
+    Mesh mesh;
+    mesh.setFaceType( getFaceType() );
+    std::map<size_t, INDEX_TYPE> unique_indices;
+    std::map<size_t, INDEX_TYPE>::iterator iter;
+
+    INDEX_TYPE iCounter = 0;
+    std::string lastMaterialName = "";
+    for (size_t i = _start; i < _end && i < faceIndices.size(); i++) {
+        INDEX_TYPE vi = faceIndices[i];
+    
+        iter = unique_indices.find(vi);
+
+        // if already exist 
+        if (iter != unique_indices.end())
+            mesh.addFaceIndex( iter->second );
+
+        // Other wise create a new one
+        else {
+            unique_indices[vi] = (int)iCounter;
+            
+            mesh.addVertex( vertices[vi] );
+
+            // If there is a color add them
+            if (haveColors())
+                mesh.addColor( colors[vi] );
+
+            // If there is normals add them
+            if (haveNormals())
+                mesh.addNormal( normals[vi] );
+
+            // If there is texcoords add them
+            if (haveTexCoords())
+                mesh.addTexCoord( texcoords[vi] );
+
+            mesh.addFaceIndex( iCounter++ );
+        }
+        
+        MaterialConstPtr material = getMaterialForFaceIndex(i);
+        if (material->name != lastMaterialName) {
+            mesh.addMaterial( *material );
+            lastMaterialName = material->name;
+        }
+    }
+
+    return mesh;
+}
+
+std::vector<Mesh> Mesh::getMeshesByMaterials() const {
+    std::vector<Mesh> meshes;
+    meshes.resize(materialsByIndices.size());
+
+    for (size_t i = 0; i < materialsByIndices.size(); i++ ) {
+        size_t firstFaceIndex = materialsByIndices[i].first;
+        size_t lastFaceIndex = firstFaceIndex;
+        if (i+1 < materialsByIndices.size())
+            lastFaceIndex = materialsByIndices[i+1].first;
+        else
+            lastFaceIndex = faceIndices.size()-1;
+
+        Mesh mesh = getMeshForIndices(firstFaceIndex, lastFaceIndex);
+        meshes[i] = mesh;
+    }
+
+    return meshes;
 }

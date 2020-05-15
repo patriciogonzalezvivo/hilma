@@ -2,17 +2,16 @@
 
 #include <vector>
 #include <string>
+#include <memory>
 
 #include "glm/glm.hpp"
 
 namespace hilma {
 
-class Material {
-public:
+struct Material {
 
-    Material();
-    Material(const std::string& _name);
-    virtual ~Material();
+    Material() {}
+    Material(const std::string& _name): name(_name) {}
 
     std::string name;
     
@@ -59,5 +58,8 @@ public:
 
     int         illumination_model; // illum
 };
+
+typedef std::shared_ptr<Material> MaterialPtr;
+typedef std::shared_ptr<const Material> MaterialConstPtr;
 
 }
