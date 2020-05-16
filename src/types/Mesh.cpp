@@ -42,19 +42,30 @@ void Mesh::append(const Mesh& _mesh) {
     int vertexIndexOffset = (int)vertices.size();
 
     // Vertex Data
-    if (_mesh.haveVertices())
+    if (_mesh.haveTexCoords()) {
+        if (haveVertices() && !haveTexCoords() )
+            std::cout << "Skipping appending TexCoords because destination don't have them" << std::endl;
+        else
+            texcoords.insert(texcoords.end(), _mesh.texcoords.begin(), _mesh.texcoords.end());
+    }
+        
+    if (_mesh.haveColors()) {
+        if (haveVertices() && !haveColors() )
+            std::cout << "Skipping appending Colors because destination don't have them" << std::endl;
+        else
+            colors.insert(colors.end(),_mesh.colors.begin(),_mesh.colors.end());
+    }
+        
+    if (_mesh.haveNormals()) {
+        if (haveVertices() && !haveNormals() )
+            std::cout << "Skipping appending Normals because destination don't have them" << std::endl;
+        else
+            normals.insert(normals.end(),_mesh.normals.begin(),_mesh.normals.end());
+    }
+
+    if (_mesh.haveVertices()) 
         vertices.insert(vertices.end(), _mesh.vertices.begin(), _mesh.vertices.end());
-        
-    if (_mesh.haveTexCoords())
-        texcoords.insert(texcoords.end(), _mesh.texcoords.begin(), _mesh.texcoords.end());
-        
-    if (_mesh.haveColors())
-        colors.insert(colors.end(),_mesh.colors.begin(),_mesh.colors.end());
-        
-    if (_mesh.haveNormals())
-        normals.insert(normals.end(),_mesh.normals.begin(),_mesh.normals.end());
-
-
+    
     // Face Data
     if (_mesh.getFaceType() != faceMode) {
         std::cout << "INCOMPATIBLE FACEMODES" << std::endl;

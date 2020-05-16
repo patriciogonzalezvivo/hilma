@@ -6,6 +6,8 @@
 #include "glm/gtx/rotate_vector.hpp"
 #include "glm/gtx/norm.hpp"
 
+#include <iostream>
+
 namespace hilma {
 
 Mesh plane(float _width, float _height, int _columns, int _rows, FaceType _mode ) {
@@ -843,7 +845,8 @@ Mesh cone( float radius, float _height, int _radiusSegments, int _heightSegments
                 mesh.addFaceIndex( (y+1)*_radiusSegments + x );
             }
         }
-    } else {
+    }
+    else {
         for (int y = 0; y < _heightSegments-1; y++) {
             for (int x = 0; x < _radiusSegments; x++) {
                 mesh.addFaceIndex( (y)*_radiusSegments + x );
@@ -856,7 +859,7 @@ Mesh cone( float radius, float _height, int _radiusSegments, int _heightSegments
     float maxTexYNormalized = (_heightSegments-1.f) / maxTexY;
 
     // add the cap //
-    normal= {0.f,1.f,0.f};
+    normal = glm::vec3(0.f, 1.f, 0.f);
     for (int iy = 0; iy < capSegs; iy++) {
         for (int ix = 0; ix < _radiusSegments; ix++) {
             newRad = mapValue((float)iy, 0, capSegs-1, radius, 0.0, true);
@@ -877,12 +880,13 @@ Mesh cone( float radius, float _height, int _radiusSegments, int _heightSegments
         if ( capSegs > 0 ) {
             for (int y = 0; y < capSegs-1; y++) {
                 for (int x = 0; x < _radiusSegments-1; x++) {
+
                     // first triangle //
                     mesh.addFaceIndex( (y)*_radiusSegments + x + vertOffset );
                     mesh.addFaceIndex( (y)*_radiusSegments + x+1 + vertOffset);
                     mesh.addFaceIndex( (y+1)*_radiusSegments + x + vertOffset);
-
-                    if (y < capSegs-1) {
+                    
+                    if (y < capSegs-2) {
                         // second triangle //
                         mesh.addFaceIndex( (y)*_radiusSegments + x+1 + vertOffset);
                         mesh.addFaceIndex( (y+1)*_radiusSegments + x+1 + vertOffset);
@@ -891,7 +895,8 @@ Mesh cone( float radius, float _height, int _radiusSegments, int _heightSegments
                 }
             }
         }
-    } else {
+    }
+    else {
         if (capSegs > 0 ) {
             for (int y = 0; y < capSegs-1; y++) {
                 for (int x = 0; x < _radiusSegments; x++) {
