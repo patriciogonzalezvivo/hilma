@@ -6,7 +6,8 @@
 
 namespace hilma {
 
-bool loadObj( const std::string& _filename, Mesh& _mesh );
-bool saveObj( const std::string& _filename, const Mesh& _mesh );
+Mesh    loadObj( const std::string& _filename);
+bool    loadObj( const std::string& _filename, Mesh& _mesh );
+bool    saveObj( const std::string& _filename, const Mesh& _mesh );
 
 }

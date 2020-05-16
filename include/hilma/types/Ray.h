@@ -4,7 +4,7 @@
 
 namespace hilma {
 
-class Ray{
+class Ray {
 public:
     
     Ray(): origin(0.0,0.0,0.0), direction(1.0,0.0,0.0) { };
@@ -15,10 +15,10 @@ public:
         direction = _dir;
     }
     
-    glm::vec3 getOrigin() const {return origin;}
+    glm::vec3 getOrigin() const { return origin;}
     glm::vec3 getDirection() const { return direction;}
     
-    glm::vec3 getPointAtDistance(float _dist) const { return origin + getScaled(direction, _dist); }
+    glm::vec3 getAt(float _t) const { return origin + direction * _t; }
     
 private:
     glm::vec3 origin;

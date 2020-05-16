@@ -48,5 +48,8 @@ target_link_libraries (half_icosphere PRIVATE hilma)
 add_executable (cornell cornell.cpp)
 target_link_libraries (cornell PRIVATE hilma)
 
+add_executable (raytracer raytracer.cpp)
+target_link_libraries (raytracer PRIVATE hilma)
+
 add_executable (load load.cpp)
 target_link_libraries (load PRIVATE hilma)

@@ -151,7 +151,6 @@ void computeSmoothingNormals(const tinyobj::attrib_t& _attrib, const tinyobj::sh
     }
 }
 
-
 bool loadObj( const std::string& _filename, Mesh& _mesh ) {
 
     tinyobj::attrib_t attrib;
@@ -251,6 +250,12 @@ bool loadObj( const std::string& _filename, Mesh& _mesh ) {
     }
 
     return true;
+}
+
+Mesh loadObj( const std::string& _filename) {
+    Mesh mesh;
+    loadObj(_filename, mesh);
+    return mesh;
 }
 
 bool saveObj( const std::string& _filename, const Mesh& _mesh ) {

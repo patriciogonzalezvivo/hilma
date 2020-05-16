@@ -36,6 +36,10 @@
     #include "hilma/io/stl.h"
     #include "hilma/io/tiny_obj_loader.h"
     #include "hilma/io/obj.h"
+    #include "hilma/io/png.h"
+    #include "hilma/io/stb_image.h"
+    #include "hilma/io/stb_image_write.h"
+    #include "hilma/io/hdr.h"
 %}
 
 %include "glm.i"
@@ -84,9 +88,11 @@
 %include "include/hilma/io/ply.h"
 %include "include/hilma/io/stl.h"
 %include "include/hilma/io/obj.h"
+%include "include/hilma/io/obj.h"
+%include "include/hilma/io/png.h"
+%include "include/hilma/io/hdr.h"
 
 using namespace hilma;
-
 
 namespace std {
     %template(VectorString) vector<string>;
