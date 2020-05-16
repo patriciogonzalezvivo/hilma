@@ -12,23 +12,6 @@
 
 namespace hilma {
 
-IntersectionData::IntersectionData(): 
-    pos (0.0f, 0.0f, 0.0f), 
-    dir (0.0f, 0.0f, 0.0f), 
-    normal (0.0f, 0.0f, 0.0f),
-    dist (0.0f), 
-    isIntersection(false) {
-}
-
-std::string IntersectionData::toString() {
-    std::string s="isec: "+ ::toString(isIntersection);
-    if (isIntersection) {
-        s += " at: " + ::toString(pos) + " dir: " + ::toString(dir)+ " dist: " + ::toString(dist) + " normal: " + ::toString(normal);
-    }
-    return s;
-}
-
-
 // http://www.geeksforgeeks.org/how-to-check-if-a-given-point-lies-inside-a-polygon/
 //
 bool inside(const std::vector<glm::vec2> _points, const glm::vec2 _v) {
@@ -99,61 +82,160 @@ IntersectionData intersection(const Ray& _ray, const Plane& _plane) {
     float denom = glm::dot(_plane.getNormal(), _ray.getDirection());
     
     // check if _ray is paralles to _plane:
-    idata.isIntersection = fabs(denom) > EPS;
-    if (idata.isIntersection) {
+    idata.hit = fabs(denom) > EPS;
+    if (idata.hit) {
         u = glm::dot(_plane.getNormal(), _plane.getOrigin() - _ray.getOrigin()) / denom;
-        idata.pos = _ray.getOrigin() + _ray.getDirection() * u;
+        idata.position = _ray.getOrigin() + _ray.getDirection() * u;
     }
 
     return idata;
 }
 
+// MOLLER_TRUMBORE
+#define CULLING
+bool intersectionMT(const Ray& _ray, const Triangle& _triangle, float& _t, float& _u, float& _v) {
+    glm::vec3 v0v1 = _triangle[1] - _triangle[0]; 
+    glm::vec3 v0v2 = _triangle[2] - _triangle[0]; 
+    glm::vec3 pvec = glm::cross(_ray.getDirection(), v0v2); 
+    float det = glm::dot(v0v1, pvec); 
+#ifdef CULLING 
+    // if the determinant is negative the triangle is backfacing
+    // if the determinant is close to 0, the ray misses the triangle
+    if (det < EPS) return false; 
+#else 
+    // ray and triangle are parallel if det is close to 0
+    if (fabs(det) < EPS) return false; 
+#endif 
+    float invDet = 1 / det; 
+ 
+    glm::vec3 tvec = _ray.getOrigin() - _triangle[0]; 
+    _u = glm::dot(tvec, pvec) * invDet; 
+    if (_u < 0 || _u > 1) return false; 
+ 
+    glm::vec3 qvec = glm::cross(tvec, v0v1); 
+    _v = glm::dot(_ray.getDirection(), qvec) * invDet; 
+    if (_v < 0 || _u + _v > 1) return false; 
+ 
+    _t = glm::dot(v0v2, qvec) * invDet; 
+ 
+    return true; 
+}
+
+bool intersection(const Ray& _ray, const Triangle& _triangle, float& _t, float& _u, float& _v) {
+    // no need to normalize
+    glm::vec3 N = _triangle.getNormal(); 
+    float denom = glm::dot(N, N); 
+ 
+    // Step 1: finding P
+ 
+    // check if ray and plane are parallel ?
+    float NdotRayDirection = glm::dot(N, _ray.getDirection()); 
+    if (fabs(NdotRayDirection) < EPS) // almost 0 
+        return false; // they are parallel so they don't intersect ! 
+ 
+    // compute d parameter using equation 2
+    float d = glm::dot(N, _triangle[0]); 
+ 
+    // compute t (equation 3)
+    _t = (glm::dot(N, _ray.getOrigin()) + d) / NdotRayDirection; 
+    // check if the triangle is in behind the ray
+    if (_t < 0) return false; // the triangle is behind 
+ 
+    // compute the intersection point using equation 1
+    glm::vec3 P = _ray.getOrigin() + _t * _ray.getDirection(); 
+ 
+    // Step 2: inside-outside test
+    glm::vec3 C; // vector perpendicular to triangle's plane 
+ 
+    // edge 0
+    glm::vec3 edge0 = _triangle[1] - _triangle[0]; 
+    glm::vec3 vp0 = P - _triangle[0]; 
+    C = glm::cross(edge0, vp0); 
+    if (glm::dot(N, C) < 0) return false; // P is on the right side 
+ 
+    // edge 1
+    glm::vec3 edge1 = _triangle[2] - _triangle[1]; 
+    glm::vec3 vp1 = P - _triangle[1]; 
+    C = glm::cross(edge1, vp1); 
+    if ((_u = glm::dot(N, C)) < 0)  return false; // P is on the right side 
+ 
+    // edge 2
+    glm::vec3 edge2 = _triangle[0] - _triangle[2]; 
+    glm::vec3 vp2 = P - _triangle[2]; 
+    C = glm::cross(edge2, vp2); 
+    if ((_v = glm::dot(N, C)) < 0) return false; // P is on the right side; 
+ 
+    _u /= denom; 
+    _v /= denom; 
+ 
+    return true; // this ray hits the triangle 
+} 
+
 IntersectionData intersection(const Ray& _ray, const Triangle& _triangle) {
 
     IntersectionData idata;
-    glm::vec3 rayStart = _ray.getOrigin();
-    glm::vec3 rayDir = _ray.getDirection();
-    glm::vec3 triNorm = _triangle.getNormal();
-    float vn = glm::dot(rayDir, triNorm);
-    
-    glm::vec3 aa = rayStart - _triangle[0];
-    float xpn = glm::dot(aa, triNorm);
-    float distance = -xpn / vn;
-    float max = std::numeric_limits<float>::max();
-    
-    if (distance < EPS || distance > max) return idata; // behind ray origin. fail
-    
-    glm::vec3 hitPos(rayDir.x * distance + rayStart.x,
-                     rayDir.y * distance + rayStart.y,
-                     rayDir.z * distance + rayStart.z);
-    
-    glm::vec3 hit00 = hitPos - _triangle[0];
-    glm::vec3 hit01 = _triangle[1] - _triangle[0];
-    glm::vec3 cross0 = glm::cross(hit00,hit01);
-    
-    if (glm::dot(cross0,triNorm) > EPS)
-        return idata; // not in _triangle. fail
-    
-    glm::vec3 hit10 = hitPos - _triangle[1];
-    glm::vec3 hit11 = _triangle[2] - _triangle[1];
-    glm::vec3 cross1 = glm::cross(hit10,hit11);
-    
-    if (glm::dot(cross1,triNorm) > EPS)
-        return idata; // not in _triangle. fail
-    
-    glm::vec3 hit20 = hitPos - _triangle[2];
-    glm::vec3 hit21 = _triangle[0] - _triangle[2];
-    glm::vec3 cross2 = glm::cross(hit20, hit21);
-    
-    if (glm::dot(cross2,triNorm) > EPS)
-        return idata;; // not in _triangle. fail
-    
-    idata.isIntersection = true;
-    idata.pos = hitPos;
-    idata.dist = distance;
-    
+
+    float t,u,v;
+    // idata.hit = intersection(_ray, _triangle, t, u, v);
+    idata.hit = intersectionMT(_ray, _triangle, t, u, v);
+
+    if (!idata.hit) return idata;
+
+    float vn = glm::dot(_ray.getDirection(), _triangle.getNormal());
+    glm::vec3 aa = _ray.getOrigin() - _triangle[0];
+    float xpn = glm::dot(aa, _triangle.getNormal());
+    idata.distance = -xpn / vn;
+    idata.position = _ray.getAt(idata.distance);
     return idata;
+
+    // glm::vec3 rayStart = _ray.getOrigin();
+    // glm::vec3 rayDir = _ray.getDirection();
+    // glm::vec3 triNorm = _triangle.getNormal();
+    // float vn = glm::dot(rayDir, triNorm);
+    
+    // glm::vec3 aa = rayStart - _triangle[0];
+    // float xpn = glm::dot(aa, triNorm);
+    // float distance = -xpn / vn;
+    // float max = std::numeric_limits<float>::max();
+    
+    // if (distance < EPS || distance > max) return idata; // behind ray origin. fail
+    
+    // glm::vec3 hitPos(rayDir.x * distance + rayStart.x,
+    //                  rayDir.y * distance + rayStart.y,
+    //                  rayDir.z * distance + rayStart.z);
+    
+    // glm::vec3 hit00 = hitPos - _triangle[0];
+    // glm::vec3 hit01 = _triangle[1] - _triangle[0];
+    // glm::vec3 cross0 = glm::cross(hit00,hit01);
+    
+    // if (glm::dot(cross0,triNorm) > EPS)
+    //     return idata; // not in _triangle. fail
+    
+    // glm::vec3 hit10 = hitPos - _triangle[1];
+    // glm::vec3 hit11 = _triangle[2] - _triangle[1];
+    // glm::vec3 cross1 = glm::cross(hit10,hit11);
+    
+    // if (glm::dot(cross1,triNorm) > EPS)
+    //     return idata; // not in _triangle. fail
+    
+    // glm::vec3 hit20 = hitPos - _triangle[2];
+    // glm::vec3 hit21 = _triangle[0] - _triangle[2];
+    // glm::vec3 cross2 = glm::cross(hit20, hit21);
+    
+    // if (glm::dot(cross2,triNorm) > EPS)
+    //     return idata;; // not in _triangle. fail
+    
+    // idata.hit = true;
+    // idata.position = hitPos;
+    // idata.dist = distance;
+
+    // // TODO:
+    // //  - Interpolate the normal if it's possible
+    // idata.normal = triNorm;
+
+    // return idata;
 }
+
 
 
 float PointPlaneDistance(const glm::vec3& _point, const Plane& _plane) {
@@ -171,7 +253,7 @@ IntersectionData intersection(const Line& _line, const Plane& _plane) {
     int pos2 = signValue(dist2);
     
     if (pos1==pos2) {
-        idata.isIntersection=false;
+        idata.hit=false;
         return idata;
     }
     
@@ -184,14 +266,14 @@ IntersectionData intersection(const Line& _line, const Plane& _plane) {
         u= glm::dot(_plane.getNormal(),_plane.getOrigin()-_line[0])/denom;
         // check if intersection is within line-segment:
         if (u>1.0 || u<0) {
-            idata.isIntersection=false;
+            idata.hit=false;
             return idata;
         }
-        idata.isIntersection=true;
-        idata.pos = _line[0]+_line.getVector()*u;
+        idata.hit=true;
+        idata.position = _line[0]+_line.getVector()*u;
     }
     else
-        idata.isIntersection=false;
+        idata.hit=false;
     
 
     return idata;
@@ -220,7 +302,7 @@ IntersectionData intersection(const Line& _line1, const Line& _line2) {
     p43.y = p4.y - p3.y;
     p43.z = p4.z - p3.z;
     if (ABS(p43.x) < EPS && ABS(p43.y) < EPS && ABS(p43.z) < EPS) {
-        idata.isIntersection=false;
+        idata.hit=false;
         return idata;
     }
     
@@ -229,7 +311,7 @@ IntersectionData intersection(const Line& _line1, const Line& _line2) {
     p21.z = p2.z - p1.z;
     
     if (ABS(p21.x) < EPS && ABS(p21.y) < EPS && ABS(p21.z) < EPS) {
-        idata.isIntersection=false;
+        idata.hit=false;
         return idata;
     }
     
@@ -241,7 +323,7 @@ IntersectionData intersection(const Line& _line1, const Line& _line2) {
     
     denom = d2121 * d4343 - d4321 * d4321;
     if (ABS(denom) < EPS) {
-        idata.isIntersection=false;
+        idata.hit=false;
         return idata;
     }
     
@@ -256,9 +338,9 @@ IntersectionData intersection(const Line& _line1, const Line& _line2) {
     pb.y = p3.y + mub * p43.y;
     pb.z = p3.z + mub * p43.z;
     
-    idata.isIntersection=true;
-    idata.pos = pa;
-    idata.dir = pb-pa;
+    idata.hit = true;
+    idata.position = pa;
+    idata.direction = pb-pa;
     return idata;
     
 }
@@ -270,20 +352,18 @@ IntersectionData intersection(const glm::vec3& _point, const Line& _line) {
     IntersectionData idata;
     
     u = ( ( ( _point.x - _line[0].x ) * ( _line.getVector().x ) +
-           ( ( _point.y - _line[0].y ) * ( _line.getVector().y) ) +
-           ( ( _point.z - _line[0].z ) * ( _line.getVector().z) ) ) /
-         ( glm::length2( _line.getVector() ) ) );
+        ( ( _point.y - _line[0].y ) * ( _line.getVector().y) ) +
+        ( ( _point.z - _line[0].z ) * ( _line.getVector().z) ) ) /
+        ( glm::length2( _line.getVector() ) ) );
 
     if ( u < 0.0f || u > 1.0f ) {
-        idata.isIntersection=false;
+        idata.hit = false;
         return idata;
     }
     
-    idata.isIntersection=true;
-    idata.pos.x = _line[0].x + u * ( _line.getVector().x );
-    idata.pos.y = _line[0].y + u * ( _line.getVector().y );
-    idata.pos.z = _line[0].z + u * ( _line.getVector().z );
-    idata.dir = idata.pos - _point;
+    idata.hit = true;
+    idata.position = _line[0] + u * _line.getVector();
+    idata.direction = idata.position - _point;
     
     return idata;
 }
@@ -302,9 +382,9 @@ IntersectionData intersection(const Plane& _plane1, const Plane& _plane2) {
     // Check if planes are parallel, if so return false:
     glm::vec3 dir= glm::cross(_plane1.getNormal(),_plane2.getNormal());
     
-    idata.isIntersection = dir.length() < EPS;
+    idata.hit = dir.length() < EPS;
 
-    if (idata.isIntersection) {
+    if (idata.hit) {
         // Direction of intersection is the cross product of the two normals:
         dir = glm::normalize(dir);
         
@@ -315,8 +395,8 @@ IntersectionData intersection(const Plane& _plane1, const Plane& _plane2) {
         double b = (d2 - d1 * offDiagonal) * det;
         glm::vec3 anchor = getScaled(n1,(float)a) + getScaled(n2,(float)b);
         
-        idata.pos = anchor;
-        idata.dir = dir;
+        idata.position = anchor;
+        idata.direction = dir;
     }
     
     return idata;
@@ -353,7 +433,7 @@ IntersectionData intersection(const Plane& _plane, const Triangle& _triangle) {
     int pos3 = signValue(dist3);
     
     if (pos1==pos2 && pos1==pos3) {
-        idata.isIntersection=false;
+        idata.hit=false;
         return idata;
     };
     
@@ -380,13 +460,13 @@ IntersectionData intersection(const Plane& _plane, const Triangle& _triangle) {
         };
     }
     
-    idata.isIntersection=true;
-    idata.pos = ispoints.at(0);
+    idata.hit = true;
+    idata.position = ispoints.at(0);
     
-    if (ispoints.size()==2) {
-        idata.dir = ispoints.at(1);
-        idata.dir-=idata.pos;
-        idata.dist=idata.dir.length();
+    if ( ispoints.size() == 2) {
+        idata.direction = ispoints.at(1);
+        idata.direction -= idata.position;
+        idata.distance = idata.direction.length();
     }
     
     return idata;

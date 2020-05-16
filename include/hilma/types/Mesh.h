@@ -159,6 +159,7 @@ public:
 
     void        addMaterial(const Material& _material);
     MaterialPtr getMaterial(const std::string& _name);
+    bool        haveMaterials() const { return !materialsByIndices.empty(); }
     
     std::vector<std::string> getMaterialsNames() const;
     MaterialConstPtr getMaterialForFaceIndex(size_t _index) const;

@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
     for (size_t i = 0; i < triangles.size(); i++) {
         hilma::IntersectionData data = intersection(ray, triangles[i]);
 
-        if (data.isIntersection)
+        if (data.hit)
             triangles[i].setColor(1.0, 0.0, 0.0);
         else
             triangles[i].setColor(1.0, 1.0, 1.0);

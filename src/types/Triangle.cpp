@@ -104,3 +104,30 @@ bool Triangle::containsPoint(const glm::vec3 &_p){
     // Check if point is in triangle
     return (u >= 0.0) && (v >= 0.0) && (u + v <= 1.0);
 }
+
+glm::vec3 Triangle::getVertex(float _u, float _v) const {
+    return  getVertex(0) * _u +
+            getVertex(1) * _v +
+            getVertex(2) * (1.0f - _u - _v);
+}
+
+glm::vec4 Triangle::getColor(float _u, float _v) const {
+    return  getColor(0) * _u +
+            getColor(1) * _v +
+            getColor(2) * (1.0f - _u - _v);
+}
+
+glm::vec3 Triangle::getNormal(float _u, float _v) const {
+    if (haveNormals())
+        return  getNormal(0) * _u +
+                getNormal(1) * _v +
+                getNormal(2) * (1.0f - _u - _v);
+    else
+        return getNormal();
+}
+
+glm::vec2 Triangle::getTexCoord(float _u, float _v) const {
+    return  getTexCoord(0) * _u +
+            getTexCoord(1) * _v +
+            getTexCoord(2) * (1.0f - _u - _v);
+}

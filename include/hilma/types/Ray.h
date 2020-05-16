@@ -15,8 +15,8 @@ public:
         direction = _dir;
     }
     
-    glm::vec3 getOrigin() const { return origin;}
-    glm::vec3 getDirection() const { return direction;}
+    const glm::vec3& getOrigin() const { return origin;}
+    const glm::vec3& getDirection() const { return direction;}
     
     glm::vec3 getAt(float _t) const { return origin + direction * _t; }
     

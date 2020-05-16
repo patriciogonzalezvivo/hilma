@@ -65,11 +65,13 @@ void Mesh::append(const Mesh& _mesh) {
         std::string lastMaterialName = "";
         for (size_t i = 0; i < _mesh.faceIndices.size(); i++) {
             addFaceIndex(vertexIndexOffset + _mesh.faceIndices[i]);
-            MaterialConstPtr material = _mesh.getMaterialForFaceIndex(i);
-            if (material != NULL) {
-                if (material->name != lastMaterialName) {
-                    addMaterial( *material );
-                    lastMaterialName = material->name;
+            if (_mesh.haveMaterials()) {
+                MaterialConstPtr material = _mesh.getMaterialForFaceIndex(i);
+                if (material != NULL) {
+                    if (material->name != lastMaterialName) {
+                        addMaterial( *material );
+                        lastMaterialName = material->name;
+                    }
                 }
             }
         }
@@ -547,7 +549,7 @@ std::vector<Triangle> Mesh::getTriangles() const {
         if (haveColors()) tri.setColors(colors[it->x], colors[it->y], colors[it->z]);
         if (haveNormals()) tri.setNormals(normals[it->x], normals[it->y], normals[it->z]);
         if (haveTexCoords()) tri.setTexCoords(texcoords[it->x], texcoords[it->y], texcoords[it->z]);
-        tri.material = getMaterialForFaceIndex(it->x);
+        if (haveMaterials()) tri.material = getMaterialForFaceIndex(it->x);
         triangles.push_back( tri );
     }
 

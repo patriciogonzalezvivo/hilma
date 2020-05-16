@@ -25,20 +25,17 @@ bool intersection(  const glm::vec2 &_line1Start, const glm::vec2 &_line1End,
 // 3D
 //
 struct IntersectionData {
-    glm::vec3   pos;
-    glm::vec3   dir;
-    glm::vec3   normal;
-    
-    float       dist;
-    bool        isIntersection;
-
-    IntersectionData();
-    std::string toString();
+    glm::vec3   position;
+    glm::vec3   direction;
+    float       distance    = 0.0f;
+    bool        hit         = false;
 };
 
 // Ray
 IntersectionData intersection(const Ray& _ray, const Plane& _plane);
 IntersectionData intersection(const Ray& _ray, const Triangle& _triangle);
+bool             intersection(const Ray& _ray, const Triangle& _triangle, float& _t, float& _u, float& _v);
+bool             intersectionMT(const Ray& _ray, const Triangle& _triangle, float& _t, float& _u, float& _v);
 
 // Line
 IntersectionData intersection(const Line& _line, const Plane& _plane);
