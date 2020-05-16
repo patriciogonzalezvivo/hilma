@@ -176,8 +176,8 @@ IntersectionData intersection(const Ray& _ray, const Triangle& _triangle) {
     IntersectionData idata;
 
     float t,u,v;
-    // idata.hit = intersection(_ray, _triangle, t, u, v);
-    idata.hit = intersectionMT(_ray, _triangle, t, u, v);
+    idata.hit = intersection(_ray, _triangle, t, u, v);
+    // idata.hit = intersectionMT(_ray, _triangle, t, u, v);
 
     if (!idata.hit) return idata;
 
@@ -188,52 +188,6 @@ IntersectionData intersection(const Ray& _ray, const Triangle& _triangle) {
     idata.position = _ray.getAt(idata.distance);
     return idata;
 
-    // glm::vec3 rayStart = _ray.getOrigin();
-    // glm::vec3 rayDir = _ray.getDirection();
-    // glm::vec3 triNorm = _triangle.getNormal();
-    // float vn = glm::dot(rayDir, triNorm);
-    
-    // glm::vec3 aa = rayStart - _triangle[0];
-    // float xpn = glm::dot(aa, triNorm);
-    // float distance = -xpn / vn;
-    // float max = std::numeric_limits<float>::max();
-    
-    // if (distance < EPS || distance > max) return idata; // behind ray origin. fail
-    
-    // glm::vec3 hitPos(rayDir.x * distance + rayStart.x,
-    //                  rayDir.y * distance + rayStart.y,
-    //                  rayDir.z * distance + rayStart.z);
-    
-    // glm::vec3 hit00 = hitPos - _triangle[0];
-    // glm::vec3 hit01 = _triangle[1] - _triangle[0];
-    // glm::vec3 cross0 = glm::cross(hit00,hit01);
-    
-    // if (glm::dot(cross0,triNorm) > EPS)
-    //     return idata; // not in _triangle. fail
-    
-    // glm::vec3 hit10 = hitPos - _triangle[1];
-    // glm::vec3 hit11 = _triangle[2] - _triangle[1];
-    // glm::vec3 cross1 = glm::cross(hit10,hit11);
-    
-    // if (glm::dot(cross1,triNorm) > EPS)
-    //     return idata; // not in _triangle. fail
-    
-    // glm::vec3 hit20 = hitPos - _triangle[2];
-    // glm::vec3 hit21 = _triangle[0] - _triangle[2];
-    // glm::vec3 cross2 = glm::cross(hit20, hit21);
-    
-    // if (glm::dot(cross2,triNorm) > EPS)
-    //     return idata;; // not in _triangle. fail
-    
-    // idata.hit = true;
-    // idata.position = hitPos;
-    // idata.dist = distance;
-
-    // // TODO:
-    // //  - Interpolate the normal if it's possible
-    // idata.normal = triNorm;
-
-    // return idata;
 }
 
 

@@ -7,6 +7,7 @@ Hilma is 2D/3D geometry library in C++ with Python bindings (with support for Nu
 * [Mapbox's Earcut tessellator](https://github.com/mapbox/earcut)
 * [Tangram-es's ployline to spline converter](https://github.com/tangrams/tangram-es/blob/master/core/src/util/builders.cpp)
 * [Dan Wilcox's swig wrapper for GLM](https://github.com/danomatika/swig-openframeworks)
+* [Ray/Triangle intersection](https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle)
 
 Dependencies
 

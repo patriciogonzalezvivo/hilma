@@ -16,11 +16,14 @@ Mesh plane(float _width, float _height, int _columns, int _rows, FaceType _mode 
     if (_mode != TRIANGLE_STRIP && _mode != TRIANGLES)
         _mode = TRIANGLES;
 
+    _columns++;
+    _rows++;
+
     mesh.setFaceType(_mode, false);
 
-    glm::vec3 vert;
+    glm::vec3 vert(0.0f, 0.0f, 0.0f);
     glm::vec3 normal(0.0f, 0.0f, 1.0f); // always facing forward //
-    glm::vec2 texcoord;
+    glm::vec2 texcoord(0.0f, 0.0f);
 
     // the origin of the plane is at the center //
     float halfW = _width  * 0.5f;
@@ -885,7 +888,7 @@ Mesh cone( float radius, float _height, int _radiusSegments, int _heightSegments
                     mesh.addFaceIndex( (y)*_radiusSegments + x + vertOffset );
                     mesh.addFaceIndex( (y)*_radiusSegments + x+1 + vertOffset);
                     mesh.addFaceIndex( (y+1)*_radiusSegments + x + vertOffset);
-                    
+
                     if (y < capSegs-2) {
                         // second triangle //
                         mesh.addFaceIndex( (y)*_radiusSegments + x+1 + vertOffset);
