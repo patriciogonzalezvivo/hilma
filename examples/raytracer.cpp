@@ -5,100 +5,18 @@
 
 #include "hilma/timer.h"
 #include "hilma/text.h"
-#include "hilma/random.h"
 
-#include "hilma/types/Ray.h"
 #include "hilma/types/Camera.h"
 
 #include "hilma/ops/generate.h"
 #include "hilma/ops/transform.h"
-#include "hilma/ops/intersection.h"
-#include "hilma/io/obj.h"
+#include "hilma/ops/raytrace.h"
+
 #include "hilma/io/ply.h"
 #include "hilma/io/png.h"
 
 using namespace hilma;
 using namespace glm;
-
-//
-//  This examples follow the amazing book of @Peter_shirley
-//  Ray Tracing in One Weekend 
-//  https://raytracing.github.io/books/RayTracingInOneWeekend.html
-//
-
-// Type aliases for vec3
-using point3 = vec3;   // 3D point
-using color = vec3;    // RGB color
-const float infinity = std::numeric_limits<float>::infinity();
-
-struct hit_record {
-    point3  p;
-    vec3    normal;
-    float   t;
-    bool front_face;
-
-    inline void set_face_normal(const Ray& _ray, const vec3& outward_normal) {
-        front_face = dot(_ray.getDirection(), outward_normal) < 0;
-        normal = front_face ? outward_normal :-outward_normal;
-    }
-};
-
-bool hit(const Ray& _ray, float t_min, float t_max, const Triangle& _triangle, hit_record& _rec) { 
-    float tU, tV;
-    if ( intersectionMT(_ray, _triangle, _rec.t, tU, tV) ) {
-        if (_rec.t > t_min && _rec.t < t_max) {
-            // _rec.normal = reflect(_ray.getDirection(), _triangle.getNormal());
-            // _rec.normal = _triangle.getNormal();
-            // _rec.set_face_normal(_ray, _triangle.getNormal(tU, tV));
-            _rec.normal = _triangle.getNormal(tU, tV);
-            _rec.p = _ray.getAt(_rec.t);
-            return true;
-        }
-    }
-    return false;
-}
-
-bool hit_list(const Ray& _ray, float t_min, float t_max, const std::vector<Triangle>& _triangles, hit_record& _rec) {
-
-    bool hit_anything = false;
-    auto closest_so_far = t_max;
-
-    for (size_t i = 0; i < _triangles.size(); i++) {
-        hit_record tmp_rec;
-        if (glm::dot(_ray.getDirection(), _triangles[i].getNormal()) <= 0)
-        {
-            if ( hit(_ray, t_min, closest_so_far, _triangles[i], tmp_rec) ) {
-                if (_rec.t < closest_so_far) {
-                    hit_anything = true;
-                    closest_so_far = tmp_rec.t;
-                    _rec = tmp_rec;
-                }
-            }
-        }
-    }
-
-    return hit_anything;
-}
-
-color ray_color(const Ray& _ray, const std::vector<Triangle>& _triangles, int _depth) {
-    if (_depth <= 0)
-        return color(0.0f);
-
-    hit_record rec;
-    if ( hit_list(_ray, 0.0, infinity, _triangles, rec) ) {
-        // return color(rec.t);
-        // return 0.5f * rec.p + 0.5f;
-        // return 0.5f * rec.normal + 0.5f;
-        // point3 target = rec.normal + random3(-1.0, 1.0) * 0.1f;
-        // point3 target = rec.normal + random_unit_vector();
-        point3 target = random_in_hemisphere(rec.normal);
-        return ray_color( Ray(rec.p, target), _triangles, _depth-1) * 0.5f;
-    }
-
-    vec3 unit_direction = normalize(_ray.getDirection());
-    float t = 0.5*(unit_direction.y + 1.0f);
-    return (1.0f-t) * color(1.0f) + t * color(0.5f, 0.7f, 1.0f);
-}
 
 int main(int argc, char **argv) {
 
@@ -154,13 +72,13 @@ int main(int argc, char **argv) {
 
             int i = y * image_width + x;
 
-            color pixel_color(0.0f, 0.0f, 0.0f);
+            glm::vec3 pixel_color(0.0f, 0.0f, 0.0f);
             for (int s = 0; s < samples_per_pixel; ++s) {
                 float u = (x + randomf()) / (image_width-1);
                 float v = (y + randomf()) / (image_height-1);
 
                 Ray ray = cam.getRay(u, v);
-                pixel_color += ray_color(ray, triangles, max_depth);
+                pixel_color += raytrace(ray, triangles, max_depth);
             }
 
             pixel_color = pixel_color * over_samples;

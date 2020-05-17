@@ -1,15 +1,20 @@
 
 ![](docs/00.jpg)
 
-Hilma is 2D/3D geometry library in C++ with Python bindings (with support for Numpy) ready to be embed into your projects. Some of the code is based on:
+Hilma is 3D geometry library in C++ with Python bindings (with support for Numpy) ready to be embed into your projects. 
 
-* [OpenFrameworks](https://openframeworks.cc/) `ofMesh`, `ofPolyline` and `ofPath`
+Aknoledgements Some of the code is based on:
+
+* [OpenFrameworks](https://openframeworks.cc/) `ofMesh` and `ofPolyline`
 * [Mapbox's Earcut tessellator](https://github.com/mapbox/earcut)
 * [Tangram-es's ployline to spline converter](https://github.com/tangrams/tangram-es/blob/master/core/src/util/builders.cpp)
 * [Dan Wilcox's swig wrapper for GLM](https://github.com/danomatika/swig-openframeworks)
+* [Dimitri Diakopoulos' TinyPly](https://github.com/ddiakopoulos/tinyply)
+* [Syoyo Fujita's TinyObj loader](https://github.com/tinyobjloader/tinyobjloader)
+* [Peter Shirley's Ray Tracing in One Weekend ](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
 * [Ray/Triangle intersection](https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle)
 
-Dependencies
+Dependencies:
 
 * [glm](https://github.com/g-truc/glm)
 

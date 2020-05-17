@@ -1,6 +1,7 @@
 #pragma once
 
 #include <math.h>
+#include <cstdlib>
 
 #include "glm/glm.hpp"
 
@@ -17,6 +18,16 @@
 #endif
 
 namespace hilma {
+
+// Returns a random real in [0,1).
+inline float randomf() {
+    return rand() / (RAND_MAX + 1.0f);
+}
+
+// Returns a random real in [min,max).
+inline float randomf(float _min, float _max) {
+    return _min + (_max-_min) * randomf();
+}
 
 inline float mapValue(const float& _value, const float& _inputMin, const float& _inputMax, const float& _outputMin, const float& _outputMax, bool _clamp) {
     if (fabs(_inputMin - _inputMax) < std::numeric_limits<float>::epsilon()) { return _outputMin; } else {
