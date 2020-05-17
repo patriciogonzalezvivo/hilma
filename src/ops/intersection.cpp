@@ -92,7 +92,7 @@ IntersectionData intersection(const Ray& _ray, const Plane& _plane) {
 }
 
 // MOLLER_TRUMBORE
-#define CULLING
+// #define CULLING
 bool intersectionMT(const Ray& _ray, const Triangle& _triangle, float& _t, float& _u, float& _v) {
     glm::vec3 v0v1 = _triangle[1] - _triangle[0]; 
     glm::vec3 v0v2 = _triangle[2] - _triangle[0]; 

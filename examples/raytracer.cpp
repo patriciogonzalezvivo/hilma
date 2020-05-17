@@ -34,32 +34,45 @@ const float infinity = std::numeric_limits<float>::infinity();
 struct hit_record {
     point3  p;
     vec3    normal;
+    float   t;
+    bool front_face;
+
+    inline void set_face_normal(const Ray& _ray, const vec3& outward_normal) {
+        front_face = dot(_ray.getDirection(), outward_normal) < 0;
+        normal = front_face ? outward_normal :-outward_normal;
+    }
 };
 
-vec3 random_in_unit_sphere() {
-    while (true) {
-        glm::vec3 p = randomVec3(-1.0f, 1.0f);
-        if ( dot(p,p) >= 1) continue;
-        return p;
+bool hit(const Ray& _ray, float t_min, float t_max, const Triangle& _triangle, hit_record& _rec) { 
+    float tU, tV;
+    if ( intersectionMT(_ray, _triangle, _rec.t, tU, tV) ) {
+        if (_rec.t > t_min && _rec.t < t_max) {
+            // _rec.normal = reflect(_ray.getDirection(), _triangle.getNormal());
+            // _rec.normal = _triangle.getNormal();
+            // _rec.set_face_normal(_ray, _triangle.getNormal(tU, tV));
+            _rec.normal = _triangle.getNormal(tU, tV);
+            _rec.p = _ray.getAt(_rec.t);
+            return true;
+        }
     }
+    return false;
 }
 
-bool hit(const Ray& _ray, float t_min, float t_max, const std::vector<Triangle>& _triangles, hit_record& _rec) {
-    hit_record temp_rec;
+bool hit_list(const Ray& _ray, float t_min, float t_max, const std::vector<Triangle>& _triangles, hit_record& _rec) {
+
     bool hit_anything = false;
     auto closest_so_far = t_max;
 
-    float t, tU, tV;
     for (size_t i = 0; i < _triangles.size(); i++) {
-        if (glm::dot(_ray.getDirection(), _triangles[i].getNormal()) < 0) {
-            if (intersection(_ray, _triangles[i], t, tU, tV)) {
-                if (t < closest_so_far) {
+        hit_record tmp_rec;
+        if (glm::dot(_ray.getDirection(), _triangles[i].getNormal()) <= 0)
+        {
+            if ( hit(_ray, t_min, closest_so_far, _triangles[i], tmp_rec) ) {
+                if (_rec.t < closest_so_far) {
                     hit_anything = true;
-                    closest_so_far = t;
-                    temp_rec.normal = _triangles[i].getNormal() * 0.5f + 0.5f;
-                    temp_rec.p = _ray.getAt(t);
+                    closest_so_far = tmp_rec.t;
+                    _rec = tmp_rec;
                 }
-
             }
         }
     }
@@ -68,32 +81,34 @@ bool hit(const Ray& _ray, float t_min, float t_max, const std::vector<Triangle>&
 }
 
 color ray_color(const Ray& _ray, const std::vector<Triangle>& _triangles, int _depth) {
-
     if (_depth <= 0)
-        return color(0,0,0);
+        return color(0.0f);
 
     hit_record rec;
-    if ( hit(_ray, 0, infinity, _triangles, rec)) {
-        // point3 target = rec.p + rec.normal + random_in_unit_sphere();
-        point3 target = rec.p + rec.normal + normalize( randomVec3(-1.0f, 1.0f) );
-        return ray_color( Ray(rec.p, target - rec.p), _triangles, _depth-1) * 0.5f;
+    if ( hit_list(_ray, 0.0, infinity, _triangles, rec) ) {
+        // return color(rec.t);
+        // return 0.5f * rec.p + 0.5f;
+        // return 0.5f * rec.normal + 0.5f;
+        // point3 target = rec.normal + random3(-1.0, 1.0) * 0.1f;
+        // point3 target = rec.normal + random_unit_vector();
+        point3 target = random_in_hemisphere(rec.normal);
+        return ray_color( Ray(rec.p, target), _triangles, _depth-1) * 0.5f;
     }
 
-
     vec3 unit_direction = normalize(_ray.getDirection());
-    float t = 0.5f * (unit_direction.y + 1.0f);
-    return (1.0f-t) * color(1.0f, 1.0f, 1.0f) + t * color(0.5f, 0.7f, 1.0f);
+    float t = 0.5*(unit_direction.y + 1.0f);
+    return (1.0f-t) * color(1.0f) + t * color(0.5f, 0.7f, 1.0f);
 }
 
 int main(int argc, char **argv) {
 
     // Set up conext
     const float aspect_ratio = 16.0f / 9.0f;
-    const int image_width = 512;
+    const int image_width = 1024*0.5;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const int samples_per_pixel = 10;
+    const float samples_per_pixel = 4;
     const float over_samples = 1.0f/samples_per_pixel; 
-    const int max_depth = 10;
+    const int max_depth = 50;
 
     // Scene
     Camera cam;
@@ -149,9 +164,10 @@ int main(int argc, char **argv) {
             }
 
             pixel_color = pixel_color * over_samples;
-            pixels[i * 3 + 0] = char(pixel_color.r * 255.999);
-            pixels[i * 3 + 1] = char(pixel_color.g * 255.999);
-            pixels[i * 3 + 2] = char(pixel_color.b * 255.999);
+            pixel_color = sqrt(pixel_color);
+            pixels[i * 3 + 0] = static_cast<char>(256 * clamp(pixel_color.r, 0.0, 0.999));
+            pixels[i * 3 + 1] = static_cast<char>(256 * clamp(pixel_color.g, 0.0, 0.999));
+            pixels[i * 3 + 2] = static_cast<char>(256 * clamp(pixel_color.b, 0.0, 0.999));
 
             std::cout << deleteLine;
             std::cout << " RayTracing - [ ";
