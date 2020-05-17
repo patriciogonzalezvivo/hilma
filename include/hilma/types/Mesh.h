@@ -67,7 +67,7 @@ public:
     void        clearVertices() { vertices.clear(); }
 
     const glm::vec3& getVertex(size_t _index) const { return vertices[_index]; }
-    size_t          getVerticesTotal() const { return vertices.size(); }
+    const size_t    getVerticesTotal() const { return vertices.size(); }
     const  std::vector<glm::vec3>& getVertices() const { return vertices; }
 
     // Colorss

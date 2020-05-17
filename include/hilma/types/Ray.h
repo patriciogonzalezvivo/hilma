@@ -13,16 +13,19 @@ public:
     void set(const glm::vec3& _org, const glm::vec3& _dir){
         origin = _org;
         direction = _dir;
+        invDirection = 1.0f / _dir; 
     }
     
     const glm::vec3& getOrigin() const { return origin;}
     const glm::vec3& getDirection() const { return direction;}
+    const glm::vec3& getInvertDirection() const { return invDirection; }
     
     glm::vec3 getAt(float _t) const { return origin + direction * _t; }
     
 private:
     glm::vec3 origin;
     glm::vec3 direction;
+    glm::vec3 invDirection;
 };
 
 }

@@ -4,6 +4,7 @@
 #include "hilma/types/Line.h"
 #include "hilma/types/Plane.h"
 #include "hilma/types/Triangle.h"
+#include "hilma/types/BoundingBox.h"
 
 #include <string>
 
@@ -31,11 +32,16 @@ struct IntersectionData {
     bool        hit         = false;
 };
 
+
 // Ray
-IntersectionData intersection(const Ray& _ray, const Plane& _plane);
-IntersectionData intersection(const Ray& _ray, const Triangle& _triangle);
-bool             intersection(const Ray& _ray, const Triangle& _triangle, float& _t, float& _u, float& _v);
-bool             intersectionMT(const Ray& _ray, const Triangle& _triangle, float& _t, float& _u, float& _v);
+IntersectionData    intersection(const Ray& _ray, const Plane& _plane);
+
+IntersectionData    intersection(const Ray& _ray, const BoundingBox& _bbox);
+bool                intersection(const Ray& _ray, const BoundingBox& _bbox, float& _tmin, float& _tmax);
+
+IntersectionData    intersection(const Ray& _ray, const Triangle& _triangle);
+bool                intersection(const Ray& _ray, const Triangle& _triangle, float& _t, float& _u, float& _v);
+bool                intersectionMT(const Ray& _ray, const Triangle& _triangle, float& _t, float& _u, float& _v);
 
 // Line
 IntersectionData intersection(const Line& _line, const Plane& _plane);

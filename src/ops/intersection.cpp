@@ -91,6 +91,42 @@ IntersectionData intersection(const Ray& _ray, const Plane& _plane) {
     return idata;
 }
 
+bool intersection(const Ray& _ray, const BoundingBox& _bbox, float &_tmin, float &_tmax) {
+    float tx1 = (_bbox.min.x - _ray.getOrigin().x)*_ray.getInvertDirection().x;
+    float tx2 = (_bbox.max.x - _ray.getOrigin().x)*_ray.getInvertDirection().x;
+ 
+    _tmin = std::min(tx1, tx2);
+    _tmax = std::max(tx1, tx2);
+ 
+    float ty1 = (_bbox.min.y - _ray.getOrigin().y)*_ray.getInvertDirection().y;
+    float ty2 = (_bbox.max.y - _ray.getOrigin().y)*_ray.getInvertDirection().y;
+ 
+    _tmin = std::max(_tmin, std::min(ty1, ty2));
+    _tmax = std::min(_tmax, std::max(ty1, ty2));
+
+    float tz1 = (_bbox.min.z - _ray.getOrigin().z)*_ray.getInvertDirection().z;
+    float tz2 = (_bbox.max.z - _ray.getOrigin().z)*_ray.getInvertDirection().z;
+ 
+    _tmin = std::max(_tmin, std::min(tz1, tz2));
+    _tmax = std::min(_tmax, std::max(tz1, tz2));
+ 
+    return _tmax >= _tmin;
+}
+
+IntersectionData intersection(const Ray& _ray, const BoundingBox& _bbox) {
+    IntersectionData idata;
+
+    float tmin, tmax;
+    idata.hit = intersection(_ray, _bbox, tmin, tmax);
+
+    if (!idata.hit) return idata;
+
+    idata.distance = tmin;
+    idata.position = _ray.getAt(tmin);
+
+    return idata;
+}
+
 // MOLLER_TRUMBORE
 // #define CULLING
 bool intersectionMT(const Ray& _ray, const Triangle& _triangle, float& _t, float& _u, float& _v) {
@@ -181,11 +217,12 @@ IntersectionData intersection(const Ray& _ray, const Triangle& _triangle) {
 
     if (!idata.hit) return idata;
 
-    float vn = glm::dot(_ray.getDirection(), _triangle.getNormal());
-    glm::vec3 aa = _ray.getOrigin() - _triangle[0];
-    float xpn = glm::dot(aa, _triangle.getNormal());
-    idata.distance = -xpn / vn;
-    idata.position = _ray.getAt(idata.distance);
+    // float vn = glm::dot(_ray.getDirection(), _triangle.getNormal());
+    // glm::vec3 aa = _ray.getOrigin() - _triangle[0];
+    // float xpn = glm::dot(aa, _triangle.getNormal());
+    // idata.distance = -xpn / vn;
+    idata.distance = t;
+    idata.position = _ray.getAt(t);
     return idata;
 
 }

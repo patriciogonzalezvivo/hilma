@@ -24,52 +24,52 @@ int main(int argc, char **argv) {
     const float aspect_ratio = 16.0f / 9.0f;
     const int image_width = 1024*0.5;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const float samples_per_pixel = 4;
+    const float samples_per_pixel = 1;
     const float over_samples = 1.0f/samples_per_pixel; 
     const int max_depth = 50;
 
     // Scene
     Camera cam;
-    Mesh scene;
+
+    std::vector<Hittable> scene;
+
+    Mesh plane = hilma::plane(6.0f, 6.0f, 1, 1);
+    translateZ(plane, -0.6f);
+    rotateX(plane, -PI/2.);
+    translateZ(plane, -1.0f);
+    scene.push_back( Hittable(plane) );
 
     // Mesh head = loadPly("head.ply");
     // center(head);
     // scale(head, 0.1);
-    // scene.append(head);    
+    // translateZ(head, -1.0f);
+    // scene.push_back( Hittable(head) );
+    
+
+    Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
+    rotateX(cone, PI);
+    translateX(cone, -2.0f);
+    translateZ(cone, -1.0f);
+    scene.push_back( Hittable(cone) );
+
+    Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
+    translateX(cylinder, 2.0f);
+    translateZ(cylinder, -1.0f);
+    scene.push_back( Hittable(cylinder) );
     
     Mesh icosphere = hilma::icosphere(0.5f, 2);
-    scene.append(icosphere);
-
-    // Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
-    // rotateX(cone, PI);
-    // translateX(cone, -2.0f);
-    // scene.append(cone);
-
-    // Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
-    // translateX(cylinder, 2.0f);
-    // scene.append(cylinder);
-    
-    Mesh plane = hilma::plane(6.0f, 6.0f, 1, 1);
-    translateZ(plane, -0.6f);
-    rotateX(plane, -PI/2.);
-    scene.append(plane);
-
-    savePly("raytracer.ply", scene, false);
-
-    translate(scene, 0.0f, 0.0f, -1.0f);
-    std::vector<Triangle> triangles = scene.getTriangles();
+    translateZ(icosphere, -1.0f);
+    scene.push_back( Hittable(icosphere) );
 
     Timer timer;
     timer.start();
     std::cout << std::endl;
-
     const std::string deleteLine = "\e[2K\r\e[1A";
     const int totalPixels = image_width * image_height;
     const float totalRays = image_width * image_height * samples_per_pixel;
     unsigned char* pixels = new unsigned char[totalPixels * 3];
     for (int y = 0; y < image_height; ++y) {
         for (int x = 0; x < image_width; ++x) {
-
             int i = y * image_width + x;
 
             glm::vec3 pixel_color(0.0f, 0.0f, 0.0f);
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
                 float v = (y + randomf()) / (image_height-1);
 
                 Ray ray = cam.getRay(u, v);
-                pixel_color += raytrace(ray, triangles, max_depth);
+                pixel_color += raytrace(ray, scene, max_depth);
             }
 
             pixel_color = pixel_color * over_samples;
