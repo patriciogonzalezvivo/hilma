@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <iostream>
+
 
 #include "hilma/types/Ray.h"
 #include "hilma/types/Mesh.h"
@@ -15,13 +17,15 @@ namespace hilma {
 //
 
 struct HitRecord {
-    MaterialConstPtr    material;
+    MaterialConstPtr    material    = nullptr;
+    glm::vec4           color       = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
     glm::vec3           position;
     glm::vec3           normal;
-    float               distance;
-    bool                frontFace;
-
-    void    setNormal(const Ray& _ray, const glm::vec3& outward_normal);
+    glm::vec2           texcoord;
+    float               distance     = -1.0f;
+    bool                frontFace    = false;
+    bool                haveColor    = false;
+    bool                haveTexcoord = false;
 };
 
 class Hittable : public BoundingBox {
@@ -34,7 +38,7 @@ public:
     std::vector<Triangle> triangles;
 };
 
-// glm::vec3   raytrace(const Ray& _ray, const std::vector<Triangle>& _triangles, int _depth);
-glm::vec3   raytrace(const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth);
+bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Triangle>& _triangles, HitRecord& _rec);
+bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Hittable>& _hittables, HitRecord& _rec);
 
 }

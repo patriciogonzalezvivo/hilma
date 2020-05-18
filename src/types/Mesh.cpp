@@ -555,6 +555,7 @@ std::vector<Triangle> Mesh::getTriangles() const {
     std::vector<glm::ivec3> triIndices = getTrianglesIndices();
     std::vector<Triangle> triangles;
 
+    int t = 0;
     for (std::vector<glm::ivec3>::iterator it = triIndices.begin(); it != triIndices.end(); ++it) {
         Triangle tri = Triangle(vertices[it->x], vertices[it->y], vertices[it->z]);
         if (haveColors()) tri.setColors(colors[it->x], colors[it->y], colors[it->z]);
@@ -563,6 +564,7 @@ std::vector<Triangle> Mesh::getTriangles() const {
         if (haveMaterials()) tri.material = getMaterialForFaceIndex(it->x);
         
         triangles.push_back( tri );
+        t++;
     }
 
     return triangles;
@@ -750,16 +752,15 @@ void Mesh::setMaterial(const Material& _material) {
     materialsByName.clear();
     materialsByIndices.clear();
 
-    materialsByName[_material.name] = std::make_shared<Material>(_material);
-    IndexMaterial in_mat(0, materialsByName[_material.name] );
-    materialsByIndices.push_back(in_mat);
+    addMaterial(_material, 0);
 }
 
-void Mesh::addMaterial(const Material& _material) {
-    size_t currentIndex = faceIndices.size();
+void Mesh::addMaterial(const Material& _material, int _index) {
+    if (_index < 0)
+        _index = faceIndices.size();
 
     materialsByName[_material.name] = std::make_shared<Material>(_material);
-    IndexMaterial in_mat(currentIndex, materialsByName[_material.name] );
+    IndexMaterial in_mat(_index, materialsByName[_material.name] );
     materialsByIndices.push_back(in_mat);
 }
 
@@ -776,10 +777,10 @@ std::vector<std::string> Mesh::getMaterialsNames() const {
 }
 
 MaterialConstPtr Mesh::getMaterialForFaceIndex(size_t _index) const {
-    for (size_t i = materialsByIndices.size() - 1 ; i > 0; i--)
+    for (size_t i = materialsByIndices.size() - 1 ; i >= 0; i--)
         if (_index >= materialsByIndices[i].first)
             return std::const_pointer_cast<const Material>(materialsByIndices[i].second);
-    return NULL;
+    return nullptr;
 }
 
 

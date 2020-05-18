@@ -10,7 +10,7 @@ namespace hilma {
 
 struct Material {
 
-    Material() {}
+    // Material() {}
     Material(const std::string& _name): name(_name) {}
 
     std::string name;
@@ -28,10 +28,10 @@ struct Material {
     glm::vec3   emissive;           // Ke
 
     std::string roughness_map;
-    float       roughness;
+    float       roughness       = 1.0f;
 
     std::string metallic_map;
-    float       metallic;
+    float       metallic        = 0.0f;
     
     std::string normal_map;
     std::string bump_map;           // map_bump

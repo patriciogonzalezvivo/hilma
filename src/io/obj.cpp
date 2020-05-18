@@ -22,8 +22,7 @@ namespace hilma {
 
 
 Material InitMaterial (const tinyobj::material_t& _material) {
-    Material mat;
-    mat.name = toLower( toUnderscore( purifyString( _material.name ) ) );
+    Material mat = Material( toLower( toUnderscore( purifyString( _material.name ) ) ) );
     mat.diffuse = glm::vec3(_material.diffuse[0], _material.diffuse[1], _material.diffuse[2]);
     mat.diffuse_map = _material.diffuse_texname;
 
@@ -183,8 +182,8 @@ bool loadObj( const std::string& _filename, Mesh& _mesh ) {
         if (hasSmoothingGroup(shapes[s]) > 0)
             computeSmoothingNormals(attrib, shapes[s], smoothVertexNormals);
 
-        std::map<INDEX_TYPE, tinyobj::index_t> unique_indices;
-        std::map<INDEX_TYPE, tinyobj::index_t>::iterator iter;
+        // std::map<INDEX_TYPE, tinyobj::index_t> unique_indices;
+        // std::map<INDEX_TYPE, tinyobj::index_t>::iterator iter;
         
         int mi = -1;
         INDEX_TYPE iCounter = 0;
@@ -207,26 +206,26 @@ bool loadObj( const std::string& _filename, Mesh& _mesh ) {
                 }
             }
 
-            bool reuse = false;
-            iter = unique_indices.find(vi);
+            // bool reuse = false;
+            // iter = unique_indices.find(vi);
 
-            // if already exist 
-            if (iter != unique_indices.end())
-                // and have the same attributes
-                if ((iter->second.normal_index == ni) &&
-                    (iter->second.texcoord_index == ti) )
-                    reuse = true;
+            // // if already exist 
+            // if (iter != unique_indices.end())
+            //     // and have the same attributes
+            //     if ((iter->second.normal_index == ni) &&
+            //         (iter->second.texcoord_index == ti) )
+            //         reuse = true;
 
-            // Re use the vertex
-            if (reuse)
-                _mesh.addFaceIndex( (INDEX_TYPE)iter->second.vertex_index );
+            // // Re use the vertex
+            // if (reuse)
+            //     _mesh.addFaceIndex( (INDEX_TYPE)iter->second.vertex_index );
 
-            // Other wise create a new one
-            else 
+            // // Other wise create a new one
+            // else 
             {
-                unique_indices[vi].vertex_index = iCounter;
-                unique_indices[vi].normal_index = ni;
-                unique_indices[vi].texcoord_index = ti;
+                // unique_indices[vi].vertex_index = iCounter;
+                // unique_indices[vi].normal_index = ni;
+                // unique_indices[vi].texcoord_index = ti;
                 
                 _mesh.addVertex( getVertex(attrib, vi) );
 

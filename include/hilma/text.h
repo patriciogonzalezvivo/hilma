@@ -10,6 +10,10 @@
 #include <cctype>
 #include <vector>
 
+namespace hilma {
+
+const std::string DELETE_LINE = "\e[2K\r\e[1A";
+
 //-------------------------------------------------- << and >>
 
 inline std::ostream& operator<<(std::ostream& os, const glm::vec3& vec) {
@@ -182,4 +186,17 @@ inline std::string toString(const glm::vec4 &_vec, char _sep = ','){
     std::ostringstream strStream;
     strStream<< _vec.x << _sep << _vec.y << _sep << _vec.z << _sep << _vec.w;
     return strStream.str();
+}
+
+inline void printProgressBar(const std::string& _name, float _pct, int total_bars = 50 ) {
+    std::cout << DELETE_LINE;
+    std::cout << _name << " [ ";
+    _pct *= total_bars;
+    for (int i = 0; i < total_bars; i++) {
+        if (i < _pct) std::cout << "#";
+        else std::cout << ".";
+    }
+    std::cout << " ]" << std::endl;
+}
+
 }
