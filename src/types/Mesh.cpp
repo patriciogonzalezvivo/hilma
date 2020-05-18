@@ -561,6 +561,7 @@ std::vector<Triangle> Mesh::getTriangles() const {
         if (haveNormals()) tri.setNormals(normals[it->x], normals[it->y], normals[it->z]);
         if (haveTexCoords()) tri.setTexCoords(texcoords[it->x], texcoords[it->y], texcoords[it->z]);
         if (haveMaterials()) tri.material = getMaterialForFaceIndex(it->x);
+        
         triangles.push_back( tri );
     }
 
@@ -745,6 +746,15 @@ void Mesh::mergeDuplicateVertices() {
 
 }
 
+void Mesh::setMaterial(const Material& _material) {
+    materialsByName.clear();
+    materialsByIndices.clear();
+
+    materialsByName[_material.name] = std::make_shared<Material>(_material);
+    IndexMaterial in_mat(0, materialsByName[_material.name] );
+    materialsByIndices.push_back(in_mat);
+}
+
 void Mesh::addMaterial(const Material& _material) {
     size_t currentIndex = faceIndices.size();
 
@@ -766,7 +776,7 @@ std::vector<std::string> Mesh::getMaterialsNames() const {
 }
 
 MaterialConstPtr Mesh::getMaterialForFaceIndex(size_t _index) const {
-    for (size_t i = materialsByIndices.size() - 1 ; i >= 0; i--)
+    for (size_t i = materialsByIndices.size() - 1 ; i > 0; i--)
         if (_index >= materialsByIndices[i].first)
             return std::const_pointer_cast<const Material>(materialsByIndices[i].second);
     return NULL;

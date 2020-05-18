@@ -12,6 +12,7 @@
 #include "hilma/ops/transform.h"
 #include "hilma/ops/raytrace.h"
 
+#include "hilma/io/obj.h"
 #include "hilma/io/ply.h"
 #include "hilma/io/png.h"
 
@@ -22,44 +23,61 @@ int main(int argc, char **argv) {
 
     // Set up conext
     const float aspect_ratio = 16.0f / 9.0f;
-    const int image_width = 1024*0.5;
+    const int image_width = 1024 * 0.5;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const float samples_per_pixel = 1;
+    const float samples_per_pixel = 10;
     const float over_samples = 1.0f/samples_per_pixel; 
     const int max_depth = 50;
 
     // Scene
     Camera cam;
 
+    Mesh sceneMesh;
     std::vector<Hittable> scene;
+
+    Mesh cornell = loadObj("CornellBox.obj");
+    center(cornell);
+    translateY(cornell, 0.4f);
+    translateZ(cornell, -2.0f);
+    scene.push_back( Hittable(cornell) );
+    sceneMesh.append(cornell);
+
+    Material metal;
+    metal.name = "metal";
+    metal.metallic = 1.0f;
+    metal.roughness = 0.5f;
+
+    Material plastic;
+    plastic.name = "plastic";
+    plastic.roughness = 0.1;
+    plastic.diffuse = glm::vec3(0.1,0.3,0.7);
 
     Mesh plane = hilma::plane(6.0f, 6.0f, 1, 1);
     translateZ(plane, -0.6f);
     rotateX(plane, -PI/2.);
     translateZ(plane, -1.0f);
     scene.push_back( Hittable(plane) );
+    sceneMesh.append(plane);
 
-    // Mesh head = loadPly("head.ply");
-    // center(head);
-    // scale(head, 0.1);
-    // translateZ(head, -1.0f);
-    // scene.push_back( Hittable(head) );
-    
+    // Mesh icosphere = hilma::icosphere(0.5f, 2);
+    // translateZ(icosphere, -1.0f);
+    // scene.push_back( Hittable(icosphere) );
 
     Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
+    cone.setMaterial(plastic);
     rotateX(cone, PI);
     translateX(cone, -2.0f);
     translateZ(cone, -1.0f);
     scene.push_back( Hittable(cone) );
 
     Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
+    cylinder.setMaterial(metal);
     translateX(cylinder, 2.0f);
     translateZ(cylinder, -1.0f);
     scene.push_back( Hittable(cylinder) );
-    
-    Mesh icosphere = hilma::icosphere(0.5f, 2);
-    translateZ(icosphere, -1.0f);
-    scene.push_back( Hittable(icosphere) );
+
+    // std::vector<Triangle> triangles = sceneMesh.getTriangles();
+    // savePly("raytracer.ply", sceneMesh, false);
 
     Timer timer;
     timer.start();

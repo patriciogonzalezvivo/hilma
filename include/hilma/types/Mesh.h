@@ -158,6 +158,7 @@ public:
     std::vector<glm::ivec2> getLinesIndices() const;
 
     void        addMaterial(const Material& _material);
+    void        setMaterial(const Material& _material);
     MaterialPtr getMaterial(const std::string& _name);
     bool        haveMaterials() const { return !materialsByIndices.empty(); }
     

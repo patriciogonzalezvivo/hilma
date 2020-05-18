@@ -183,8 +183,8 @@ bool loadObj( const std::string& _filename, Mesh& _mesh ) {
         if (hasSmoothingGroup(shapes[s]) > 0)
             computeSmoothingNormals(attrib, shapes[s], smoothVertexNormals);
 
-        std::map<int, tinyobj::index_t> unique_indices;
-        std::map<int, tinyobj::index_t>::iterator iter;
+        std::map<INDEX_TYPE, tinyobj::index_t> unique_indices;
+        std::map<INDEX_TYPE, tinyobj::index_t>::iterator iter;
         
         int mi = -1;
         INDEX_TYPE iCounter = 0;
@@ -216,19 +216,22 @@ bool loadObj( const std::string& _filename, Mesh& _mesh ) {
                 if ((iter->second.normal_index == ni) &&
                     (iter->second.texcoord_index == ti) )
                     reuse = true;
-            
+
             // Re use the vertex
             if (reuse)
                 _mesh.addFaceIndex( (INDEX_TYPE)iter->second.vertex_index );
 
             // Other wise create a new one
-            else {
-                unique_indices[vi].vertex_index = (int)iCounter;
+            else 
+            {
+                unique_indices[vi].vertex_index = iCounter;
                 unique_indices[vi].normal_index = ni;
                 unique_indices[vi].texcoord_index = ti;
                 
                 _mesh.addVertex( getVertex(attrib, vi) );
-                _mesh.addColor( getColor(attrib, vi) );
+
+                if (attrib.colors.size() > 0)
+                    _mesh.addColor( getColor(attrib, vi) );
 
                 // If there is normals add them
                 if (attrib.normals.size() > 0)
@@ -242,7 +245,8 @@ bool loadObj( const std::string& _filename, Mesh& _mesh ) {
                 if (attrib.texcoords.size() > 0)
                     _mesh.addTexCoord( getTexCoords(attrib, ti) );
 
-                _mesh.addFaceIndex( iCounter++ );
+                _mesh.addFaceIndex( iCounter );
+                iCounter++;
             }
             
         }

@@ -5,6 +5,7 @@
 #include "glm/gtx/norm.hpp"
 
 #include <cstdlib>
+#include <iostream>
 
 #include "hilma/math.h"
 #include "hilma/ops/intersection.h"
@@ -55,9 +56,13 @@ bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const Tri
     float distance, u, v;
     if ( intersectionMT(_ray, _triangle, distance, u, v) ) {
         if (distance > _minDistance && distance < _maxDistance ) {
+
             _rec.distance = distance;
             _rec.position = _ray.getAt( distance );
             _rec.setNormal(_ray, _triangle.getNormal(u, v));
+            if (_triangle.material != nullptr)
+                _rec.material = _triangle.material;
+            
             return true;
         }
     }
@@ -66,12 +71,12 @@ bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const Tri
 
 bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Triangle>& _triangles, HitRecord& _rec) {
 
-    HitRecord tmp_rec;
     bool hit_anything = false;
     float closest_so_far = _maxDistance;
 
+    HitRecord tmp_rec;
     for (size_t i = 0; i < _triangles.size(); i++) {
-        if (glm::dot(_ray.getDirection(), _triangles[i].getNormal()) < 0)
+        // if (glm::dot(_ray.getDirection(), _triangles[i].getNormal()) < 0)
         {
             if ( raytrace(_ray, _minDistance, closest_so_far, _triangles[i], tmp_rec) ) {
                 if ( tmp_rec.distance < closest_so_far ) { //&& tmp_rec.frontFace ) {
@@ -91,28 +96,27 @@ bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std
 
 bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Hittable>& _hittables, HitRecord& _rec) {
 
-    float tmin, tmax;
-    HitRecord tmp_rec;
     bool hit_anything = false;
     float closest_so_far = _maxDistance;
 
+    float tmin, tmax;
+    HitRecord tmp_rec;
+    // foreach hittable
     for (size_t i = 0; i < _hittables.size(); i++) {
 
-        // // Skip hittables (meshes) which boundingboxes don't intersect with the ray or are not contain by it
-        if (_hittables[i].contains(_ray.getOrigin()) || 
-            intersection(_ray, static_cast<Hittable>(_hittables[i]), tmin, tmax) ) 
+        // //but not those whos ray origine are insde of it or doesn't intersect their bounding boxes
+        // if (_hittables[i].contains(_ray.getOrigin()) ||
+        //     intersection(_ray, static_cast<Hittable>(_hittables[i]), tmin, tmax) ) 
         {
-            // if ( tmin < closest_so_far ) 
-            {
-                if ( raytrace(_ray, _minDistance, closest_so_far, _hittables[i].triangles, tmp_rec) ) {
-                    if ( tmp_rec.distance < closest_so_far ) { //&& tmp_rec.frontFace ) {
-                        hit_anything = true;
-                        closest_so_far = tmp_rec.distance;
-                        _rec = tmp_rec;
-                    }
+            if ( raytrace(_ray, _minDistance, closest_so_far, _hittables[i].triangles, tmp_rec) ) {
+                if ( tmp_rec.distance < closest_so_far ) {
+                    hit_anything = true;
+                    closest_so_far = tmp_rec.distance;
+                    _rec = tmp_rec;
                 }
             }
         }
+
     }
 
     return hit_anything;
@@ -123,11 +127,29 @@ glm::vec3 raytrace(const Ray& _ray, const std::vector<Hittable>& _hittables, int
         return glm::vec3(0.0f);
 
     HitRecord rec;
-    if ( raytrace(_ray, 0.01, infinity, _hittables, rec) ) {
-        // return glm::vec3(rec.distance);
-        glm::vec3 target = rec.normal + random_unit_vector();
-        // glm::vec3 target = random_in_hemisphere(rec.normal);
-        return raytrace( Ray(rec.position, target), _hittables, _depth-1) * 0.5f;
+    if ( raytrace(_ray, 0.001, infinity, _hittables, rec) ) {
+
+        if (!rec.frontFace)
+            return glm::vec3(0.0f);
+
+        glm::vec3 attenuation = glm::vec3(0.5f);
+        glm::vec3 emission = glm::vec3(0.0f);
+        glm::vec3 target = rec.normal;
+        glm::vec3 roughness = random_unit_vector();
+
+        if (rec.material != nullptr) {
+            attenuation = rec.material->diffuse;
+            emission = rec.material->emissive;
+            glm::vec3 reflected = glm::reflect(glm::normalize(_ray.getDirection()), target);
+            target = glm::mix(target, reflected, rec.material->metallic);
+            target += roughness * (0.5f + rec.material->roughness * 0.5f);
+        }
+        else
+            target += roughness;
+
+        Ray scattered(rec.position, target);
+
+        return emission + attenuation * raytrace( scattered, _hittables, _depth-1);
     }
 
     glm::vec3 unit_direction = normalize(_ray.getDirection() );
