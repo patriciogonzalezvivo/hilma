@@ -22,18 +22,7 @@ bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const Tri
             _rec.frontFace = glm::dot(_ray.getDirection(), _rec.normal) < 0;
             _rec.normal = _rec.frontFace ? _rec.normal :-_rec.normal;
 
-            // if (_triangle.material!= nullptr)
-            _rec.material = _triangle.material;
-            
-            if (_triangle.haveColors()) {
-                _rec.color = _triangle.getColor(u, v);
-                _rec.haveColor = true;
-            }
-            
-            if (_triangle.haveTexCoords()) {
-                _rec.texcoord = _triangle.getTexCoord(u, v);
-                _rec.haveTexcoord = true;
-            }
+            _rec.triangle = std::make_shared<Triangle>(_triangle);
 
             return true;
         }
@@ -71,24 +60,34 @@ bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std
     bool hit_anything = false;
     float closest_so_far = _maxDistance;
 
-    float tmin, tmax;
     HitRecord tmp_rec;
+    float tmin, tmax;
     // foreach hittable
     for (size_t i = 0; i < _hittables.size(); i++) {
 
-        // //but not those whos ray origine are insde of it or doesn't intersect their bounding boxes
-        // if (_hittables[i].contains(_ray.getOrigin()) ||
-        //     intersection(_ray, static_cast<Hittable>(_hittables[i]), tmin, tmax) ) 
+        // if ( raytrace(_ray, _minDistance, closest_so_far, _hittables[i].triangles, tmp_rec) ) {
+        //     if ( tmp_rec.distance < closest_so_far ) {
+        //         hit_anything = true;
+        //         closest_so_far = tmp_rec.distance;
+        //         _rec = tmp_rec;
+        //     }
+        // }
+
+
+        // if (_hittables[i].contains(_ray.getOrigin() ) ||
+        // if ( intersection(_ray, static_cast<Hittable>(_hittables[i]), tmin, tmax) ) 
         {
-            if ( raytrace(_ray, _minDistance, closest_so_far, _hittables[i].triangles, tmp_rec) ) {
-                if ( tmp_rec.distance < closest_so_far ) {
-                    hit_anything = true;
-                    closest_so_far = tmp_rec.distance;
-                    _rec = tmp_rec;
+
+            for (size_t j = 0; j < _hittables[i].triangles.size(); j++) {
+                if ( raytrace(_ray, _minDistance, closest_so_far, _hittables[i].triangles[j], tmp_rec) ) {
+                    if ( tmp_rec.distance < closest_so_far ) {
+                        hit_anything = true;
+                        closest_so_far = tmp_rec.distance;
+                        _rec = tmp_rec;
+                    }   
                 }
             }
         }
-
     }
 
     return hit_anything;

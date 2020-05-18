@@ -30,6 +30,7 @@ public:
 
     void    expand(const glm::vec2& _v) { expand(_v.x, _v.y); }
     void    expand(const glm::vec3& _v) { expand(_v.x, _v.y, _v.z); }
+    void    expand(const BoundingBox& _b) { expand(_b.min); expand(_b.max); }
 
     void    expand(float _x, float _y) {
         min.x = std::min(min.x, _x);

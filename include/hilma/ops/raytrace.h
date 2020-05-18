@@ -7,7 +7,6 @@
 #include "hilma/types/Ray.h"
 #include "hilma/types/Mesh.h"
 #include "hilma/types/Triangle.h"
-#include "hilma/types/Material.h"
 
 namespace hilma {
 
@@ -17,15 +16,11 @@ namespace hilma {
 //
 
 struct HitRecord {
-    MaterialConstPtr    material    = nullptr;
-    glm::vec4           color       = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
     glm::vec3           position;
     glm::vec3           normal;
-    glm::vec2           texcoord;
-    float               distance     = -1.0f;
-    bool                frontFace    = false;
-    bool                haveColor    = false;
-    bool                haveTexcoord = false;
+    float               distance    = -1.0f;
+    TriangleConstPtr    triangle    = nullptr;
+    bool                frontFace   = false;
 };
 
 class Hittable : public BoundingBox {

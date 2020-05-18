@@ -15,6 +15,7 @@
 #include "hilma/ops/generate.h"
 #include "hilma/ops/transform.h"
 #include "hilma/ops/raytrace.h"
+#include "hilma/ops/intersection.h"
 
 #include "hilma/io/obj.h"
 #include "hilma/io/ply.h"
@@ -66,12 +67,12 @@ glm::vec3 raytrace(const Ray& _ray, const std::vector<Hittable>& _hittables, int
         glm::vec3 target = rec.normal;
         glm::vec3 lambert = random_unit_vector();
 
-        if (rec.material != nullptr) {
-            attenuation = rec.material->diffuse;
-            emission = rec.material->emissive * 10.0f;
+        if (rec.triangle->material != nullptr) {
+            attenuation = rec.triangle->material->diffuse;
+            emission = rec.triangle->material->emissive * 3.0f;
             glm::vec3 reflected = glm::reflect(glm::normalize(_ray.getDirection()), rec.normal);
-            target = glm::mix(target, reflected, rec.material->metallic);
-            target += lambert * (0.5f + rec.material->roughness);
+            target = glm::mix(target, reflected, rec.triangle->material->metallic);
+            target += lambert * (0.25f + rec.triangle->material->roughness);
         }
         else
             target += lambert;
@@ -89,9 +90,9 @@ int main(int argc, char **argv) {
 
     // Set up conext
     const float aspect_ratio = 16.0f / 9.0f;
-    const int image_width = 1024 * 0.5;
+    const int image_width = 1024;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const float samples_per_pixel = 50;
+    const float samples_per_pixel = 10;
     const float over_samples = 1.0f/samples_per_pixel; 
     const int max_depth = 50;
 
@@ -106,6 +107,12 @@ int main(int argc, char **argv) {
     translateZ(cornell, -2.0f);
     scene.push_back( Hittable(cornell) );
 
+    Mesh plane = hilma::plane(6.0f, 6.0f, 1, 1);
+    translateZ(plane, -0.6f);
+    rotateX(plane, -PI/2.);
+    translateZ(plane, -1.0f);
+    scene.push_back( Hittable(plane) );
+
     Material metal = Material("metal");
     metal.diffuse = glm::vec3(0.5);
     metal.metallic = 1.0f;
@@ -116,15 +123,10 @@ int main(int argc, char **argv) {
     plastic.diffuse = glm::vec3(0.3,0.3,1.0);
     plastic.roughness = 0.2;
 
-    Mesh plane = hilma::plane(6.0f, 6.0f, 1, 1);
-    translateZ(plane, -0.6f);
-    rotateX(plane, -PI/2.);
-    translateZ(plane, -1.0f);
-    scene.push_back( Hittable(plane) );
-
-    // Mesh icosphere = hilma::icosphere(0.5f, 2);
-    // translateZ(icosphere, -1.0f);
-    // scene.push_back( Hittable(icosphere) );
+    // // Mesh icosphere = hilma::icosphere(0.5f, 2);
+    // // icosphere.setMaterial(metal);
+    // // translateZ(icosphere, -1.0f);
+    // // scene.push_back( Hittable(icosphere) );
 
     Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
     cone.setMaterial(plastic);
@@ -171,8 +173,18 @@ int main(int argc, char **argv) {
     }
 
     timer.stop();
+
     const float time_raycasting = timer.get() / 1000.f;
-    std::cout << "Casting all rays: " << time_raycasting << " secs ( " << toString(time_raycasting / totalRays, 10) << "s per ray) "<< std::endl;
+    std::cout << "                            Rendertime time : " << time_raycasting << " secs" << std::endl;
+
+    int totalTriangles = 0;
+    for (size_t i = 0; i < scene.size(); i++)
+        totalTriangles += scene[i].triangles.size();    
+    std::cout << "                  Total number of triangles : " << totalTriangles << std::endl;
+
+    std::cout << "              Total number of ray-box tests : " << getTotalRayBoundingBoxTests() << std::endl;
+    std::cout << "        Total number of ray-triangles tests : " << getTotalRayTriangleTests() << std::endl; 
+    std::cout << "Total number of ray-triangles intersections : " << getTotalRayTrianglesIntersections() << std::endl;
 
     savePng("raytracer.png", pixels, image_width, image_height, 3);
 

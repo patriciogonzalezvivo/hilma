@@ -18,12 +18,6 @@ target_link_libraries (tube PRIVATE hilma)
 add_executable (ring ring.cpp)
 target_link_libraries (ring PRIVATE hilma)
 
-add_executable (intersec_sphere intersec_sphere.cpp)
-target_link_libraries (intersec_sphere PRIVATE hilma)
-
-add_executable (half_icosphere half_icosphere.cpp)
-target_link_libraries (half_icosphere PRIVATE hilma)
-
 add_executable (cornell cornell.cpp)
 target_link_libraries (cornell PRIVATE hilma)
 

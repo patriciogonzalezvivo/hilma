@@ -12,6 +12,12 @@
 
 namespace hilma {
 
+static uint64_t numRayBoxTests = 0; 
+static uint64_t numRayTrianglesTests = 0; 
+static uint64_t numRayTrianglesIsect = 0; 
+
+const float infinity = std::numeric_limits<float>::infinity();
+
 // http://www.geeksforgeeks.org/how-to-check-if-a-given-point-lies-inside-a-polygon/
 //
 bool inside(const std::vector<glm::vec2> _points, const glm::vec2 _v) {
@@ -92,25 +98,48 @@ IntersectionData intersection(const Ray& _ray, const Plane& _plane) {
 }
 
 bool intersection(const Ray& _ray, const BoundingBox& _bbox, float &_tmin, float &_tmax) {
-    float tx1 = (_bbox.min.x - _ray.getOrigin().x)*_ray.getInvertDirection().x;
-    float tx2 = (_bbox.max.x - _ray.getOrigin().x)*_ray.getInvertDirection().x;
- 
-    _tmin = std::min(tx1, tx2);
-    _tmax = std::max(tx1, tx2);
- 
-    float ty1 = (_bbox.min.y - _ray.getOrigin().y)*_ray.getInvertDirection().y;
-    float ty2 = (_bbox.max.y - _ray.getOrigin().y)*_ray.getInvertDirection().y;
- 
-    _tmin = std::max(_tmin, std::min(ty1, ty2));
-    _tmax = std::min(_tmax, std::max(ty1, ty2));
+    __sync_fetch_and_add(&numRayBoxTests, 1); 
 
-    float tz1 = (_bbox.min.z - _ray.getOrigin().z)*_ray.getInvertDirection().z;
-    float tz2 = (_bbox.max.z - _ray.getOrigin().z)*_ray.getInvertDirection().z;
+    // float tx1 = (_bbox.min.x - _ray.getOrigin().x)*_ray.getInvertDirection().x;
+    // float tx2 = (_bbox.max.x - _ray.getOrigin().x)*_ray.getInvertDirection().x;
  
-    _tmin = std::max(_tmin, std::min(tz1, tz2));
-    _tmax = std::min(_tmax, std::max(tz1, tz2));
+    // _tmin = std::min(tx1, tx2);
+    // _tmax = std::max(tx1, tx2);
  
-    return _tmax >= _tmin;
+    // float ty1 = (_bbox.min.y - _ray.getOrigin().y)*_ray.getInvertDirection().y;
+    // float ty2 = (_bbox.max.y - _ray.getOrigin().y)*_ray.getInvertDirection().y;
+ 
+    // _tmin = std::max(_tmin, std::min(ty1, ty2));
+    // _tmax = std::min(_tmax, std::max(ty1, ty2));
+
+    // float tz1 = (_bbox.min.z - _ray.getOrigin().z)*_ray.getInvertDirection().z;
+    // float tz2 = (_bbox.max.z - _ray.getOrigin().z)*_ray.getInvertDirection().z;
+ 
+    // _tmin = std::max(_tmin, std::min(tz1, tz2));
+    // _tmax = std::min(_tmax, std::max(tz1, tz2));
+ 
+    // return _tmax >= _tmin;
+
+    // Increase far parameter to avoid false positives due to rounding.
+    static float error_padding = 1.0f + 2.0f * tgamma(3.0f);
+
+    float t0 = 0.0f;
+    float t1 = infinity;
+
+    for (size_t i = 0; i < 3; ++i) {
+        float near = (_bbox.min[i] - _ray.getOrigin()[i]) * _ray.getInvertDirection()[i];
+        float far = (_bbox.max[i] - _ray.getOrigin()[i]) * _ray.getInvertDirection()[i];
+        if (near > far) std::swap(near, far);
+        far *= error_padding;
+        t0 = near > t0 ? near : t0;
+        t1 = far < t1 ? far : t1;
+        if (t0 > t1) return false;
+    }
+
+    _tmin = t0;
+    _tmax = t1;
+
+    return true;
 }
 
 IntersectionData intersection(const Ray& _ray, const BoundingBox& _bbox) {
@@ -130,6 +159,9 @@ IntersectionData intersection(const Ray& _ray, const BoundingBox& _bbox) {
 // MOLLER_TRUMBORE
 // #define CULLING
 bool intersectionMT(const Ray& _ray, const Triangle& _triangle, float& _t, float& _u, float& _v) {
+
+    __sync_fetch_and_add(&numRayTrianglesTests, 1); 
+
     glm::vec3 v0v1 = _triangle[1] - _triangle[0]; 
     glm::vec3 v0v2 = _triangle[2] - _triangle[0]; 
     glm::vec3 pvec = glm::cross(_ray.getDirection(), v0v2); 
@@ -153,11 +185,16 @@ bool intersectionMT(const Ray& _ray, const Triangle& _triangle, float& _t, float
     if (_v < 0 || _u + _v > 1) return false; 
  
     _t = glm::dot(v0v2, qvec) * invDet; 
+
+    __sync_fetch_and_add(&numRayTrianglesIsect, 1); 
  
     return true; 
 }
 
 bool intersection(const Ray& _ray, const Triangle& _triangle, float& _t, float& _u, float& _v) {
+
+    __sync_fetch_and_add(&numRayTrianglesTests, 1); 
+
     // no need to normalize
     glm::vec3 N = _triangle.getNormal(); 
     float denom = glm::dot(N, N); 
@@ -204,8 +241,21 @@ bool intersection(const Ray& _ray, const Triangle& _triangle, float& _t, float& 
     _u /= denom; 
     _v /= denom; 
  
+    __sync_fetch_and_add(&numRayTrianglesIsect, 1); 
+
     return true; // this ray hits the triangle 
 } 
+
+uint64_t getTotalRayBoundingBoxTests() {
+    return numRayBoxTests;
+}
+uint64_t getTotalRayTriangleTests() {
+    return numRayTrianglesTests;
+}
+
+uint64_t getTotalRayTrianglesIntersections() {
+    return numRayTrianglesIsect;
+}
 
 IntersectionData intersection(const Ray& _ray, const Triangle& _triangle) {
 

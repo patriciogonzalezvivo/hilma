@@ -188,7 +188,6 @@ bool loadObj( const std::string& _filename, Mesh& _mesh ) {
         int mi = -1;
         INDEX_TYPE iCounter = 0;
         for (size_t i = 0; i < shapes[s].mesh.indices.size(); i++) {
-            int f = (int)floor(i/3);
 
             tinyobj::index_t index = shapes[s].mesh.indices[i];
             int vi = index.vertex_index;
@@ -196,6 +195,7 @@ bool loadObj( const std::string& _filename, Mesh& _mesh ) {
             int ti = index.texcoord_index;
 
             // Associate w material with face
+            int f = (int)floor(i/3);
             if (shapes[s].mesh.material_ids.size() > 0) {
                 int material_index = shapes[s].mesh.material_ids[f];
 

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <vector>
+#include <memory>
+
 #include "glm/glm.hpp"
 #include "hilma/types/Material.h"
 
@@ -55,5 +57,8 @@ private:
     std::vector<glm::vec3>  normals;
     std::vector<glm::vec2>  texcoords;
 };
+
+typedef std::shared_ptr<Triangle> TrianglePtr;
+typedef std::shared_ptr<Triangle const> TriangleConstPtr;
 
 }

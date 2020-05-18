@@ -38,10 +38,13 @@ IntersectionData    intersection(const Ray& _ray, const Plane& _plane);
 
 IntersectionData    intersection(const Ray& _ray, const BoundingBox& _bbox);
 bool                intersection(const Ray& _ray, const BoundingBox& _bbox, float& _tmin, float& _tmax);
+uint64_t            getTotalRayBoundingBoxTests();
 
 IntersectionData    intersection(const Ray& _ray, const Triangle& _triangle);
 bool                intersection(const Ray& _ray, const Triangle& _triangle, float& _t, float& _u, float& _v);
 bool                intersectionMT(const Ray& _ray, const Triangle& _triangle, float& _t, float& _u, float& _v);
+uint64_t            getTotalRayTriangleTests();
+uint64_t            getTotalRayTrianglesIntersections();
 
 // Line
 IntersectionData intersection(const Line& _line, const Plane& _plane);
