@@ -25,33 +25,6 @@ using namespace hilma;
 
 const float infinity = std::numeric_limits<float>::infinity();
 
-glm::vec3 random3(float _min, float _max) {
-    return glm::vec3(randomf(_min,_max), randomf(_min,_max), randomf(_min,_max));
-}
-
-glm::vec3 random_in_unit_sphere() {
-    while (true) {
-        glm::vec3 p = random3(-1.0f, 1.0f);
-        if ( glm::length2(p) > 1.0) continue;
-        return p;
-    }
-}
-
-glm::vec3 random_unit_vector() {
-    float a = randomf(0.0f, TAU);
-    float z = randomf(-1.0f, 1.0f);
-    float r = sqrt(1.0f - z*z);
-    return glm::vec3(r*cos(a), r*sin(a), z);
-}
-
-glm::vec3 random_in_hemisphere(const glm::vec3& normal) {
-    glm::vec3 in_unit_sphere = random_in_unit_sphere() ;
-    if (dot(in_unit_sphere, normal) > 0.0) // In the same hemisphere as the normal
-        return in_unit_sphere;
-    else
-        return -in_unit_sphere;
-}
-
 glm::vec3 raytrace(const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
     if (_depth <= 0)
         return glm::vec3(0.0f);
@@ -69,7 +42,7 @@ glm::vec3 raytrace(const Ray& _ray, const std::vector<Hittable>& _hittables, int
 
         if (rec.triangle->material != nullptr) {
             attenuation = rec.triangle->material->diffuse;
-            emission = rec.triangle->material->emissive * 3.0f;
+            emission = rec.triangle->material->emissive;
             glm::vec3 reflected = glm::reflect(glm::normalize(_ray.getDirection()), rec.normal);
             target = glm::mix(target, reflected, rec.triangle->material->metallic);
             target += lambert * (0.25f + rec.triangle->material->roughness);
@@ -90,38 +63,51 @@ int main(int argc, char **argv) {
 
     // Set up conext
     const float aspect_ratio = 16.0f / 9.0f;
-    const int image_width = 1024;
+    const int image_width = 1024 * 0.25;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const float samples_per_pixel = 10;
+    const float samples_per_pixel = 1;
     const float over_samples = 1.0f/samples_per_pixel; 
     const int max_depth = 50;
 
     // Scene
-    Camera cam;
+    glm::vec3 lookfrom(3.0f, 2.0f, 2.0f);
+    glm::vec3 lookat(0.0f, 0.0f, -1.0f);
+    glm::vec3 vup(0.0f, -1.0f, 0.0f);
+    float dist_to_focus = glm::length(lookfrom-lookat);
+    float aperture = 0.25;
+    Camera cam = Camera(lookfrom, lookat, vup,
+                        35.0f, 
+                        aspect_ratio, aperture, dist_to_focus);
 
     std::vector<Hittable> scene;
 
-    Mesh cornell = loadObj("CornellBox.obj");
-    center(cornell);
-    translateY(cornell, 0.4f);
-    translateZ(cornell, -2.0f);
-    scene.push_back( Hittable(cornell) );
+    // Mesh cornell = loadObj("CornellBox.obj");
+    // center(cornell);
+    // translateY(cornell, 0.4f);
+    // translateZ(cornell, -2.0f);
+    // scene.push_back( Hittable(cornell) );
+
+    Mesh head = loadPly("head.ply");
+    center(head);
+    scale(head, 0.1f);
+    // translateZ(head, -2.0f);
+    scene.push_back( Hittable(head) );
 
     Mesh plane = hilma::plane(6.0f, 6.0f, 1, 1);
     translateZ(plane, -0.6f);
-    rotateX(plane, -PI/2.);
+    rotateX(plane, -PI/2.0f);
     translateZ(plane, -1.0f);
     scene.push_back( Hittable(plane) );
 
-    Material metal = Material("metal");
-    metal.diffuse = glm::vec3(0.5);
-    metal.metallic = 1.0f;
-    metal.roughness = 0.0f;
-    metal.diffuse = glm::vec3(1.0f);
+    // Material metal = Material("metal");
+    // metal.diffuse = glm::vec3(0.5);
+    // metal.metallic = 1.0f;
+    // metal.roughness = 0.0f;
+    // metal.diffuse = glm::vec3(1.0f);
 
-    Material plastic = Material("plastic");
-    plastic.diffuse = glm::vec3(0.3,0.3,1.0);
-    plastic.roughness = 0.2;
+    // Material plastic = Material("plastic");
+    // plastic.diffuse = glm::vec3(0.3,0.3,1.0);
+    // plastic.roughness = 0.2;
 
     // // Mesh icosphere = hilma::icosphere(0.5f, 2);
     // // icosphere.setMaterial(metal);
@@ -129,14 +115,14 @@ int main(int argc, char **argv) {
     // // scene.push_back( Hittable(icosphere) );
 
     Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
-    cone.setMaterial(plastic);
+    // cone.setMaterial(plastic);
     rotateX(cone, PI);
     translateX(cone, -2.0f);
     translateZ(cone, -1.0f);
     scene.push_back( Hittable(cone) );
 
     Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
-    cylinder.setMaterial(metal);
+    // cylinder.setMaterial(metal);
     translateX(cylinder, 2.0f);
     translateZ(cylinder, -1.0f);
     scene.push_back( Hittable(cylinder) );
