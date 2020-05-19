@@ -35,6 +35,7 @@ public:
     void    expand(float _x, float _y) {
         min.x = std::min(min.x, _x);
         max.x = std::max(max.x, _x);
+        
         min.y = std::min(min.y, _y);
         max.y = std::max(max.y, _y);
     }

@@ -9,6 +9,32 @@
 
 namespace hilma {
 
+// Ray / Line
+
+bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Line>& _lines, HitRecord& _rec) {
+    Line ray = Line(_ray.getOrigin(), _ray.getAt(std::min(100.0f, _maxDistance)));
+
+    HitRecord tmp_rec;
+    bool hit_anything = false;
+    float closest_so_far = _maxDistance;
+
+    glm::vec3 ip;
+    for (size_t i = 0; i < _lines.size(); i++) {
+        if (intersection(ray, _lines[i], ip, 0.1)) {
+            tmp_rec.distance = glm::length(_ray.getOrigin() - ip);
+            if (tmp_rec.distance < closest_so_far) {
+                closest_so_far = tmp_rec.distance;
+                tmp_rec.line = std::make_shared<Line>(_lines[i]);
+                tmp_rec.frontFace = true;
+                _rec = tmp_rec;
+                hit_anything = true;
+            }
+        }
+    }
+
+    return hit_anything;
+}
+
 // RAY / TRIANGLE 
 
 bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const Triangle& _triangle, HitRecord& _rec) { 
@@ -65,6 +91,7 @@ bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std
     // foreach hittable
     for (size_t i = 0; i < _hittables.size(); i++) {
 
+
         // if ( raytrace(_ray, _minDistance, closest_so_far, _hittables[i].triangles, tmp_rec) ) {
         //     if ( tmp_rec.distance < closest_so_far ) {
         //         hit_anything = true;
@@ -72,7 +99,6 @@ bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std
         //         _rec = tmp_rec;
         //     }
         // }
-
 
         // if (_hittables[i].contains(_ray.getOrigin() ) ||
         // if ( intersection(_ray, static_cast<Hittable>(_hittables[i]), tmin, tmax) ) 
@@ -86,6 +112,14 @@ bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std
                         _rec = tmp_rec;
                     }   
                 }
+            }
+        }
+
+        if (raytrace(_ray, _minDistance, _maxDistance, _hittables[i].lines, tmp_rec) ) {
+            if (tmp_rec.distance < closest_so_far) {
+                hit_anything = true;
+                closest_so_far = tmp_rec.distance;
+                _rec = tmp_rec;
             }
         }
     }

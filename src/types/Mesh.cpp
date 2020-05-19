@@ -596,14 +596,9 @@ void Mesh::addEdge(const Line& _line) {
     addEdgeIndices( index+0, index+1);
 }
 
-void Mesh::addEdge(const Ray& _ray) {
-    // TODO
-    INDEX_TYPE index = vertices.size();
-
-    addVertex(_ray.getOrigin());
-    addVertex(_ray.getOrigin() + _ray.getDirection());
-
-    addEdgeIndices( index+0, index+1);
+void Mesh::addEdges(const Line* _array1D, int _n) {
+    for (int i = 0; i < _n; i++)
+        addEdge(_array1D[i]);
 }
 
 void Mesh::setEdgeType(EdgeType _mode, bool _compute) {

@@ -35,6 +35,9 @@ glm::vec3 raytrace(const Ray& _ray, const std::vector<Hittable>& _hittables, int
         if (!rec.frontFace)
             return glm::vec3(0.0f);
 
+        if (rec.line != nullptr)
+            return glm::vec3(2.0f);
+
         glm::vec3 attenuation = glm::vec3(0.5f);
         glm::vec3 emission = glm::vec3(0.0f);
         glm::vec3 target = rec.normal;
@@ -54,9 +57,10 @@ glm::vec3 raytrace(const Ray& _ray, const std::vector<Hittable>& _hittables, int
         return emission + attenuation * raytrace( scattered, _hittables, _depth-1 );
     }
 
+
     glm::vec3 unit_direction = normalize(_ray.getDirection() );
     float t = 0.5f * (unit_direction.y + 1.0f);
-    return (1.0f - t) * glm::vec3(1.0f) + t * glm::vec3(0.5f, 0.7f, 1.0f);
+    return glm::mix(glm::vec3(1.0f), glm::vec3(0.5f, 0.7f, 1.0f), t) * 0.5f;
 }
 
 int main(int argc, char **argv) {
@@ -70,11 +74,11 @@ int main(int argc, char **argv) {
     const int max_depth = 50;
 
     // Scene
-    glm::vec3 lookfrom(3.f, 1.0f, 1.0f);
-    glm::vec3 lookat(0.0f, 0.0f, -1.0f);
+    glm::vec3 lookfrom(3.f, 0.5f, 1.5f);
+    glm::vec3 lookat(0.0f, 0.0f, 0.0f);
     glm::vec3 vup(0.0f, -1.0f, 0.0f);
     float dist_to_focus = glm::length(lookfrom-lookat);
-    float aperture = 0.25;
+    float aperture = 0.15;
     Camera cam = Camera(lookfrom, lookat, vup,
                         35.0f, 
                         aspect_ratio, aperture, dist_to_focus);
@@ -87,16 +91,15 @@ int main(int argc, char **argv) {
     // translateZ(cornell, -2.0f);
     // scene.push_back( Hittable(cornell) );
 
-    Mesh head = loadPly("head.ply");
-    center(head);
-    scale(head, 0.1f);
-    translateZ(head, -1.0f);
-    scene.push_back( Hittable(head) );
+    // Mesh head = loadPly("head.ply");
+    // center(head);
+    // scale(head, 0.1f);
+    // translateZ(head, -1.0f);
+    // scene.push_back( Hittable(head) );
 
     Mesh plane = hilma::plane(6.0f, 6.0f, 1, 1);
     translateZ(plane, -0.6f);
     rotateX(plane, -PI/2.0f);
-    translateZ(plane, -1.0f);
     scene.push_back( Hittable(plane) );
 
     // Material metal = Material("metal");
@@ -109,23 +112,20 @@ int main(int argc, char **argv) {
     // plastic.diffuse = glm::vec3(0.3,0.3,1.0);
     // plastic.roughness = 0.2;
 
-    // // Mesh icosphere = hilma::icosphere(0.5f, 2);
-    // // icosphere.setMaterial(metal);
-    // // translateZ(icosphere, -1.0f);
-    // // scene.push_back( Hittable(icosphere) );
+    Mesh icosphere = hilma::icosphere(0.5f, 2);
+    // icosphere.setMaterial(metal);
+    scene.push_back( Hittable(icosphere, true) );
 
     Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
     // cone.setMaterial(plastic);
     rotateX(cone, PI);
     translateX(cone, -2.0f);
-    translateZ(cone, -1.0f);
-    scene.push_back( Hittable(cone) );
+    scene.push_back( Hittable(cone, true) );
 
     Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
     // cylinder.setMaterial(metal);
     translateX(cylinder, 2.0f);
-    translateZ(cylinder, -1.0f);
-    scene.push_back( Hittable(cylinder) );
+    scene.push_back( Hittable(cylinder, true) );
 
     Timer timer;
     timer.start();
@@ -171,6 +171,8 @@ int main(int argc, char **argv) {
     std::cout << "              Total number of ray-box tests : " << getTotalRayBoundingBoxTests() << std::endl;
     std::cout << "        Total number of ray-triangles tests : " << getTotalRayTriangleTests() << std::endl; 
     std::cout << "Total number of ray-triangles intersections : " << getTotalRayTrianglesIntersections() << std::endl;
+    std::cout << "            Total number of ray-lines tests : " << getTotalLineLineTests() << std::endl; 
+    std::cout << "    Total number of ray-lines intersections : " << getTotalLineLineIntersections() << std::endl;
 
     savePng("raytracer.png", pixels, image_width, image_height, 3);
 

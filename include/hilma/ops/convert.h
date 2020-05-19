@@ -65,4 +65,7 @@ inline Mesh toTube(const Polyline& _polyline, const float _width, int _resolutio
     return toTube(_polyline, &_width, 1, _resolution, _caps);
 }
 
+std::vector<Line>   toLines(const BoundingBox& _bbox);
+Mesh                toEdges(const BoundingBox& _bbox);
+
 }

@@ -460,4 +460,88 @@ Mesh toTube(const Polyline& _polyline, const float* _array1D, int _n, int _resol
     return mesh;
 }
 
+std::vector<Line>   toLines(const BoundingBox& _bbox) {
+    std::vector<Line> lines;
+
+    //    D ---- A
+    // C ---- B  |
+    // |  |   |  |
+    // |  I --|- F
+    // H .... G
+
+    glm::vec3 A = _bbox.max;
+    glm::vec3 H = _bbox.min;
+
+    glm::vec3 B = glm::vec3(A.x, A.y, H.z);
+    glm::vec3 C = glm::vec3(H.x, A.y, H.z);
+    glm::vec3 D = glm::vec3(H.x, A.y, A.z);
+
+    glm::vec3 F = glm::vec3(A.x, H.y, A.z);
+    glm::vec3 G = glm::vec3(A.x, H.y, H.z);
+    glm::vec3 I = glm::vec3(H.x, H.y, A.z);
+
+    lines.push_back( Line(A, F) );
+    lines.push_back( Line(A, B) );
+    lines.push_back( Line(A, D) );
+
+    lines.push_back( Line(B, G) );
+    lines.push_back( Line(B, C) );
+
+    lines.push_back( Line(C, H) );
+    lines.push_back( Line(C, D) );
+    
+    lines.push_back( Line(D, I) );
+
+    lines.push_back( Line(F, I) );
+    lines.push_back( Line(F, G) );
+
+    lines.push_back( Line(G, H) );
+    lines.push_back( Line(H, I) );
+
+    return lines;
+}
+
+Mesh toEdges(const BoundingBox& _bbox) {
+
+    //    D ---- A
+    // C ---- B  |
+    // |  |   |  |
+    // |  I --|- F
+    // H .... G
+
+    glm::vec3 A = _bbox.max;
+    glm::vec3 H = _bbox.min;
+
+    glm::vec3 B = glm::vec3(A.x, A.y, H.z);
+    glm::vec3 C = glm::vec3(H.x, A.y, H.z);
+    glm::vec3 D = glm::vec3(H.x, A.y, A.z);
+
+    glm::vec3 F = glm::vec3(A.x, H.y, A.z);
+    glm::vec3 G = glm::vec3(A.x, H.y, H.z);
+    glm::vec3 I = glm::vec3(H.x, H.y, A.z);
+
+    Mesh mesh;
+    mesh.setEdgeType( LINES );
+    mesh.addEdge( Line(A, F) );
+    mesh.addEdge( Line(A, B) );
+    mesh.addEdge( Line(A, D) );
+
+    mesh.addEdge( Line(B, G) );
+    mesh.addEdge( Line(B, C) );
+
+    mesh.addEdge( Line(C, H) );
+    mesh.addEdge( Line(C, D) );
+    
+    mesh.addEdge( Line(D, I) );
+
+    mesh.addEdge( Line(F, I) );
+    mesh.addEdge( Line(F, G) );
+
+    mesh.addEdge( Line(G, H) );
+    mesh.addEdge( Line(H, I) );
+
+    return mesh;
+}
+
+
 }

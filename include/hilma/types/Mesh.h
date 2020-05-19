@@ -146,8 +146,8 @@ public:
     void        addEdgeIndex(INDEX_TYPE _i);
     void        addEdgeIndices(const INDEX_TYPE* _array1D, int _n);
 
-    void        addEdge(const Ray& _ray);
     void        addEdge(const Line& _line);
+    void        addEdges(const Line* _array1D, int _n);
     void        addEdgeIndices(INDEX_TYPE _i1, INDEX_TYPE _i2);
 
     const bool  haveEdgeIndices() const { return !edgeIndices.empty(); }

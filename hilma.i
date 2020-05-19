@@ -99,6 +99,7 @@ using namespace hilma;
 namespace std {
     %template(VectorString) vector<string>;
     %template(VectorTriangles) vector<Triangle>;
+    %template(VectorLines) vector<Line>;
     %template(VectorMesh) vector<Mesh>;
 };
 
