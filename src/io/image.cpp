@@ -1,6 +1,7 @@
 
 #include "hilma/io/png.h"
 #include "hilma/io/hdr.h"
+#include "hilma/math.h"
 
 #include <iostream>
 #include <stdio.h>
@@ -14,21 +15,65 @@
 
 namespace hilma {
 
-float* loadHdr(const std::string& _path, int* _width, int* _height, int* _channels) {
-    return stbi_loadf(_path.c_str(), _width, _height, _channels, 0);
+// LOAD
+//
+bool load(const std::string& _filename, Image& _image) {
+    int width, height, channels;
+    unsigned char* pixels = stbi_load(_filename.c_str(), &width, &height, &channels, 0);
+    _image.deAllocate();
+    _image.allocate(width, height, channels);
+    int total = width * height * channels;
+    for (int i = 0; i < total; i++)
+        _image.setData(i, float(pixels[i]) / 255.0f );
+    
+    delete pixels;
+    return true;
 }
 
+
+bool loadPng(const std::string& _filename, Image& _image) {
+    return load(_filename, _image);
+}
+
+unsigned char* loadPng(const std::string& _filename, int* _width, int* _height, int* _channels) {
+    return stbi_load(_filename.c_str(), _width, _height, _channels, 0);
+}
+
+bool loadHdr(const std::string& _filename, Image& _image ) {
+    _image.deAllocate();
+    _image.data = stbi_loadf(_filename.c_str(), &_image.width, &_image.height, &_image.channels, 0);
+    return true;
+}
+
+float* loadHdr(const std::string& _filename, int* _width, int* _height, int* _channels) {
+    return stbi_loadf(_filename.c_str(), _width, _height, _channels, 0);
+}
+
+// SAVE
+//
 bool saveHdr(const std::string& _filename, const float* _pixels, int _width, int _height, int _channels) {
     return stbi_write_hdr(_filename.c_str(), _width, _height, _channels, _pixels);
 }
 
-unsigned char* loadPng(const std::string& _path, int* _width, int* _height, int* _channels) {
-    return stbi_load(_path.c_str(), _width, _height, _channels, 0);
+bool saveHdr(const std::string& _filename, Image& _image) {
+    return stbi_write_hdr(_filename.c_str(), _image.width, _image.height, _image.channels, _image.data);
 }
 
 bool savePng(const std::string& _filename, const unsigned char* _pixels, int _width, int _height, int _channels) {
     return stbi_write_png(_filename.c_str(), _width, _height, _channels, _pixels, 0);
 }
+
+bool savePng(const std::string& _filename, Image& _image) {
+    int total = _image.width * _image.height * _image.channels;
+    unsigned char* pixels = new unsigned char[total];
+    for (int i = 0; i < total; i++)
+        pixels[i] = static_cast<char>(256 * clamp(_image.data[i], 0.0, 0.999));
+    savePng(_filename, pixels, _image.width, _image.height, _image.channels);
+    delete [] pixels;
+
+    return true;
+}
+
 
 // bool savePng16(const std::string& _filename, uint16_t* _pixels, int _width, int _height, int _channels) {
 

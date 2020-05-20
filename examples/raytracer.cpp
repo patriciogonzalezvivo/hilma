@@ -11,6 +11,7 @@
 #include "hilma/timer.h"
 
 #include "hilma/types/Camera.h"
+#include "hilma/types/Image.h"
 
 #include "hilma/ops/generate.h"
 #include "hilma/ops/transform.h"
@@ -69,12 +70,12 @@ int main(int argc, char **argv) {
     const float aspect_ratio = 16.0f / 9.0f;
     const int image_width = 1024 * 0.5;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const float samples_per_pixel = 10;
+    const float samples_per_pixel = 1;
     const float over_samples = 1.0f/samples_per_pixel; 
     const int max_depth = 50;
 
     // Scene
-    glm::vec3 lookfrom(3.f, 0.5f, 1.5f);
+    glm::vec3 lookfrom(3.5f, 0.5f, 1.5f);
     glm::vec3 lookat(0.0f, 0.0f, 0.0f);
     glm::vec3 vup(0.0f, -1.0f, 0.0f);
     float dist_to_focus = glm::length(lookfrom-lookat);
@@ -93,9 +94,8 @@ int main(int argc, char **argv) {
 
     // Mesh head = loadPly("head.ply");
     // center(head);
-    // scale(head, 0.1f);
-    // translateZ(head, -1.0f);
-    // scene.push_back( Hittable(head) );
+    // scale(head, 0.15f);
+    // scene.push_back( Hittable(head, true) );
 
     Mesh plane = hilma::plane(6.0f, 6.0f, 1, 1);
     translateZ(plane, -0.6f);
@@ -133,7 +133,8 @@ int main(int argc, char **argv) {
     
     const int totalPixels = image_width * image_height;
     const float totalRays = image_width * image_height * samples_per_pixel;
-    unsigned char* pixels = new unsigned char[totalPixels * 3];
+    Image image = Image(image_width, image_height, 3);
+
     for (int y = 0; y < image_height; ++y) {
         for (int x = 0; x < image_width; ++x) {
             int i = y * image_width + x;
@@ -149,10 +150,8 @@ int main(int argc, char **argv) {
 
             pixel_color = pixel_color * over_samples;
             pixel_color = sqrt(pixel_color);
-            pixels[i * 3 + 0] = static_cast<char>(256 * clamp(pixel_color.r, 0.0, 0.999));
-            pixels[i * 3 + 1] = static_cast<char>(256 * clamp(pixel_color.g, 0.0, 0.999));
-            pixels[i * 3 + 2] = static_cast<char>(256 * clamp(pixel_color.b, 0.0, 0.999));
-
+            image.setColor(x, y, pixel_color);
+            
             printProgressBar("RayTracing -", i / float(totalPixels), 100 );
 
         }
@@ -174,7 +173,7 @@ int main(int argc, char **argv) {
     std::cout << "            Total number of ray-lines tests : " << getTotalLineLineTests() << std::endl; 
     std::cout << "    Total number of ray-lines intersections : " << getTotalLineLineIntersections() << std::endl;
 
-    savePng("raytracer.png", pixels, image_width, image_height, 3);
+    savePng("raytracer.png", image);
 
     return 0;
 }

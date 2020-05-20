@@ -106,6 +106,9 @@ bool intersection(const Ray& _ray, const BoundingBox& _bbox, float &_tmin, float
     __sync_fetch_and_add(&numRayBoxTests, 1); 
     #endif
 
+    if ( _bbox.contains(_ray.getOrigin()) )
+        return true;
+
     // float tx1 = (_bbox.min.x - _ray.getOrigin().x)*_ray.getInvertDirection().x;
     // float tx2 = (_bbox.max.x - _ray.getOrigin().x)*_ray.getInvertDirection().x;
  

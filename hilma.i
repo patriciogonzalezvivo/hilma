@@ -81,6 +81,7 @@
 %include "include/hilma/types/BoundingBox.h"
 %include "include/hilma/types/Mesh.h"
 %include "include/hilma/types/Polyline.h"
+%include "include/hilma/types/Image.h"
 %include "include/hilma/ops/compute.h"
 %include "include/hilma/ops/generate.h"
 %include "include/hilma/ops/convert.h"

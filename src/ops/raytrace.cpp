@@ -91,27 +91,25 @@ bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std
     // foreach hittable
     for (size_t i = 0; i < _hittables.size(); i++) {
 
+        // if ( intersection(_ray, static_cast<Hittable>(_hittables[i]), tmin, tmax) ) 
+        // {
 
-        // if ( raytrace(_ray, _minDistance, closest_so_far, _hittables[i].triangles, tmp_rec) ) {
-        //     if ( tmp_rec.distance < closest_so_far ) {
-        //         hit_anything = true;
-        //         closest_so_far = tmp_rec.distance;
-        //         _rec = tmp_rec;
+        //     for (size_t j = 0; j < _hittables[i].triangles.size(); j++) {
+        //         if ( raytrace(_ray, _minDistance, closest_so_far, _hittables[i].triangles[j], tmp_rec) ) {
+        //             if ( tmp_rec.distance < closest_so_far ) {
+        //                 hit_anything = true;
+        //                 closest_so_far = tmp_rec.distance;
+        //                 _rec = tmp_rec;
+        //             }   
+        //         }
         //     }
         // }
 
-        // if (_hittables[i].contains(_ray.getOrigin() ) ||
-        // if ( intersection(_ray, static_cast<Hittable>(_hittables[i]), tmin, tmax) ) 
-        {
-
-            for (size_t j = 0; j < _hittables[i].triangles.size(); j++) {
-                if ( raytrace(_ray, _minDistance, closest_so_far, _hittables[i].triangles[j], tmp_rec) ) {
-                    if ( tmp_rec.distance < closest_so_far ) {
-                        hit_anything = true;
-                        closest_so_far = tmp_rec.distance;
-                        _rec = tmp_rec;
-                    }   
-                }
+        if ( raytrace(_ray, _minDistance, closest_so_far, _hittables[i].triangles, tmp_rec) ) {
+            if ( tmp_rec.distance < closest_so_far ) {
+                hit_anything = true;
+                closest_so_far = tmp_rec.distance;
+                _rec = tmp_rec;
             }
         }
 
