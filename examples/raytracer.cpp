@@ -13,6 +13,7 @@
 #include "hilma/types/Camera.h"
 #include "hilma/types/Image.h"
 
+#include "hilma/ops/convert.h"
 #include "hilma/ops/generate.h"
 #include "hilma/ops/transform.h"
 #include "hilma/ops/raytrace.h"
@@ -73,6 +74,7 @@ int main(int argc, char **argv) {
     const float samples_per_pixel = 1;
     const float over_samples = 1.0f/samples_per_pixel; 
     const int max_depth = 50;
+    bool debug = false;
 
     // Scene
     glm::vec3 lookfrom(3.5f, 0.5f, 1.5f);
@@ -97,10 +99,18 @@ int main(int argc, char **argv) {
     // scale(head, 0.15f);
     // scene.push_back( Hittable(head, true) );
 
-    Mesh plane = hilma::plane(6.0f, 6.0f, 1, 1);
-    translateZ(plane, -0.6f);
-    rotateX(plane, -PI/2.0f);
-    scene.push_back( Hittable(plane) );
+    // Mesh plane = hilma::plane(6.0f, 6.0f, 1, 1);
+    // translateZ(plane, -0.6f);
+    // rotateX(plane, -PI/2.0f);
+    // scene.push_back( Hittable(plane) );
+
+    Image heightmap;
+    loadPng("gale.png", heightmap, 1);
+    Mesh terrain = toTerrain(heightmap, 100.0, 0.05);
+    scale(terrain, 2.0/heightmap.getWidth());
+    // rotateX(terrain, -PI/2.0f);
+    // translateY(terrain, -1.0f);
+    scene.push_back( Hittable(terrain) );
 
     // Material metal = Material("metal");
     // metal.diffuse = glm::vec3(0.5);
@@ -114,18 +124,18 @@ int main(int argc, char **argv) {
 
     Mesh icosphere = hilma::icosphere(0.5f, 2);
     // icosphere.setMaterial(metal);
-    scene.push_back( Hittable(icosphere, true) );
+    scene.push_back( Hittable(icosphere, debug) );
 
-    Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
-    // cone.setMaterial(plastic);
-    rotateX(cone, PI);
-    translateX(cone, -2.0f);
-    scene.push_back( Hittable(cone, true) );
+    // Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
+    // // cone.setMaterial(plastic);
+    // rotateX(cone, PI);
+    // translateX(cone, -2.0f);
+    // scene.push_back( Hittable(cone, debug) );
 
-    Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
-    // cylinder.setMaterial(metal);
-    translateX(cylinder, 2.0f);
-    scene.push_back( Hittable(cylinder, true) );
+    // Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
+    // // cylinder.setMaterial(metal);
+    // translateX(cylinder, 2.0f);
+    // scene.push_back( Hittable(cylinder, debug) );
 
     Timer timer;
     timer.start();

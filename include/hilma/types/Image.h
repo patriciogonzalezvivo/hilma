@@ -41,7 +41,7 @@ private:
     int         channels;
 
     friend bool savePng( const std::string&, Image& );
-    friend bool loadPng( const std::string&, Image& );
+    friend bool loadPng( const std::string&, Image&, int );
     friend bool loadHdr( const std::string&, Image& );
     friend bool saveHdr( const std::string&, Image& );
     

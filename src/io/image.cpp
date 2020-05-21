@@ -17,22 +17,27 @@ namespace hilma {
 
 // LOAD
 //
-bool load(const std::string& _filename, Image& _image) {
+bool load(const std::string& _filename, Image& _image, int _channels) {
     int width, height, channels;
-    unsigned char* pixels = stbi_load(_filename.c_str(), &width, &height, &channels, 0);
+    uint16_t* pixels = stbi_load_16(_filename.c_str(), &width, &height, &channels, _channels);
+    
+    if (!pixels)
+        return false;
+
     _image.deAllocate();
     _image.allocate(width, height, channels);
     int total = width * height * channels;
+    const float m = 1.f / 65535.f;
     for (int i = 0; i < total; i++)
-        _image.setData(i, float(pixels[i]) / 255.0f );
+        _image.setData(i, float(pixels[i]) * m);
     
     delete pixels;
     return true;
 }
 
 
-bool loadPng(const std::string& _filename, Image& _image) {
-    return load(_filename, _image);
+bool loadPng(const std::string& _filename, Image& _image, int _channels) {
+    return load(_filename, _image, _channels);
 }
 
 unsigned char* loadPng(const std::string& _filename, int* _width, int* _height, int* _channels) {
@@ -42,6 +47,10 @@ unsigned char* loadPng(const std::string& _filename, int* _width, int* _height, 
 bool loadHdr(const std::string& _filename, Image& _image ) {
     _image.deAllocate();
     _image.data = stbi_loadf(_filename.c_str(), &_image.width, &_image.height, &_image.channels, 0);
+
+    if (!_image.data)
+        return false;
+
     return true;
 }
 

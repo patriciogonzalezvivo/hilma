@@ -63,13 +63,7 @@ void Image::setData(size_t _index, const float* _array1D, int _n) {
         return;
     }
 
-    // if (_n != channels) {
-    //     std::cout << "The size of the data doesn't match the pre allocated space for it" << std::endl;
-    //     return;
-    // }
-
     // memcpy(&data[_index], _array1D, _n);
-
     for (size_t i = 0; i < _n; i++)
         data[_index + i] = _array1D[i];
 }

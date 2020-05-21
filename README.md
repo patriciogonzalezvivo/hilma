@@ -3,17 +3,6 @@
 
 Hilma is 3D geometry library in C++ with Python bindings (with support for Numpy) ready to be embed into your projects. 
 
-Aknoledgements Some of the code is based on:
-
-* [OpenFrameworks](https://openframeworks.cc/) `ofMesh` and `ofPolyline`
-* [Mapbox's Earcut tessellator](https://github.com/mapbox/earcut)
-* [Tangram-es's ployline to spline converter](https://github.com/tangrams/tangram-es/blob/master/core/src/util/builders.cpp)
-* [Dan Wilcox's swig wrapper for GLM](https://github.com/danomatika/swig-openframeworks)
-* [Dimitri Diakopoulos' TinyPly](https://github.com/ddiakopoulos/tinyply)
-* [Syoyo Fujita's TinyObj loader](https://github.com/tinyobjloader/tinyobjloader)
-* [Peter Shirley's Ray Tracing in One Weekend ](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
-* [Ray/Triangle intersection](https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle)
-
 Dependencies:
 
 * [glm](https://github.com/g-truc/glm)
@@ -82,6 +71,20 @@ mesh.addIndices( [( 1, 0, 3 ), (1, 3, 2)] )
 savePly("rect.ply", mesh, False)
 
 ```
+
+# Aknoledgements 
+
+Some of the code is based on:
+
+* [OpenFrameworks](https://openframeworks.cc/) `ofMesh` and `ofPolyline`
+* [Mapbox's Earcut tessellator](https://github.com/mapbox/earcut)
+* [Tangram-es's ployline to spline converter](https://github.com/tangrams/tangram-es/blob/master/core/src/util/builders.cpp)
+* [Dan Wilcox's swig wrapper for GLM](https://github.com/danomatika/swig-openframeworks)
+* [Dimitri Diakopoulos' TinyPly](https://github.com/ddiakopoulos/tinyply)
+* [Syoyo Fujita's TinyObj loader](https://github.com/tinyobjloader/tinyobjloader)
+* [Peter Shirley's Ray Tracing in One Weekend ](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
+* [Ray/Triangle intersection](https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle)
+* [Michael Fogleman's Heightmap meshing utility](https://github.com/fogleman/hmm)
 
 # License
 
