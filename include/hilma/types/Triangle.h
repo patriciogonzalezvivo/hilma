@@ -26,32 +26,34 @@ public :
     const glm::vec3&    operator[](size_t _index) const { return vertices[_index]; }
     void                setVertex(size_t _index, const glm::vec3& _vertex);
     const glm::vec3&    getVertex(size_t _index) const { return vertices[_index]; }
-    glm::vec3           getVertex(float _u, float _v) const;
+    glm::vec3           getVertex(const glm::vec3& _barycenterCoord ) const;
 
     glm::vec3           getCentroid() const { return (vertices[0] + vertices[1] + vertices[2]) * 0.3333333333333f; }
+    glm::vec3           getBarycentricOf( const glm::vec3& _p ) const;
     
     bool                haveColors() const { return !colors.empty(); }
     void                setColor(const glm::vec4 &_color);
     void                setColor(float _r, float _g, float _b, float _a = 1.0f);
     void                setColor(size_t _index, const glm::vec4& _color);
     const glm::vec4&    getColor(size_t _index) const { return colors[_index]; }
-    glm::vec4           getColor(float _u, float _v) const;
+    glm::vec4           getColor(const glm::vec3& _barycenterCoord ) const;
 
     bool                haveNormals() const { return !normals.empty(); }
     void                setNormal(size_t _index, const glm::vec3& _normal);
     const glm::vec3&    getNormal() const { return normal; }
     const glm::vec3&    getNormal(size_t _index) const { return normals[_index]; }
-    glm::vec3           getNormal(float _u, float _v) const;
+    glm::vec3           getNormal(const glm::vec3& _barycenterCoord ) const;
 
     bool                haveTexCoords() const { return !texcoords.empty(); }
     void                setTexCoord(size_t _index, const glm::vec2& _texcoord);
     const glm::vec2&    getTexCoord(size_t _index) const { return texcoords[_index]; }
-    glm::vec2           getTexCoord(float _u, float _v) const;
+    glm::vec2           getTexCoord(const glm::vec3& _barycenterCoord ) const;
     
-    MaterialConstPtr    material;
+    MaterialConstPtr    material = nullptr;
 private:
     glm::vec3               vertices[3];
     glm::vec3               normal;
+    float                   area;
 
     std::vector<glm::vec4>  colors;
     std::vector<glm::vec3>  normals;

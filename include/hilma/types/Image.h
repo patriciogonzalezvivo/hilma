@@ -1,5 +1,6 @@
 #pragma once
 
+#include <memory>
 #include "glm/glm.hpp"
 
 namespace hilma {
@@ -40,11 +41,16 @@ private:
     int         height;
     int         channels;
 
+    friend bool saveJpg( const std::string&, Image& );
+    friend bool loadJpg( const std::string&, Image&, int );
     friend bool savePng( const std::string&, Image& );
     friend bool loadPng( const std::string&, Image&, int );
     friend bool loadHdr( const std::string&, Image& );
     friend bool saveHdr( const std::string&, Image& );
     
 };
+
+typedef std::shared_ptr<Image> ImagePtr;
+typedef std::shared_ptr<Image const> ImageConstPtr;
 
 }

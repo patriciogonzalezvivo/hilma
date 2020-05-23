@@ -18,8 +18,10 @@ namespace hilma {
 
 struct HitRecord {
     glm::vec3           position;
+    glm::vec3           barycentric;
     glm::vec3           normal;
     float               distance    = -1.0f;
+
     TriangleConstPtr    triangle    = nullptr;
     LineConstPtr        line        = nullptr;
 

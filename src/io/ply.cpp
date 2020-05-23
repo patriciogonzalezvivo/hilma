@@ -241,6 +241,13 @@ bool savePly( const std::string& _filename, Mesh& _mesh, bool _binnary, bool _co
 
     file.get_comments().push_back("generated with Hilma by Patricio Gonzalez Vivo" );
 
+    if (_mesh.haveMaterials()) {
+        MaterialConstPtr mat = _mesh.getMaterialForFaceIndex(0);
+        std::string diffuseMap = mat->getImagePath("diffuse");
+        if (diffuseMap.size() > 0)
+            file.get_comments().push_back("TextureFile " + diffuseMap);
+    }
+
     // Write file
     file.write(outstream, _binnary);
 

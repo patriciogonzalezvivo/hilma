@@ -39,12 +39,14 @@ bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std
 
 bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const Triangle& _triangle, HitRecord& _rec) { 
     float distance, u, v;
-    if ( intersectionMT(_ray, _triangle, distance, u, v) ) {
+    if ( intersection(_ray, _triangle, distance, u, v) ) {
         if (distance > _minDistance && distance < _maxDistance ) {
 
             _rec.distance = distance;
-            _rec.position = _ray.getAt( distance );
-            _rec.normal = _triangle.getNormal(u, v);
+            _rec.position = _ray.getAt(distance);
+            _rec.barycentric = glm::vec3((1.0f - u - v), u, v);
+            _rec.normal = _triangle.getNormal();
+
             _rec.frontFace = glm::dot(_ray.getDirection(), _rec.normal) < 0;
             _rec.normal = _rec.frontFace ? _rec.normal :-_rec.normal;
 
@@ -105,6 +107,7 @@ bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std
         //     }
         // }
 
+        // if ( intersection(_ray, static_cast<Hittable>(_hittables[i]), tmin, tmax) ) 
         if ( raytrace(_ray, _minDistance, closest_so_far, _hittables[i].triangles, tmp_rec) ) {
             if ( tmp_rec.distance < closest_so_far ) {
                 hit_anything = true;

@@ -23,44 +23,64 @@ namespace hilma {
 
 Material InitMaterial (const tinyobj::material_t& _material) {
     Material mat = Material( toLower( toUnderscore( purifyString( _material.name ) ) ) );
-    mat.diffuse = glm::vec3(_material.diffuse[0], _material.diffuse[1], _material.diffuse[2]);
-    mat.diffuse_map = _material.diffuse_texname;
 
-    mat.specular = glm::vec3(_material.specular[0], _material.specular[1], _material.specular[2]);
-    mat.specular_map = _material.specular_texname;
+    // if (_material.diffuse_texname.size() > 0)
+        // mat.set("diffuse", _material.diffuse_texname);
+    // else
+    //     mat.set("diffuse", _material.diffuse[0], 3);
+
+    // if (_material.specular_texname.size() > 0)
+    //     mat.set("specular", _material.specular_texname);
+    // else
+    //     mat.set("specular", _material.specular, 3);
+
+    // if (_material.emissive_texname.size() > 0)
+    //     mat.set("emissive", _material.emissive_texname);
+    // else
+    //     mat.set("emissive", _material.emission, 3);
+
+    // if (_material.roughness_texname.size() > 0)
+    //     mat.set("roughness", _material.roughness_texname);
+    // else
+    //     mat.set("roughness", _material.roughness);
+
+    // if (_material.metallic_texname.size() > 0)
+    //     mat.set("metallic", _material.metallic_texname);
+    // else
+    //     mat.set("metallic", _material.metallic);
+
+    // if (_material.sheen_texname.size() > 0)
+    //     mat.set("sheen", _material.sheen_texname);
+    // else
+    //     mat.set("sheen", _material.sheen);
+
+    // if (_material.normal_texname.size() > 0)
+    //     mat.set("normal", _material.normal_texname);
+
+    // if (_material.bump_texname.size() > 0)
+    //     mat.set("bump", _material.bump_texname);
+
+    // if (_material.alpha_texname.size() > 0)
+    //     mat.set("alpha", _material.alpha_texname);
+
+    // if (_material.displacement_texname.size() > 0)
+    //     mat.set("displacement", _material.displacement_texname);
     
-    mat.emissive = glm::vec3(_material.emission[0], _material.emission[1], _material.emission[2]);
-    mat.emissive_map = _material.emissive_texname;
+    // mat.shininess = _material.shininess;
 
-    mat.roughness = _material.roughness;
-    mat.roughness_map = _material.roughness_texname;
+    // mat.anisotropy = _material.anisotropy;
+    // mat.anisotropyRotation = _material.anisotropy_rotation;
 
-    mat.metallic = _material.metallic;
-    mat.metallic_map = _material.metallic_texname;
+    // mat.clearcoatRoughness = _material.clearcoat_roughness;
+    // mat.clearcoatThickness = _material.clearcoat_thickness;
 
-    mat.normal_map = _material.normal_texname;
-    mat.bump_map = _material.bump_texname;
-    mat.opacity_map = _material.alpha_texname;
-    mat.displacement_map = _material.displacement_texname;
+    // mat.ior = _material.ior;
+    // mat.dissolve = _material.dissolve;
+    // mat.transmittance = glm::vec3(_material.transmittance[0], _material.transmittance[1], _material.transmittance[2]);
+    // mat.reflectionMapName = _material.reflection_texname;
+    // mat.specularHighlightMapName = _material.specular_highlight_texname;
 
-    mat.sheen = _material.sheen;
-    mat.sheen_map = _material.sheen_texname;
-
-    mat.shininess = _material.shininess;
-
-    mat.anisotropy = _material.anisotropy;
-    mat.anisotropy_rotation = _material.anisotropy_rotation;
-
-    mat.clearcoat_roughness = _material.clearcoat_roughness;
-    mat.clearcoat_thickness = _material.clearcoat_thickness;
-
-    mat.ior = _material.ior;
-    mat.dissolve = _material.dissolve;
-    mat.transmittance = glm::vec3(_material.transmittance[0], _material.transmittance[1], _material.transmittance[2]);
-    mat.reflection_map = _material.reflection_texname;
-    mat.specular_highlight_map = _material.specular_highlight_texname;
-
-    mat.illumination_model = _material.illum;
+    mat.illuminationModel = _material.illum;
     return mat;
 }
 

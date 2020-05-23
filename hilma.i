@@ -19,6 +19,7 @@
     #include "hilma/math.h"
     #include "hilma/types/Ray.h"
     #include "hilma/types/Line.h"
+    #include "hilma/types/Image.h"
     #include "hilma/types/Material.h"
     #include "hilma/types/Triangle.h"
     #include "hilma/types/Plane.h"
@@ -37,9 +38,10 @@
     #include "hilma/io/stl.h"
     #include "hilma/io/tiny_obj_loader.h"
     #include "hilma/io/obj.h"
-    #include "hilma/io/png.h"
     #include "hilma/io/stb_image.h"
     #include "hilma/io/stb_image_write.h"
+    #include "hilma/io/jpg.h"
+    #include "hilma/io/png.h"
     #include "hilma/io/hdr.h"
 %}
 
@@ -75,13 +77,13 @@
 
 %include "include/hilma/types/Ray.h"
 %include "include/hilma/types/Line.h"
+%include "include/hilma/types/Image.h"
 %include "include/hilma/types/Material.h"
 %include "include/hilma/types/Triangle.h"
 %include "include/hilma/types/Plane.h"
 %include "include/hilma/types/BoundingBox.h"
 %include "include/hilma/types/Mesh.h"
 %include "include/hilma/types/Polyline.h"
-%include "include/hilma/types/Image.h"
 %include "include/hilma/ops/compute.h"
 %include "include/hilma/ops/generate.h"
 %include "include/hilma/ops/convert.h"
@@ -91,7 +93,7 @@
 %include "include/hilma/io/ply.h"
 %include "include/hilma/io/stl.h"
 %include "include/hilma/io/obj.h"
-%include "include/hilma/io/obj.h"
+%include "include/hilma/io/jpg.h"
 %include "include/hilma/io/png.h"
 %include "include/hilma/io/hdr.h"
 

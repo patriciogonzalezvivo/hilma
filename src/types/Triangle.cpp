@@ -1,5 +1,10 @@
 #include "hilma/types/Triangle.h"
 
+
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/norm.hpp"
+#include "glm/glm.hpp"
+
 using namespace hilma;
 
 
@@ -18,7 +23,42 @@ void Triangle::set(const glm::vec3 &_p0, const glm::vec3 &_p1, const glm::vec3 &
     vertices[0] = _p0;
     vertices[1] = _p1;
     vertices[2] = _p2;
-    normal = glm::normalize( glm::cross(vertices[0] - vertices[2], vertices[1] - vertices[0]) );
+    normal = glm::cross(vertices[0] - vertices[2], vertices[1] - vertices[0]);
+    area = glm::length( normal );
+    normal = normal / area;
+    // normal = glm::normalize( normal );
+}
+
+glm::vec3 Triangle::getBarycentricOf(const glm::vec3& _p) const {
+    const glm::vec3 f0 = vertices[0] - _p;
+    const glm::vec3 f1 = vertices[1] - _p;
+    const glm::vec3 f2 = vertices[2] - _p;
+    // calculate the areas and factors (order of parameters doesn't matter):
+    // float a = glm::length(glm::cross(vertices[0] - vertices[1], vertices[0] - vertices[2])); // main triangle area a
+    return glm::vec3(   glm::length(glm::cross(f1, f2)),        // p1's triangle area / a
+                        glm::length(glm::cross(f2, f0)),        // p2's triangle area / a 
+                        glm::length(glm::cross(f0, f1))) / area;   // p3's triangle area / a
+}
+
+bool Triangle::containsPoint(const glm::vec3 &_p){
+    const glm::vec3 v0 = vertices[2] - vertices[0];
+    const glm::vec3 v1 = vertices[1] - vertices[0];
+    const glm::vec3 v2 = _p - vertices[0];
+    
+    // Compute dot products
+    float dot00 = glm::dot(v0, v0);
+    float dot01 = glm::dot(v0, v1);
+    float dot02 = glm::dot(v0, v2);
+    float dot11 = glm::dot(v1, v1);
+    float dot12 = glm::dot(v1, v2);
+    
+    // Compute barycentric coordinates
+    float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
+    float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+    float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+    
+    // Check if point is in triangle
+    return (u >= 0.0) && (v >= 0.0) && (u + v <= 1.0);
 }
 
 void Triangle::setVertex(size_t _index, const glm::vec3& _vertex) {
@@ -84,50 +124,30 @@ void Triangle::setTexCoords(const glm::vec2 &_p0, const glm::vec2 &_p1, const gl
     texcoords[2] = _p2;
 }
 
-bool Triangle::containsPoint(const glm::vec3 &_p){
-    glm::vec3 v0 = vertices[2] - vertices[0];
-    glm::vec3 v1 = vertices[1] - vertices[0];
-    glm::vec3 v2 = _p - vertices[0];
-    
-    // Compute dot products
-    float dot00 = glm::dot(v0, v0);
-    float dot01 = glm::dot(v0, v1);
-    float dot02 = glm::dot(v0, v2);
-    float dot11 = glm::dot(v1, v1);
-    float dot12 = glm::dot(v1, v2);
-    
-    // Compute barycentric coordinates
-    float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
-    float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-    float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
-    
-    // Check if point is in triangle
-    return (u >= 0.0) && (v >= 0.0) && (u + v <= 1.0);
+glm::vec3 Triangle::getVertex(const glm::vec3& _barycenter) const {
+    return  getVertex(0) * _barycenter.x +
+            getVertex(1) * _barycenter.y +
+            getVertex(2) * _barycenter.z;
 }
 
-glm::vec3 Triangle::getVertex(float _u, float _v) const {
-    return  getVertex(0) * _u +
-            getVertex(1) * _v +
-            getVertex(2) * (1.0f - _u - _v);
+glm::vec4 Triangle::getColor(const glm::vec3& _barycenter) const {
+    return  getColor(0) * _barycenter.x +
+            getColor(1) * _barycenter.y +
+            getColor(2) * _barycenter.z;
 }
 
-glm::vec4 Triangle::getColor(float _u, float _v) const {
-    return  getColor(0) * _u +
-            getColor(1) * _v +
-            getColor(2) * (1.0f - _u - _v);
-}
-
-glm::vec3 Triangle::getNormal(float _u, float _v) const {
+glm::vec3 Triangle::getNormal(const glm::vec3& _barycenter) const {
     if (haveNormals())
-        return  getNormal(0) * _u +
-                getNormal(1) * _v +
-                getNormal(2) * (1.0f - _u - _v);
+        return  getNormal(0) * _barycenter.x +
+                getNormal(1) * _barycenter.y +
+                getNormal(2) * _barycenter.z;
     else
         return getNormal();
 }
 
-glm::vec2 Triangle::getTexCoord(float _u, float _v) const {
-    return  getTexCoord(0) * _u +
-            getTexCoord(1) * _v +
-            getTexCoord(2) * (1.0f - _u - _v);
+glm::vec2 Triangle::getTexCoord(const glm::vec3& _barycenter) const {
+    return  getTexCoord(0) * _barycenter.x +
+            getTexCoord(1) * _barycenter.y +
+            getTexCoord(2) * _barycenter.z;
 }
+

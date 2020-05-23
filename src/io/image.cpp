@@ -1,4 +1,5 @@
 
+#include "hilma/io/jpg.h"
 #include "hilma/io/png.h"
 #include "hilma/io/hdr.h"
 #include "hilma/math.h"
@@ -44,6 +45,14 @@ unsigned char* loadPng(const std::string& _filename, int* _width, int* _height, 
     return stbi_load(_filename.c_str(), _width, _height, _channels, 0);
 }
 
+bool loadJpg(const std::string& _filename, Image& _image, int _channels) {
+    return load(_filename, _image, _channels);
+}
+
+unsigned char* loadJpg(const std::string& _filename, int* _width, int* _height, int* _channels) {
+    return stbi_load(_filename.c_str(), _width, _height, _channels, 0);
+}
+
 bool loadHdr(const std::string& _filename, Image& _image ) {
     _image.deAllocate();
     _image.data = stbi_loadf(_filename.c_str(), &_image.width, &_image.height, &_image.channels, 0);
@@ -82,6 +91,22 @@ bool savePng(const std::string& _filename, Image& _image) {
 
     return true;
 }
+
+bool saveJpg(const std::string& _filename, const unsigned char* _pixels, int _width, int _height, int _channels) {
+    return stbi_write_jpg(_filename.c_str(), _width, _height, _channels, _pixels, 90);
+}
+
+bool saveJpg(const std::string& _filename, Image& _image) {
+    int total = _image.width * _image.height * _image.channels;
+    unsigned char* pixels = new unsigned char[total];
+    for (int i = 0; i < total; i++)
+        pixels[i] = static_cast<char>(256 * clamp(_image.data[i], 0.0, 0.999));
+    saveJpg(_filename, pixels, _image.width, _image.height, _image.channels);
+    delete [] pixels;
+
+    return true;
+}
+
 
 
 // bool savePng16(const std::string& _filename, uint16_t* _pixels, int _width, int _height, int _channels) {

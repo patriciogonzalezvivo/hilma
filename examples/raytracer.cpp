@@ -19,20 +19,19 @@
 #include "hilma/ops/raytrace.h"
 #include "hilma/ops/intersection.h"
 
+#include "hilma/io/png.h"
+#include "hilma/io/jpg.h"
 #include "hilma/io/obj.h"
 #include "hilma/io/ply.h"
-#include "hilma/io/png.h"
 
 using namespace hilma;
-
-const float infinity = std::numeric_limits<float>::infinity();
 
 glm::vec3 raytrace(const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
     if (_depth <= 0)
         return glm::vec3(0.0f);
 
     HitRecord rec;
-    if ( raytrace(_ray, 0.001, infinity, _hittables, rec) ) {
+    if ( raytrace(_ray, 0.001, 1000.0, _hittables, rec) ) {
 
         if (!rec.frontFace)
             return glm::vec3(0.0f);
@@ -41,28 +40,50 @@ glm::vec3 raytrace(const Ray& _ray, const std::vector<Hittable>& _hittables, int
             return glm::vec3(2.0f);
 
         glm::vec3 attenuation = glm::vec3(0.5f);
-        glm::vec3 emission = glm::vec3(0.0f);
-        glm::vec3 target = rec.normal;
+        glm::vec3 emissive = glm::vec3(0.0f);
+        float metallic = 0.0f;
+        float roughtness = 1.0f;
+        glm::vec3 normal = rec.normal;
         glm::vec3 lambert = random_unit_vector();
 
-        if (rec.triangle->material != nullptr) {
-            attenuation = rec.triangle->material->diffuse;
-            emission = rec.triangle->material->emissive;
-            glm::vec3 reflected = glm::reflect(glm::normalize(_ray.getDirection()), rec.normal);
-            target = glm::mix(target, reflected, rec.triangle->material->metallic);
-            target += lambert * (0.25f + rec.triangle->material->roughness);
+        if (rec.triangle != nullptr) {
+            normal = rec.triangle->getNormal(rec.barycentric);
+
+            if (rec.triangle->material != nullptr) {
+                bool haveUV = rec.triangle->haveTexCoords();
+                glm::vec2 uv;
+
+                if (haveUV) uv = rec.triangle->getTexCoord(rec.barycentric);
+                uv.x = 1.0f - uv.x;
+
+                if ( rec.triangle->material->haveProperty("diffuse") )
+                    if ( haveUV ) attenuation = rec.triangle->material->getColor("diffuse", uv);
+                    else attenuation = rec.triangle->material->getColor("diffuse");
+                
+                if ( rec.triangle->material->haveProperty("emissive") )
+                    if ( haveUV ) emissive = rec.triangle->material->getColor("emissive", uv);
+                    else emissive = rec.triangle->material->getColor("emissive");
+                
+                if ( rec.triangle->material->haveProperty("roughness") )
+                    roughtness = rec.triangle->material->getValue("roughness", uv);
+
+                if ( rec.triangle->material->haveProperty("metallic") )
+                    metallic = rec.triangle->material->getValue("metallic", uv);
+            }
         }
-        else
-            target += lambert;
+
+        glm::vec3 reflected = glm::reflect(glm::normalize(_ray.getDirection()), rec.normal);
+        glm::vec3 target = glm::mix(normal, reflected, metallic);
+        target += lambert * roughtness;
 
         Ray scattered(rec.position, target);
-        return emission + attenuation * raytrace( scattered, _hittables, _depth-1 );
+        return emissive + attenuation * raytrace( scattered, _hittables, _depth-1 );
     }
 
 
     glm::vec3 unit_direction = normalize(_ray.getDirection() );
     float t = 0.5f * (unit_direction.y + 1.0f);
-    return glm::mix(glm::vec3(1.0f), glm::vec3(0.5f, 0.7f, 1.0f), t) * 0.5f;
+    return glm::mix(glm::vec3(1.0f), glm::vec3(0.5f, 0.7f, 1.0f), t);
 }
 
 int main(int argc, char **argv) {
@@ -71,7 +92,7 @@ int main(int argc, char **argv) {
     const float aspect_ratio = 16.0f / 9.0f;
     const int image_width = 1024 * 0.5;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const float samples_per_pixel = 1;
+    const float samples_per_pixel = 10;
     const float over_samples = 1.0f/samples_per_pixel; 
     const int max_depth = 50;
     bool debug = false;
@@ -81,12 +102,27 @@ int main(int argc, char **argv) {
     glm::vec3 lookat(0.0f, 0.0f, 0.0f);
     glm::vec3 vup(0.0f, -1.0f, 0.0f);
     float dist_to_focus = glm::length(lookfrom-lookat);
-    float aperture = 0.15;
+    float aperture = 0.05;
     Camera cam = Camera(lookfrom, lookat, vup,
-                        35.0f, 
+                        35.0f,
                         aspect_ratio, aperture, dist_to_focus);
 
     std::vector<Hittable> scene;
+
+    Material metal = Material("metal");
+    metal.set("metallic", 1.0f);
+    metal.set("roughness", 0.0f);
+
+    // Material plastic = Material("plastic");
+    // plastic.set("diffuse", glm::vec3(0.3,0.3,1.0));
+    // plastic.set("roughness", 0.2);
+
+    Material checker = Material("Checker");
+    checker.set("diffuse", "default.png");
+
+    Material earth = Material("Checker");
+    earth.set("diffuse", "earth.jpg");
+    earth.set("roughness", "earth.png");
 
     // Mesh cornell = loadObj("CornellBox.obj");
     // center(cornell);
@@ -99,43 +135,42 @@ int main(int argc, char **argv) {
     // scale(head, 0.15f);
     // scene.push_back( Hittable(head, true) );
 
-    // Mesh plane = hilma::plane(6.0f, 6.0f, 1, 1);
-    // translateZ(plane, -0.6f);
-    // rotateX(plane, -PI/2.0f);
-    // scene.push_back( Hittable(plane) );
-
-    Image heightmap;
-    loadPng("gale.png", heightmap, 1);
-    Mesh terrain = toTerrain(heightmap, 100.0, 0.05);
-    scale(terrain, 2.0/heightmap.getWidth());
+    // Image heightmap;
+    // loadPng("gale.png", heightmap, 1);
+    // Mesh terrain = toTerrain(heightmap, 100.0, 0.05);
+    // terrain.setMaterial(checker);
+    // center(terrain);
     // rotateX(terrain, -PI/2.0f);
+    // scale(terrain, 0.1);
     // translateY(terrain, -1.0f);
-    scene.push_back( Hittable(terrain) );
+    // scene.push_back( Hittable(terrain) );
 
-    // Material metal = Material("metal");
-    // metal.diffuse = glm::vec3(0.5);
-    // metal.metallic = 1.0f;
-    // metal.roughness = 0.0f;
-    // metal.diffuse = glm::vec3(1.0f);
-
-    // Material plastic = Material("plastic");
-    // plastic.diffuse = glm::vec3(0.3,0.3,1.0);
-    // plastic.roughness = 0.2;
+    Mesh plane = hilma::plane(6.0f, 6.0f, 1, 1);
+    plane.setMaterial(checker);
+    translateZ(plane, -0.6f);
+    rotateX(plane, -PI/2.0f);
+    scene.push_back( Hittable(plane) );
 
     Mesh icosphere = hilma::icosphere(0.5f, 2);
     // icosphere.setMaterial(metal);
+    // icosphere.setMaterial(checker);
+    icosphere.setMaterial(earth);
+    savePly("icosphere.ply", icosphere, true);
     scene.push_back( Hittable(icosphere, debug) );
 
-    // Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
-    // // cone.setMaterial(plastic);
-    // rotateX(cone, PI);
-    // translateX(cone, -2.0f);
-    // scene.push_back( Hittable(cone, debug) );
+    Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
+    // cone.setMaterial(plastic);
+    cone.setMaterial(metal);
+    rotateX(cone, PI);
+    translateX(cone, -2.0f);
+    scene.push_back( Hittable(cone, debug) );
 
-    // Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
-    // // cylinder.setMaterial(metal);
-    // translateX(cylinder, 2.0f);
-    // scene.push_back( Hittable(cylinder, debug) );
+    Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
+    cylinder.setMaterial(metal);
+    translateX(cylinder, 2.0f);
+    scene.push_back( Hittable(cylinder, debug) );
+
+    // RAYTRACER
 
     Timer timer;
     timer.start();

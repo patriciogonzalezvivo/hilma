@@ -1,62 +1,55 @@
 #pragma once
 
-#include <vector>
 #include <string>
 #include <memory>
+#include <vector>
+#include <map>
 
 #include "glm/glm.hpp"
 
+#include "hilma/types/Image.h"
+
 namespace hilma {
 
-struct Material {
+enum MaterialPropertyType {
+    TEXTURE_PROPERTY = 0,
+    COLOR_PROPERTY = 1,
+    VALUE_PROPERTY = 2
+};
 
+class Material {
+public:
     // Material() {}
-    Material(const std::string& _name): name(_name) {}
+    Material(const std::string& _name);
 
-    std::string name;
-    
-    std::string ambient_map;        // map_Ka
-    glm::vec3   ambient;            // Ka
+    void set(const std::string& _property, const std::string& _filename);
+    void set(const std::string& _property, const glm::vec3& _color);
+    void set(const std::string& _property, const float* _array1D, int _n);
+    void set(const std::string& _property, const float _value);
 
-    std::string diffuse_map;        // map_Kd
-    glm::vec3   diffuse;            // Kd
-    
-    std::string specular_map;       // map_Ks
-    glm::vec3   specular;           // Ks
-    
-    std::string emissive_map;       // map_Ke
-    glm::vec3   emissive;           // Ke
+    std::string     getName() const { return name; }
 
-    std::string roughness_map;
-    float       roughness       = 1.0f;
+    bool            haveProperty(const std::string& _property) const;
 
-    std::string metallic_map;
-    float       metallic        = 0.0f;
-    
-    std::string normal_map;
-    std::string bump_map;           // map_bump
-    std::string displacement_map;
-    
-    float       opacity;            // d
-    std::string opacity_map;        // map_d
+    std::string     getImagePath(const std::string& _property) const;
+    glm::vec3       getColor(const std::string& _property, const glm::vec2& _uv) const;
+    float           getValue(const std::string& _property, const glm::vec2& _uv) const;
+    glm::vec3       getColor(const std::string& _property) const;
+    float           getValue(const std::string& _property) const;
 
-    float       sheen;
-    std::string sheen_map;
+    int             illuminationModel;      // illum
 
-    float       shininess;
-    float       anisotropy;
-    float       anisotropy_rotation;
-    float       clearcoat_roughness;
-    float       clearcoat_thickness;
-    float       ior;
+    std::string     name;
+    std::map<std::string, MaterialPropertyType> properties;
 
-    float       dissolve;
-    float       optical_density;    // Ni
-    glm::vec3   transmittance;
-    std::string reflection_map;
-    std::string specular_highlight_map;
+// private:
 
-    int         illumination_model; // illum
+    std::map<const std::string, float>        values;
+    std::map<const std::string, glm::vec3>    colors;
+
+    std::map<const std::string, ImagePtr>     textures;
+    std::map<const std::string, std::string>  texturesPaths;
+
 };
 
 typedef std::shared_ptr<Material> MaterialPtr;
