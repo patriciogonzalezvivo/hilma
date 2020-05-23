@@ -158,20 +158,20 @@ int main(int argc, char **argv) {
     savePly("icosphere.ply", icosphere, true);
     scene.push_back( Hittable(icosphere, debug) );
 
-    Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
-    // cone.setMaterial(plastic);
-    cone.setMaterial(metal);
-    rotateX(cone, PI);
-    translateX(cone, -2.0f);
-    scene.push_back( Hittable(cone, debug) );
+    // Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
+    // // cone.setMaterial(plastic);
+    // cone.setMaterial(metal);
+    // rotateX(cone, PI);
+    // translateX(cone, -2.0f);
+    // scene.push_back( Hittable(cone, debug) );
 
-    Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
-    cylinder.setMaterial(metal);
-    translateX(cylinder, 2.0f);
-    scene.push_back( Hittable(cylinder, debug) );
+    // Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
+    // cylinder.setMaterial(metal);
+    // translateX(cylinder, 2.0f);
+    // scene.push_back( Hittable(cylinder, debug) );
 
     // RAYTRACER
-
+    //
     Timer timer;
     timer.start();
     std::cout << std::endl;

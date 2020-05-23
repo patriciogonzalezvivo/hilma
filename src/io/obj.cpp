@@ -20,34 +20,33 @@
 
 namespace hilma {
 
-
 Material InitMaterial (const tinyobj::material_t& _material) {
     Material mat = Material( toLower( toUnderscore( purifyString( _material.name ) ) ) );
 
-    // if (_material.diffuse_texname.size() > 0)
-        // mat.set("diffuse", _material.diffuse_texname);
-    // else
-    //     mat.set("diffuse", _material.diffuse[0], 3);
+    if (_material.diffuse_texname.size() > 0)
+        mat.set("diffuse", _material.diffuse_texname);
+    else
+        mat.set("diffuse", &_material.diffuse[0], 3);
 
-    // if (_material.specular_texname.size() > 0)
-    //     mat.set("specular", _material.specular_texname);
-    // else
-    //     mat.set("specular", _material.specular, 3);
+    if (_material.specular_texname.size() > 0)
+        mat.set("specular", _material.specular_texname);
+    else
+        mat.set("specular", &_material.specular[0], 3);
 
-    // if (_material.emissive_texname.size() > 0)
-    //     mat.set("emissive", _material.emissive_texname);
-    // else
-    //     mat.set("emissive", _material.emission, 3);
+    if (_material.emissive_texname.size() > 0)
+        mat.set("emissive", _material.emissive_texname);
+    else
+        mat.set("emissive", &_material.emission[0], 3);
 
-    // if (_material.roughness_texname.size() > 0)
-    //     mat.set("roughness", _material.roughness_texname);
-    // else
-    //     mat.set("roughness", _material.roughness);
+    if (_material.roughness_texname.size() > 0)
+        mat.set("roughness", _material.roughness_texname);
+    else
+        mat.set("roughness", _material.roughness);
 
-    // if (_material.metallic_texname.size() > 0)
-    //     mat.set("metallic", _material.metallic_texname);
-    // else
-    //     mat.set("metallic", _material.metallic);
+    if (_material.metallic_texname.size() > 0)
+        mat.set("metallic", _material.metallic_texname);
+    else
+        mat.set("metallic", _material.metallic);
 
     // if (_material.sheen_texname.size() > 0)
     //     mat.set("sheen", _material.sheen_texname);
@@ -82,6 +81,59 @@ Material InitMaterial (const tinyobj::material_t& _material) {
 
     mat.illuminationModel = _material.illum;
     return mat;
+}
+
+bool saveMaterials(const std::string& _filename, const Mesh& _mesh) {
+    FILE * mtl_file = fopen(_filename.c_str(), "w");
+    if (NULL == mtl_file) {
+        printf("IOError: %s could not be opened for writing...", _filename.c_str());
+        return false;
+    }
+
+    std::vector<std::string> materials = _mesh.getMaterialsNames();
+    fprintf(mtl_file, "# Material Count: %i \n", (int)materials.size());
+
+    std::vector<std::string> mat_value_obj = {           "Ns",               "Ni",       "d",        "Pr",       "Pm",    "Ps",                  "Pc",                 "Pcr",      "aniso",              "anisor"};
+    std::vector<std::string> mat_value_name= { "specular_exp",  "optical_density", "opacity", "roughness", "metallic", "sheen", "clearcoat_thickness", "clearcoat_roughness", "anisotropy", "anisotropy rotation"};
+
+    std::vector<std::string> mat_color_obj = {      "Ka",      "Kd",       "Ks",       "Ke" };
+    std::vector<std::string> mat_color_name= { "ambient", "diffuse", "specular", "emissive" };
+    
+    std::vector<std::string> mat_tex_obj   = { "bump",               "disp",      "norm" };
+    std::vector<std::string> mat_tex_name  = { "bumpmap", "displacementmap", "normalmap" };
+
+    for (size_t i = 0; i < materials.size(); i++) {
+        fprintf(mtl_file, "\nnewmtl %s\n", materials[i].c_str());
+        MaterialConstPtr mat = _mesh.getMaterial(materials[i]);
+
+        for (size_t j = 0; j < mat_value_obj.size(); j++)
+            if (mat->haveProperty(mat_value_name[j])) {
+                if (mat->getImagePath(mat_value_name[j]).size() > 0) 
+                    fprintf(mtl_file, "map_%s %s\n", mat_value_obj[j].c_str(), mat->getImagePath(mat_value_name[j]).c_str() );
+                else
+                    fprintf(mtl_file, "%s %.3f\n", mat_value_obj[j].c_str(), mat->getValue(mat_value_name[j]) );
+            }
+
+        for (size_t j = 0; j < mat_color_obj.size(); j++)
+            if (mat->haveProperty(mat_color_name[j])) {
+                if (mat->getImagePath(mat_color_name[j]).size() > 0)
+                    fprintf(mtl_file, "map_%s %s\n", mat_color_obj[j].c_str(), mat->getImagePath(mat_color_name[j]).c_str() );
+                else {
+                    glm::vec3 color = mat->getColor(mat_color_name[j]);
+                    fprintf(mtl_file, "%s %.3f %.3f %.3f\n", mat_color_obj[j].c_str(), color.r, color.g, color.b );
+                }
+            }
+
+        for (size_t j = 0; j < mat_tex_obj.size(); j++)
+            if (mat->getImagePath(mat_tex_name[j]).size() > 0) 
+                fprintf(mtl_file, "map_%s %s\n", mat_tex_obj[j].c_str(), mat->getImagePath(mat_tex_name[j]).c_str() );
+
+        fprintf(mtl_file, "illum %i\n", mat->illuminationModel);
+    }
+
+    fclose(mtl_file);
+
+    return true;
 }
 
 glm::vec3 getVertex(const tinyobj::attrib_t& _attrib, int _index) {
@@ -282,11 +334,14 @@ Mesh loadObj( const std::string& _filename) {
 }
 
 bool saveObj( const std::string& _filename, const Mesh& _mesh ) {
+
     FILE * obj_file = fopen(_filename.c_str(), "w");
     if (NULL == obj_file) {
         printf("IOError: %s could not be opened for writing...", _filename.c_str());
         return false;
     }
+
+    saveMaterials(_filename.substr(0,_filename.size()-3) + "mtl", _mesh);
 
     // https://github.com/libigl/libigl/blob/master/include/igl/writeOBJ.cpp
     fprintf(obj_file,"# generated with Hilma by Patricio Gonzalez Vivo\n");
@@ -316,7 +371,16 @@ bool saveObj( const std::string& _filename, const Mesh& _mesh ) {
 
     if (_mesh.haveFaceIndices()) {
         std::vector<glm::ivec3> faces = _mesh.getTrianglesIndices();
+        std::string last_material = "";
         for (size_t i = 0; i < faces.size(); i++) {
+
+            std::string matname = _mesh.getMaterialForFaceIndex(faces[i][0])->name;
+
+            if (matname != last_material) {
+                fprintf(obj_file, "usemtl %s\n", matname.c_str() );
+                last_material = matname;
+            }
+
             fprintf(obj_file,"f");
 
             for(int j = 0; j < 3; j++) {
@@ -335,8 +399,8 @@ bool saveObj( const std::string& _filename, const Mesh& _mesh ) {
 
             fprintf(obj_file,"\n");
         }
-    }
-    fclose(obj_file);
+    } fclose(obj_file);
+   
 
     return true;
 };

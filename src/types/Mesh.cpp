@@ -759,8 +759,8 @@ void Mesh::addMaterial(const Material& _material, int _index) {
     materialsByIndices.push_back(in_mat);
 }
 
-MaterialPtr Mesh::getMaterial(const std::string& _name) {
-    return materialsByName[_name];
+MaterialPtr Mesh::getMaterial(const std::string& _name) const {
+    return materialsByName.find(_name)->second;
 }
 
 std::vector<std::string> Mesh::getMaterialsNames() const {

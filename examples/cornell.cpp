@@ -43,7 +43,8 @@ int main(int argc, char **argv) {
     //     std::cout << std::endl;
     // }
 
-    hilma::savePly("CornellBox.ply", mesh, false);
+    hilma::savePly("cornell.ply", mesh, false);
+    hilma::saveObj("cornell.obj", mesh);
 
     return 0;
 }

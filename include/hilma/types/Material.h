@@ -12,9 +12,9 @@
 namespace hilma {
 
 enum MaterialPropertyType {
-    TEXTURE_PROPERTY = 0,
-    COLOR_PROPERTY = 1,
-    VALUE_PROPERTY = 2
+    VALUE = 0,
+    COLOR = 1,
+    TEXTURE = 2
 };
 
 class Material {

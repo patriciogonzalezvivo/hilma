@@ -30,24 +30,24 @@ void Material::set(const std::string& _property, const std::string& _filename) {
 
         if (loaded) {
             textures[_property] = image;
-            properties[_property] = TEXTURE_PROPERTY;
+            properties[_property] = TEXTURE;
         }
     }
 }
 
 void Material::set(const std::string& _property, const float* _array1D, int _n) {
     colors[_property] = glm::vec3(_array1D[0], _array1D[1], _array1D[2]);
-    properties[_property] = COLOR_PROPERTY;
+    properties[_property] = COLOR;
 }
 
 void Material::set(const std::string& _property, const glm::vec3& _color) {
     colors[_property] = _color;
-    properties[_property] = COLOR_PROPERTY;
+    properties[_property] = COLOR;
 }
 
 void Material::set(const std::string& _property, const float _value) {
     values[_property] = _value;
-    properties[_property] = VALUE_PROPERTY;
+    properties[_property] = VALUE;
 }
 
 std::string Material::getImagePath(const std::string& _property) const {
@@ -61,14 +61,14 @@ std::string Material::getImagePath(const std::string& _property) const {
 glm::vec3 Material::getColor(const std::string& _property, const glm::vec2& _uv) const {
     if (haveProperty(_property)) {
         MaterialPropertyType type = properties.find(_property)->second;
-        if (type == TEXTURE_PROPERTY) {
+        if (type == TEXTURE) {
             const ImagePtr tex = textures.find(_property)->second;
             return tex->getColor(   _uv.x * tex->getWidth(), 
                                     _uv.y * tex->getHeight() );
         }
-        else if (type == COLOR_PROPERTY)
+        else if (type == COLOR)
             return colors.find(_property)->second;
-        else if (type == VALUE_PROPERTY)
+        else if (type == VALUE)
             return glm::vec3(values.find(_property)->second);
     }
 
@@ -78,9 +78,9 @@ glm::vec3 Material::getColor(const std::string& _property, const glm::vec2& _uv)
 glm::vec3 Material::getColor(const std::string& _property) const {
     if (haveProperty(_property)) {
         MaterialPropertyType type = properties.find(_property)->second;
-        if (type == COLOR_PROPERTY)
+        if (type == COLOR)
             return colors.find(_property)->second;
-        else if (type == VALUE_PROPERTY)
+        else if (type == VALUE)
             return glm::vec3(values.find(_property)->second);
     }
 
@@ -90,14 +90,14 @@ glm::vec3 Material::getColor(const std::string& _property) const {
 float Material::getValue(const std::string& _property, const glm::vec2& _uv) const {
     if (haveProperty(_property)) {
         MaterialPropertyType type = properties.find(_property)->second;
-        if (type == TEXTURE_PROPERTY) {
+        if (type == TEXTURE) {
             const ImagePtr tex = textures.find(_property)->second;
             return tex->getColor(   _uv.x * tex->getWidth(), 
                                     _uv.y * tex->getHeight() )[0];
         }
-        else if (type == COLOR_PROPERTY)
+        else if (type == COLOR)
             return colors.find(_property)->second.x;
-        else if (type == VALUE_PROPERTY)
+        else if (type == VALUE)
             return values.find(_property)->second;
     }
 
@@ -107,9 +107,9 @@ float Material::getValue(const std::string& _property, const glm::vec2& _uv) con
 float Material::getValue(const std::string& _property) const {
     if (haveProperty(_property)) {
         MaterialPropertyType type = properties.find(_property)->second;
-        if (type == COLOR_PROPERTY)
+        if (type == COLOR)
             return colors.find(_property)->second.r;
-        else if (type == VALUE_PROPERTY)
+        else if (type == VALUE)
             return values.find(_property)->second;
     }
 

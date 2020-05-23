@@ -159,7 +159,7 @@ public:
 
     void        setMaterial(const Material& _material);
     void        addMaterial(const Material& _material, int _index = -1);
-    MaterialPtr getMaterial(const std::string& _name);
+    MaterialPtr getMaterial(const std::string& _name) const;
     bool        haveMaterials() const { return !materialsByIndices.empty(); }
     
     std::vector<std::string> getMaterialsNames() const;
