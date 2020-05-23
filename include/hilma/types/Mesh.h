@@ -131,6 +131,7 @@ public:
 
     void        addFaceIndex(INDEX_TYPE _i);
     void        addFaceIndices(const INDEX_TYPE* _array1D, int _n);
+    size_t      getFaceIndex(size_t _index);  
 
     void        addTriangles(const Triangle* _array1D, int _n);
 

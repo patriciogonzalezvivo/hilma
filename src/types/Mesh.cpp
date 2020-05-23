@@ -419,6 +419,10 @@ void Mesh::addFaceIndex(INDEX_TYPE _i) {
     faceIndices.push_back(_i);
 }
 
+size_t Mesh::getFaceIndex(size_t _index) {
+    return faceIndices[_index];
+}
+
 void Mesh::addFaceIndices(const INDEX_TYPE* _array1D, int _n) {
     faceIndices.insert(faceIndices.end(),_array1D,_array1D+_n);
 }

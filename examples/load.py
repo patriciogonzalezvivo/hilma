@@ -14,6 +14,8 @@ loadPly("head.ply", mesh)
 verts = []
 faces = []
 edges = []
+uvs = []
+
 
 for v in mesh.getVertices():
     verts.append( (v.x, v.y, v.z) )
@@ -23,7 +25,6 @@ for t in mesh.getTrianglesIndices():
 
 for e in mesh.getLinesIndices():
     edges.append( (e.x, e.y) )
-
 
 # print( verts )
 # print( faces )
