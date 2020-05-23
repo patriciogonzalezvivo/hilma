@@ -9,6 +9,7 @@
 #include "hilma/io/tinyply.h"
 
 #include "hilma/io/ply.h"
+#include "hilma/text.h"
 
 namespace hilma {
 
@@ -30,6 +31,18 @@ bool loadPly( const std::string& _filename, Mesh& _mesh ) {
         // for (const auto & c : file.get_comments()) std::cout << "\t[ply_header] Comment: " << c << std::endl;
         // for (const auto & c : file.get_info()) std::cout << "\t[ply_header] Info: " << c << std::endl;
 
+        if (_mesh.name == "undefined")
+            _mesh.name = _filename.substr(0, _filename.size()-4);
+
+        std::vector<std::string> comments = file.get_comments();
+        for (size_t i = 0; i < comments.size(); i++) {
+            std::vector<std::string> parts = split(comments[i], ' ', true);
+            if (parts[0] == "TextureFile") {
+                Material mat("default");
+                mat.set("diffuse", parts[1]);
+                _mesh.addMaterial(mat);
+            }
+        }
 
         for (const auto & e : file.get_elements()) {
             // std::cout << "\t[ply_header] element: " << e.name << " (" << e.size << ")" << std::endl;

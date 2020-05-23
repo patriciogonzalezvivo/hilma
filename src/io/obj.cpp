@@ -84,13 +84,16 @@ Material InitMaterial (const tinyobj::material_t& _material) {
 }
 
 bool saveMaterials(const std::string& _filename, const Mesh& _mesh) {
+    std::vector<std::string> materials = _mesh.getMaterialsNames();
+    if (materials.size() == 0)
+        return true;
+
     FILE * mtl_file = fopen(_filename.c_str(), "w");
     if (NULL == mtl_file) {
         printf("IOError: %s could not be opened for writing...", _filename.c_str());
         return false;
     }
 
-    std::vector<std::string> materials = _mesh.getMaterialsNames();
     fprintf(mtl_file, "# Material Count: %i \n", (int)materials.size());
 
     std::vector<std::string> mat_value_obj = {           "Ns",               "Ni",       "d",        "Pr",       "Pm",    "Ps",                  "Pc",                 "Pcr",      "aniso",              "anisor"};
@@ -369,16 +372,18 @@ bool saveObj( const std::string& _filename, const Mesh& _mesh ) {
         // fprintf(obj_file,"\n");
     }
 
+    bool materials = _mesh.getMaterialsNames().size() > 0;
     if (_mesh.haveFaceIndices()) {
         std::vector<glm::ivec3> faces = _mesh.getTrianglesIndices();
         std::string last_material = "";
         for (size_t i = 0; i < faces.size(); i++) {
 
-            std::string matname = _mesh.getMaterialForFaceIndex(faces[i][0])->name;
-
-            if (matname != last_material) {
-                fprintf(obj_file, "usemtl %s\n", matname.c_str() );
-                last_material = matname;
+            if (materials) {
+                std::string matname = _mesh.getMaterialForFaceIndex(faces[i][0])->name;
+                if (matname != last_material) {
+                    fprintf(obj_file, "usemtl %s\n", matname.c_str() );
+                    last_material = matname;
+                }
             }
 
             fprintf(obj_file,"f");
