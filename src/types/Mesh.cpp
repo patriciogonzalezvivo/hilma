@@ -561,6 +561,7 @@ std::vector<Triangle> Mesh::getTriangles() const {
         if (haveColors()) tri.setColors(colors[it->x], colors[it->y], colors[it->z]);
         if (haveNormals()) tri.setNormals(normals[it->x], normals[it->y], normals[it->z]);
         if (haveTexCoords()) tri.setTexCoords(texcoords[it->x], texcoords[it->y], texcoords[it->z]);
+        if (haveTangents()) tri.setTangents(tangents[it->x], tangents[it->y], tangents[it->z]);
         if (haveMaterials()) tri.material = getMaterialForFaceIndex(it->x);
         
         triangles.push_back( tri );

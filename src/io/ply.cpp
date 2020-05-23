@@ -27,12 +27,12 @@ bool loadPly( const std::string& _filename, Mesh& _mesh ) {
         tinyply::PlyFile file;
         file.parse_header(*file_stream);
 
+        if (_mesh.name == "undefined")
+            _mesh.name = _filename.substr(0, _filename.size()-4);
+
         // std::cout << "\t[ply_header] Type: " << (file.is_binary_file() ? "binary" : "ascii") << std::endl;
         // for (const auto & c : file.get_comments()) std::cout << "\t[ply_header] Comment: " << c << std::endl;
         // for (const auto & c : file.get_info()) std::cout << "\t[ply_header] Info: " << c << std::endl;
-
-        if (_mesh.name == "undefined")
-            _mesh.name = _filename.substr(0, _filename.size()-4);
 
         std::vector<std::string> comments = file.get_comments();
         for (size_t i = 0; i < comments.size(); i++) {

@@ -10,5 +10,23 @@ from hilma import Mesh, loadPly, savePly
 
 mesh = Mesh()
 loadPly("head.ply", mesh)
-savePly("out.ply", mesh, False)
 
+verts = []
+faces = []
+edges = []
+
+for v in mesh.getVertices():
+    verts.append( (v.x, v.y, v.z) )
+
+for t in mesh.getTrianglesIndices():
+    faces.append( (t.x, t.y, t.z ) )
+
+for e in mesh.getLinesIndices():
+    edges.append( (e.x, e.y) )
+
+
+# print( verts )
+# print( faces )
+# print(edges)
+
+savePly("out.ply", mesh, False)

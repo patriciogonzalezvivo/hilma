@@ -40,12 +40,12 @@ Material InitMaterial (const tinyobj::material_t& _material) {
 
     if (_material.roughness_texname.size() > 0)
         mat.set("roughness", _material.roughness_texname);
-    else
+    else if (_material.roughness > 0.0f)
         mat.set("roughness", _material.roughness);
 
     if (_material.metallic_texname.size() > 0)
         mat.set("metallic", _material.metallic_texname);
-    else
+    else if (_material.roughness > 0.0f)
         mat.set("metallic", _material.metallic);
 
     // if (_material.sheen_texname.size() > 0)

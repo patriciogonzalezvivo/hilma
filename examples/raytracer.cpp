@@ -39,12 +39,12 @@ glm::vec3 raytrace(const Ray& _ray, const std::vector<Hittable>& _hittables, int
         if (rec.line != nullptr)
             return glm::vec3(2.0f);
 
-        glm::vec3 attenuation = glm::vec3(0.5f);
+        glm::vec3 attenuation = glm::vec3(1.0f);
         glm::vec3 emissive = glm::vec3(0.0f);
+        glm::vec3 normal = rec.normal;
+        float opacity = 1.0f;
         float metallic = 0.0f;
         float roughtness = 1.0f;
-        glm::vec3 normal = rec.normal;
-        glm::vec3 lambert = random_unit_vector();
 
         if (rec.triangle != nullptr) {
             normal = rec.triangle->getNormal(rec.barycentric);
@@ -69,15 +69,21 @@ glm::vec3 raytrace(const Ray& _ray, const std::vector<Hittable>& _hittables, int
 
                 if ( rec.triangle->material->haveProperty("metallic") )
                     metallic = rec.triangle->material->getValue("metallic", uv);
+
+                if ( rec.triangle->material->haveProperty("opacity") )
+                    opacity = rec.triangle->material->getValue("opacity", uv);
             }
         }
 
-        glm::vec3 reflected = glm::reflect(glm::normalize(_ray.getDirection()), rec.normal);
+        glm::vec3 dir = glm::normalize(_ray.getDirection());
+        glm::vec3 reflected = glm::reflect(dir, normal);
         glm::vec3 target = glm::mix(normal, reflected, metallic);
-        target += lambert * roughtness;
+        target += random_unit_vector() * roughtness;
 
         Ray scattered(rec.position, target);
+        // if ((dot(scattered.getDirection(), rec.normal) > 0))
         return emissive + attenuation * raytrace( scattered, _hittables, _depth-1 );
+        // return glm::vec3(0.0f);
     }
 
 
@@ -98,7 +104,7 @@ int main(int argc, char **argv) {
     bool debug = false;
 
     // Scene
-    glm::vec3 lookfrom(3.5f, 0.5f, 1.5f);
+    glm::vec3 lookfrom(1.5f, 0.5f, 3.0f);
     glm::vec3 lookat(0.0f, 0.0f, 0.0f);
     glm::vec3 vup(0.0f, -1.0f, 0.0f);
     float dist_to_focus = glm::length(lookfrom-lookat);
@@ -124,16 +130,11 @@ int main(int argc, char **argv) {
     earth.set("diffuse", "earth.jpg");
     earth.set("roughness", "earth.png");
 
-    // Mesh cornell = loadObj("CornellBox.obj");
-    // center(cornell);
-    // translateY(cornell, 0.4f);
-    // translateZ(cornell, -2.0f);
-    // scene.push_back( Hittable(cornell) );
-
-    // Mesh head = loadPly("head.ply");
-    // center(head);
-    // scale(head, 0.15f);
-    // scene.push_back( Hittable(head, true) );
+    Mesh cornell = loadObj("CornellBox.obj");
+    center(cornell);
+    translateY(cornell, 0.4f);
+    translateZ(cornell, -2.0f);
+    scene.push_back( Hittable(cornell) );
 
     // Image heightmap;
     // loadPng("gale.png", heightmap, 1);
@@ -152,9 +153,9 @@ int main(int argc, char **argv) {
     scene.push_back( Hittable(plane) );
 
     Mesh icosphere = hilma::icosphere(0.5f, 2);
-    // icosphere.setMaterial(metal);
+    icosphere.setMaterial(metal);
     // icosphere.setMaterial(checker);
-    icosphere.setMaterial(earth);
+    // icosphere.setMaterial(earth);
     savePly("icosphere.ply", icosphere, true);
     scene.push_back( Hittable(icosphere, debug) );
 

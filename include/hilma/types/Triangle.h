@@ -19,6 +19,7 @@ public :
     void setColors(const glm::vec4 &_p0, const glm::vec4 &_p1, const glm::vec4 &_p2);
     void setNormals(const glm::vec3 &_p0, const glm::vec3 &_p1, const glm::vec3 &_p2);
     void setTexCoords(const glm::vec2 &_p0, const glm::vec2 &_p1, const glm::vec2 &_p2);
+    void setTangents(const glm::vec4 &_p0, const glm::vec4 &_p1, const glm::vec4 &_p2);
 
     bool containsPoint(const glm::vec3 &_p);
     
@@ -48,6 +49,11 @@ public :
     void                setTexCoord(size_t _index, const glm::vec2& _texcoord);
     const glm::vec2&    getTexCoord(size_t _index) const { return texcoords[_index]; }
     glm::vec2           getTexCoord(const glm::vec3& _barycenterCoord ) const;
+
+    bool                haveTangents() const { return !tangents.empty(); }
+    void                setTangent(size_t _index, const glm::vec4& _tangent);
+    const glm::vec4&    getTangent(size_t _index) const { return tangents[_index]; }
+    glm::vec4           getTangent(const glm::vec3& _barycenterCoord ) const;
     
     MaterialConstPtr    material = nullptr;
 private:
@@ -58,6 +64,8 @@ private:
     std::vector<glm::vec4>  colors;
     std::vector<glm::vec3>  normals;
     std::vector<glm::vec2>  texcoords;
+    std::vector<glm::vec4>  tangents;
+    
 };
 
 typedef std::shared_ptr<Triangle> TrianglePtr;

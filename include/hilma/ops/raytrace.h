@@ -47,8 +47,7 @@ public:
     std::vector<Line>       lines;
 };
 
-bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Line>& _lines);
-
+bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Line>& _lines,         HitRecord& _rec);
 bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Triangle>& _triangles, HitRecord& _rec);
 bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Hittable>& _hittables, HitRecord& _rec);
 

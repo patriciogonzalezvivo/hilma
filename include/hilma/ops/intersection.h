@@ -43,7 +43,6 @@ bool                intersection(const Ray& _ray, const BoundingBox& _bbox, floa
 
 IntersectionData    intersection(const Ray& _ray, const Triangle& _triangle);
 bool                intersection(const Ray& _ray, const Triangle& _triangle, float& _t, float& _u, float& _v);
-bool                intersectionMT(const Ray& _ray, const Triangle& _triangle, float& _t, float& _u, float& _v);
 
 // Line
 IntersectionData    intersection(const Line& _line, const Plane& _plane);

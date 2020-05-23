@@ -66,9 +66,9 @@ public:
     bool        haveVertices() const { return !vertices.empty(); };
     void        clearVertices() { vertices.clear(); }
 
-    const glm::vec3& getVertex(size_t _index) const { return vertices[_index]; }
-    const size_t    getVerticesTotal() const { return vertices.size(); }
-    const  std::vector<glm::vec3>& getVertices() const { return vertices; }
+    const size_t        getVerticesTotal() const { return vertices.size(); }
+    const glm::vec3&    getVertex(size_t _index) const { return vertices[_index]; }
+    const std::vector<glm::vec3>& getVertices() const { return vertices; }
 
     // Colorss
     void        setColor(const glm::vec4& _color);
@@ -154,7 +154,7 @@ public:
     size_t      getEdgeIndicesTotal() const { return edgeIndices.size(); }
     void        clearEdgeIndices() { edgeIndices.clear(); }
 
-    std::vector<Line> getLinesEdges() const;
+    std::vector<Line>       getLinesEdges() const;
     std::vector<glm::ivec2> getLinesIndices() const;
 
     void        setMaterial(const Material& _material);

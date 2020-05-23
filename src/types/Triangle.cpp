@@ -103,6 +103,15 @@ void Triangle::setTexCoord(size_t _index, const glm::vec2& _texcoord) {
         texcoords[_index] = _texcoord;
 }
 
+void Triangle::setTangent(size_t _index, const glm::vec4& _tangent) {
+        if (tangents.empty()) {
+        tangents.resize(3);
+        std::fill(tangents.begin(),tangents.begin()+3, _tangent);
+    }
+    else
+        tangents[_index] = _tangent;
+}
+
 void Triangle::setColors(const glm::vec4 &_p0, const glm::vec4 &_p1, const glm::vec4 &_p2) {
     colors.resize(3);
     colors[0] = _p0;
@@ -122,6 +131,13 @@ void Triangle::setTexCoords(const glm::vec2 &_p0, const glm::vec2 &_p1, const gl
     texcoords[0] = _p0;
     texcoords[1] = _p1;
     texcoords[2] = _p2;
+}
+
+void Triangle::setTangents(const glm::vec4 &_p0, const glm::vec4 &_p1, const glm::vec4 &_p2) {
+    tangents.resize(3);
+    tangents[0] = _p0;
+    tangents[1] = _p1;
+    tangents[2] = _p2;
 }
 
 glm::vec3 Triangle::getVertex(const glm::vec3& _barycenter) const {
@@ -149,5 +165,11 @@ glm::vec2 Triangle::getTexCoord(const glm::vec3& _barycenter) const {
     return  getTexCoord(0) * _barycenter.x +
             getTexCoord(1) * _barycenter.y +
             getTexCoord(2) * _barycenter.z;
+}
+
+glm::vec4 Triangle::getTangent(const glm::vec3& _barycenter ) const {
+    return  getTangent(0) * _barycenter.x +
+            getTangent(1) * _barycenter.y +
+            getTangent(2) * _barycenter.z;
 }
 

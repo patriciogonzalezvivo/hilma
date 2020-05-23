@@ -100,9 +100,16 @@
 using namespace hilma;
 
 namespace std {
-    %template(VectorString) vector<string>;
-    %template(VectorTriangles) vector<Triangle>;
-    %template(VectorLines) vector<Line>;
-    %template(VectorMesh) vector<Mesh>;
+    %template(Vector4DVectors)  vector<glm::vec4>;
+    %template(Vector3DVectors)  vector<glm::vec3>;
+    %template(Vector2DVectors)  vector<glm::vec2>;
+
+    %template(VectorFaces)      vector<glm::ivec3>;
+    %template(VectorTriangles)  vector<Triangle>;
+    %template(VectorEdges)      vector<glm::ivec2>;
+    %template(VectorLines)      vector<Line>;
+    %template(VectorMesh)       vector<Mesh>;
+
+    %template(VectorString)     vector<string>;
 };
 
