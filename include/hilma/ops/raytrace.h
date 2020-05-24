@@ -2,9 +2,9 @@
 
 #include <vector>
 #include <iostream>
+#include <memory>
 
 #include "hilma/types/Ray.h"
-#include "hilma/types/Mesh.h"
 #include "hilma/types/Triangle.h"
 
 #include "hilma/ops/convert.h"
@@ -30,21 +30,18 @@ struct HitRecord {
 
 class Hittable : public BoundingBox {
 public:
-    Hittable( const Mesh& _mesh, bool _debug = false) {
-        for (size_t i = 0; i < _mesh.getVerticesTotal(); i++)
-            expand(_mesh.getVertices()[i]);
-        triangles = _mesh.getTriangles();
+    Hittable( const std::vector<Triangle>& _triangles, int _brances, bool _debug = false);
 
-        if (_debug) {
-            BoundingBox bbox;
-            bbox.min = min;
-            bbox.max = max;
-            lines = toLines(bbox);
-        }
-    }
+    virtual bool hit(const Ray& _ray, float _minDistance, float _maxDistance, HitRecord& _rec) const;
+    virtual int  getTotalTriangles();
 
-    std::vector<Triangle>   triangles;
-    std::vector<Line>       lines;
+private:
+    std::vector<Triangle>       triangles;
+    std::vector<Line>           lines;
+
+    std::shared_ptr<Hittable>   left;
+    std::shared_ptr<Hittable>   right;
+    bool                        leaf;
 };
 
 bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Line>& _lines,         HitRecord& _rec);

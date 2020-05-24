@@ -86,10 +86,10 @@ glm::vec3 raytrace(const Ray& _ray, const std::vector<Hittable>& _hittables, int
         // return glm::vec3(0.0f);
     }
 
-
+    // return glm::vec3(0.0f);
     glm::vec3 unit_direction = normalize(_ray.getDirection() );
     float t = 0.5f * (unit_direction.y + 1.0f);
-    return glm::mix(glm::vec3(1.0f), glm::vec3(0.5f, 0.7f, 1.0f), t);
+    return glm::mix(glm::vec3(1.0f), glm::vec3(0.5f, 0.7f, 1.0f), t) * 0.5f;
 }
 
 int main(int argc, char **argv) {
@@ -101,10 +101,12 @@ int main(int argc, char **argv) {
     const float samples_per_pixel = 10;
     const float over_samples = 1.0f/samples_per_pixel; 
     const int max_depth = 50;
-    bool debug = false;
+    int branches = 10;
+    bool debug = true;
 
     // Scene
-    glm::vec3 lookfrom(1.5f, 0.5f, 3.0f);
+    glm::vec3 lookfrom(3.5f, 0.5f, 3.0f);
+    // lookfrom = glm::vec3(0.0f, 0.0f, 2.f);
     glm::vec3 lookat(0.0f, 0.0f, 0.0f);
     glm::vec3 vup(0.0f, -1.0f, 0.0f);
     float dist_to_focus = glm::length(lookfrom-lookat);
@@ -126,15 +128,16 @@ int main(int argc, char **argv) {
     Material checker = Material("Checker");
     checker.set("diffuse", "default.png");
 
-    Material earth = Material("Checker");
-    earth.set("diffuse", "earth.jpg");
-    earth.set("roughness", "earth.png");
+    // Material earth = Material("Checker");
+    // earth.set("diffuse", "earth.jpg");
+    // earth.set("roughness", "earth.png");
 
-    Mesh cornell = loadObj("CornellBox.obj");
-    center(cornell);
-    translateY(cornell, 0.4f);
-    translateZ(cornell, -2.0f);
-    scene.push_back( Hittable(cornell) );
+    // Mesh cornell = loadObj("CornellBox.obj");
+    // center(cornell);
+    // translateY(cornell, 0.4f);
+    // translateZ(cornell, -2.0f);
+    // saveObj("cornell.obj", cornell);
+    // scene.push_back( Hittable(cornell, branches, debug) );
 
     // Image heightmap;
     // loadPng("gale.png", heightmap, 1);
@@ -144,32 +147,39 @@ int main(int argc, char **argv) {
     // rotateX(terrain, -PI/2.0f);
     // scale(terrain, 0.1);
     // translateY(terrain, -1.0f);
-    // scene.push_back( Hittable(terrain) );
+    // scene.push_back( Hittable(terrain, branches, debug) );
 
     Mesh plane = hilma::plane(6.0f, 6.0f, 1, 1);
     plane.setMaterial(checker);
     translateZ(plane, -0.6f);
     rotateX(plane, -PI/2.0f);
-    scene.push_back( Hittable(plane) );
+    scene.push_back( Hittable(plane.getTriangles(), 0, false) );
 
-    Mesh icosphere = hilma::icosphere(0.5f, 2);
-    icosphere.setMaterial(metal);
-    // icosphere.setMaterial(checker);
-    // icosphere.setMaterial(earth);
-    savePly("icosphere.ply", icosphere, true);
-    scene.push_back( Hittable(icosphere, debug) );
+    Mesh head = loadPly("head.ply");
+    center(head);
+    translateY(head, 0.5f);
+    scale(head, 0.15f);
+    scene.push_back( Hittable(head.getTriangles(), branches, debug) );
 
-    // Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
-    // // cone.setMaterial(plastic);
+    // Mesh icosphere = hilma::icosphere(0.5f, 2);
+    // icosphere.setMaterial(metal);
+    // // icosphere.setMaterial(checker);
+    // // icosphere.setMaterial(earth);
+    // scene.push_back( Hittable(icosphere.getTriangles(), branches, debug) );
+
+    Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
+    // cone.setMaterial(plastic);
     // cone.setMaterial(metal);
-    // rotateX(cone, PI);
-    // translateX(cone, -2.0f);
-    // scene.push_back( Hittable(cone, debug) );
+    cone.setMaterial(checker);
+    rotateX(cone, PI);
+    translateX(cone, -2.0f);
+    scene.push_back( Hittable(cone.getTriangles(), branches, debug) );
 
-    // Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
+    Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
     // cylinder.setMaterial(metal);
-    // translateX(cylinder, 2.0f);
-    // scene.push_back( Hittable(cylinder, debug) );
+    cylinder.setMaterial(checker);
+    translateX(cylinder, 2.0f);
+    scene.push_back( Hittable(cylinder.getTriangles(), branches, debug) );
 
     // RAYTRACER
     //
@@ -210,9 +220,8 @@ int main(int argc, char **argv) {
 
     int totalTriangles = 0;
     for (size_t i = 0; i < scene.size(); i++)
-        totalTriangles += scene[i].triangles.size();    
+        totalTriangles += scene[i].getTotalTriangles();    
     std::cout << "                  Total number of triangles : " << totalTriangles << std::endl;
-
     std::cout << "              Total number of ray-box tests : " << getTotalRayBoundingBoxTests() << std::endl;
     std::cout << "        Total number of ray-triangles tests : " << getTotalRayTriangleTests() << std::endl; 
     std::cout << "Total number of ray-triangles intersections : " << getTotalRayTrianglesIntersections() << std::endl;

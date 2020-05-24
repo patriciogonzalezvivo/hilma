@@ -101,52 +101,24 @@ IntersectionData intersection(const Ray& _ray, const Plane& _plane) {
     return idata;
 }
 
+// By Andrew Kensler
+//
 bool intersection(const Ray& _ray, const BoundingBox& _bbox, float &_tmin, float &_tmax) {
     #ifdef DEBUG_INTERSECTIONS
     __sync_fetch_and_add(&numRayBoxTests, 1); 
     #endif
 
-    if ( _bbox.contains(_ray.getOrigin()) )
-        return true;
-
-    float tx1 = (_bbox.min.x - _ray.getOrigin().x)*_ray.getInvertDirection().x;
-    float tx2 = (_bbox.max.x - _ray.getOrigin().x)*_ray.getInvertDirection().x;
- 
-    _tmin = std::min(tx1, tx2);
-    _tmax = std::max(tx1, tx2);
- 
-    float ty1 = (_bbox.min.y - _ray.getOrigin().y)*_ray.getInvertDirection().y;
-    float ty2 = (_bbox.max.y - _ray.getOrigin().y)*_ray.getInvertDirection().y;
- 
-    _tmin = std::max(_tmin, std::min(ty1, ty2));
-    _tmax = std::min(_tmax, std::max(ty1, ty2));
-
-    float tz1 = (_bbox.min.z - _ray.getOrigin().z)*_ray.getInvertDirection().z;
-    float tz2 = (_bbox.max.z - _ray.getOrigin().z)*_ray.getInvertDirection().z;
- 
-    _tmin = std::max(_tmin, std::min(tz1, tz2));
-    _tmax = std::min(_tmax, std::max(tz1, tz2));
- 
-    return _tmax >= _tmin;
-
-    // // Increase far parameter to avoid false positives due to rounding.
-    // static float error_padding = 1.0f + 2.0f * tgamma(3.0f);
-
-    // float t0 = 0.0f;
-    // float t1 = infinity;
-
-    // for (size_t i = 0; i < 3; ++i) {
-    //     float near = (_bbox.min[i] - _ray.getOrigin()[i]) * _ray.getInvertDirection()[i];
-    //     float far = (_bbox.max[i] - _ray.getOrigin()[i]) * _ray.getInvertDirection()[i];
-    //     if (near > far) std::swap(near, far);
-    //     far *= error_padding;
-    //     t0 = near > t0 ? near : t0;
-    //     t1 = far < t1 ? far : t1;
-    //     if (t0 > t1) return false;
-    // }
-
-    // _tmin = t0;
-    // _tmax = t1;
+    for (int a = 0; a < 3; a++) {
+        float invD = _ray.getInvertDirection()[a];
+        float t0 = (_bbox.min[a] - _ray.getOrigin()[a]) * invD;
+        float t1 = (_bbox.max[a] - _ray.getOrigin()[a]) * invD;
+        if (invD < 0.0f)
+            std::swap(t0, t1);
+        _tmin = t0 > _tmin ? t0 : _tmin;
+        _tmax = t1 < _tmax ? t1 : _tmax;
+        if (_tmax <= _tmin)
+            return false;
+    }
 
     return true;
 }
@@ -196,53 +168,6 @@ bool intersection(const Ray& _ray, const Triangle& _triangle, float& _t, float& 
     if (_v < 0.0f || _u + _v > 1.0f) return false; 
  
     _t = glm::dot(v0v2, qvec) * invDet; 
-
-
-    // // no need to normalize
-    // glm::vec3 N = _triangle.getNormal(); 
-    // float denom = glm::dot(N, N); 
- 
-    // // Step 1: finding P
- 
-    // // check if ray and plane are parallel ?
-    // float NdotRayDirection = glm::dot(N, _ray.getDirection()); 
-    // if (fabs(NdotRayDirection) < EPS) // almost 0 
-    //     return false; // they are parallel so they don't intersect ! 
- 
-    // // compute d parameter using equation 2
-    // float d = glm::dot(N, _triangle[0]); 
- 
-    // // compute t (equation 3)
-    // _t = (glm::dot(N, _ray.getOrigin()) + d) / NdotRayDirection; 
-    // // check if the triangle is in behind the ray
-    // if (_t < 0) return false; // the triangle is behind 
- 
-    // // compute the intersection point using equation 1
-    // glm::vec3 P = _ray.getOrigin() + _t * _ray.getDirection(); 
- 
-    // // Step 2: inside-outside test
-    // // vector perpendicular to triangle's plane 
- 
-    // // edge 0
-    // glm::vec3 edge0 = _triangle[1] - _triangle[0]; 
-    // glm::vec3 vp0 = P - _triangle[0]; 
-    // glm::vec3 C = glm::cross(edge0, vp0); 
-    // if (glm::dot(N, C) < 0) return false; // P is on the right side 
- 
-    // // edge 1
-    // glm::vec3 edge1 = _triangle[2] - _triangle[1]; 
-    // glm::vec3 vp1 = P - _triangle[1]; 
-    // C = glm::cross(edge1, vp1); 
-    // if ((_u = glm::dot(N, C)) < 0)  return false; // P is on the right side 
- 
-    // // edge 2
-    // glm::vec3 edge2 = _triangle[0] - _triangle[2]; 
-    // glm::vec3 vp2 = P - _triangle[2]; 
-    // C = glm::cross(edge2, vp2); 
-    // if ((_v = glm::dot(N, C)) < 0) return false; // P is on the right side; 
- 
-    // _u /= denom; 
-    // _v /= denom; 
  
 #ifdef DEBUG_INTERSECTIONS
     __sync_fetch_and_add(&numRayTrianglesIsect, 1); 

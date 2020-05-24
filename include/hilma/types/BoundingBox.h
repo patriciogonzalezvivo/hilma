@@ -12,9 +12,9 @@ public:
     
     BoundingBox(): min(std::numeric_limits<float>::max()), max(std::numeric_limits<float>::min()) {}
 
-    float  getWidth() const { return fabs(max.x - min.x); }
-    float  getHeight() const { return fabs(max.y - min.y); }
-    float  getDepth() const { return fabs(max.z - min.z); }
+    float   getWidth() const { return fabs(max.x - min.x); }
+    float   getHeight() const { return fabs(max.y - min.y); }
+    float   getDepth() const { return fabs(max.z - min.z); }
     
     glm::vec3 getCenter() const { return (min + max) * 0.5f; }
     
@@ -27,6 +27,11 @@ public:
 
     bool    contains(float _x, float _y, float _z) const { return containsX(_x) && containsY(_y) && containsZ(_z); }
     bool    contains(const glm::vec3& _v) const { return containsX(_v.x) && containsY(_v.y) && containsZ(_v.z); }
+
+    void    expand(float _value) {
+        min -= _value;
+        max += _value;
+    }
 
     void    expand(const glm::vec2& _v) { expand(_v.x, _v.y); }
     void    expand(const glm::vec3& _v) { expand(_v.x, _v.y, _v.z); }
