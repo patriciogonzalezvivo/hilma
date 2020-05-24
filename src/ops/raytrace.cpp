@@ -37,9 +37,17 @@ Hittable:: Hittable( const std::vector<Triangle>& _triangles, int _branches, boo
 
     if (_branches > 0 && _triangles.size() > 1) {
         leaf = false;
-        int axis = rand() % 3;
-        auto comparator = (axis == 0) ? triangle_x_compare
-                        : (axis == 1) ? triangle_y_compare
+
+        // int axis = rand() % 3;
+        // auto comparator = (axis == 0) ? triangle_x_compare
+        //                 : (axis == 1) ? triangle_y_compare
+        //                 : triangle_z_compare;
+
+        float width = getWidth();
+        float height = getHeight();
+        float depth = getDepth();
+        auto comparator = (width > std::max(height, depth) ) ? triangle_x_compare
+                        : (height > std::max(width, depth) ) ? triangle_y_compare
                         : triangle_z_compare;
 
         std::vector<Triangle> tris = _triangles;
@@ -64,6 +72,22 @@ int Hittable::getTotalTriangles() {
         return triangles.size();
     else
         return left->getTotalTriangles() + right->getTotalTriangles();
+}
+
+Mesh Hittable::getMesh() {
+    Mesh mesh;
+    if (leaf) {
+        if (triangles.size() > 0)
+            mesh.addTriangles(&triangles[0], triangles.size());
+        
+        if (lines.size() > 0)
+            mesh.addEdges(&lines[0], lines.size());
+    }
+    else {
+        mesh.append( left->getMesh() );
+        mesh.append( right->getMesh() );
+    }
+    return mesh;
 }
 
 bool Hittable::hit(const Ray& _ray, float _minDistance, float _maxDistance, HitRecord& _rec) const {

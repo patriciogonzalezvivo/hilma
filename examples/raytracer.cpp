@@ -89,7 +89,7 @@ glm::vec3 ray_color(const Ray& _ray, const std::vector<Hittable>& _hittables, in
     // return glm::vec3(0.0f);
     glm::vec3 unit_direction = normalize(_ray.getDirection() );
     float t = 0.5f * (unit_direction.y + 1.0f);
-    return glm::mix(glm::vec3(1.0f), glm::vec3(0.5f, 0.7f, 1.0f), t) * 0.5f;
+    return glm::mix(glm::vec3(1.0f), glm::vec3(0.5f, 0.7f, 1.0f), t);
 }
 
 int main(int argc, char **argv) {
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
     const float samples_per_pixel = 10;
     const float over_samples = 1.0f/samples_per_pixel; 
     const int max_depth = 50;
-    int branches = 3;
+    int branches = 10;
     bool debug = true;
 
     // Scene
@@ -157,9 +157,11 @@ int main(int argc, char **argv) {
 
     Mesh head = loadPly("head.ply");
     center(head);
-    translateY(head, 0.5f);
     scale(head, 0.15f);
+    translateY(head, 0.1f);
     scene.push_back( Hittable(head.getTriangles(), branches, debug) );
+    Mesh h = scene[ scene.size()-1 ].getMesh();
+    savePly("h.ply", h, false);
 
     // Mesh icosphere = hilma::icosphere(0.5f, 2);
     // icosphere.setMaterial(metal);

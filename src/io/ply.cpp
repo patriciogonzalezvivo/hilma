@@ -22,7 +22,7 @@ bool loadPly( const std::string& _filename, Mesh& _mesh ) {
 
         if (!file_stream || file_stream->fail()) throw std::runtime_error("file_stream failed to open " + _filename);
 
-        std::vector<std::string> colors_names, texcoords_names, faces_name;
+        std::vector<std::string> colors_names, texcoords_names, faces_name, edges_name;
 
         tinyply::PlyFile file;
         file.parse_header(*file_stream);
@@ -60,14 +60,15 @@ bool loadPly( const std::string& _filename, Mesh& _mesh ) {
                     texcoords_names.push_back(p.name);
                 else if (p.name == "vertex_indices" || p.name == "vertex_index")
                     faces_name.push_back(p.name);
-                
+                else if (p.name == "vertex1" || p.name == "vertex2")
+                    edges_name.push_back(p.name);
             }
         }
 
 
         // Because most people have their own mesh types, tinyply treats parsed data as structured/typed byte buffers. 
         // See examples below on how to marry your own application-specific data structures with this one. 
-        std::shared_ptr<PlyData> vertices, normals, colors, texcoords, faces, tripstrip;
+        std::shared_ptr<PlyData> vertices, normals, colors, texcoords, faces, edges; //tripstrip;
 
         // The header information can be used to programmatically extract properties on elements
         // known to exist in the header prior to reading the data. For brevity of this sample, properties 
@@ -92,6 +93,11 @@ bool loadPly( const std::string& _filename, Mesh& _mesh ) {
         // arbitrary ply files, it is best to leave this 0. 
         if (faces_name.size() == 1) {
             try { faces = file.request_properties_from_element("face", faces_name, 3); }
+            catch (const std::exception & e) { std::cerr << "tinyply exception: " << e.what() << std::endl; }
+        }
+
+        if (edges_name.size() > 0) {
+            try { edges = file.request_properties_from_element("edge", edges_name, 2); }
             catch (const std::exception & e) { std::cerr << "tinyply exception: " << e.what() << std::endl; }
         }
 
@@ -157,6 +163,10 @@ bool loadPly( const std::string& _filename, Mesh& _mesh ) {
 
             if (faces) {
                 _mesh.addFaceIndices(reinterpret_cast<INDEX_TYPE*>(faces->buffer.get()), faces->count * 3);
+            }
+
+            if (edges) {
+                _mesh.addFaceIndices(reinterpret_cast<INDEX_TYPE*>(edges->buffer.get()), edges->count * 2);
             }
         }
     }
