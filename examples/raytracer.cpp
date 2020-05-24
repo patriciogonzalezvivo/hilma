@@ -26,7 +26,7 @@
 
 using namespace hilma;
 
-glm::vec3 raytrace(const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
+glm::vec3 ray_color(const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
     if (_depth <= 0)
         return glm::vec3(0.0f);
 
@@ -82,7 +82,7 @@ glm::vec3 raytrace(const Ray& _ray, const std::vector<Hittable>& _hittables, int
 
         Ray scattered(rec.position, target);
         // if ((dot(scattered.getDirection(), rec.normal) > 0))
-        return emissive + attenuation * raytrace( scattered, _hittables, _depth-1 );
+        return emissive + attenuation * ray_color( scattered, _hittables, _depth-1 );
         // return glm::vec3(0.0f);
     }
 
@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
     const float samples_per_pixel = 10;
     const float over_samples = 1.0f/samples_per_pixel; 
     const int max_depth = 50;
-    int branches = 10;
+    int branches = 3;
     bool debug = true;
 
     // Scene
@@ -201,7 +201,7 @@ int main(int argc, char **argv) {
                 float v = (y + randomf()) / (image_height-1);
 
                 Ray ray = cam.getRay(u, v);
-                pixel_color += raytrace(ray, scene, max_depth);
+                pixel_color += ray_color(ray, scene, max_depth);
             }
 
             pixel_color = pixel_color * over_samples;
