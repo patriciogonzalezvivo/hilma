@@ -619,13 +619,13 @@ Mesh cylinder( float _radius, float _height, int _radiusSegments, int _heightSeg
         normal = {0.f, -1.f, 0.f};
         for (int iy = 0; iy < capSegs; iy++) {
             for (int ix = 0; ix < _radiusSegments; ix++) {
-                newRad = mapValue((float)iy, 0, capSegs-1, 0.0, _radius, true);
+                newRad = remap((float)iy, 0, capSegs-1, 0.0, _radius, true);
                 vert.x = cos((float)ix*angleIncRadius) * newRad;
                 vert.z = sin((float)ix*angleIncRadius) * newRad;
                 vert.y = -halfH;
 
                 tcoord.x = (float)ix/((float)_radiusSegments-1.f);
-                tcoord.y = 1.f - mapValue(iy, 0, capSegs-1, 0, maxTexYNormalized, true);
+                tcoord.y = 1.f - remap(iy, 0, capSegs-1, 0, maxTexYNormalized, true);
 
                 mesh.addTexCoord( tcoord );
                 mesh.addVertex( vert );
@@ -673,13 +673,13 @@ Mesh cylinder( float _radius, float _height, int _radiusSegments, int _heightSeg
         normal = {1.f, 0.f, 0.f};
         for (int ix = 0; ix < _radiusSegments; ix++) {
 
-            //newRad = mapValue((float)iy, 0, _heightSegments-1, 0.0, radius);
+            //newRad = remap((float)iy, 0, _heightSegments-1, 0.0, radius);
             vert.x = cos(ix*angleIncRadius) * _radius;
             vert.y = heightInc*float(iy) - halfH;
             vert.z = sin(ix*angleIncRadius) * _radius;
 
             tcoord.x = float(ix)/(float(_radiusSegments)-1.f);
-            tcoord.y = 1.f - mapValue(iy, 0, _heightSegments-1, minTexYNormalized, maxTexYNormalized, true );
+            tcoord.y = 1.f - remap(iy, 0, _heightSegments-1, minTexYNormalized, maxTexYNormalized, true );
 
             mesh.addTexCoord( tcoord );
             mesh.addVertex( vert );
@@ -723,13 +723,13 @@ Mesh cylinder( float _radius, float _height, int _radiusSegments, int _heightSeg
         normal = {0.f, 1.f, 0.f};
         for (int iy = 0; iy < capSegs; iy++) {
             for (int ix = 0; ix < _radiusSegments; ix++) {
-                newRad = mapValue((float)iy, 0, capSegs-1, _radius, 0.0, true);
+                newRad = remap((float)iy, 0, capSegs-1, _radius, 0.0, true);
                 vert.x = cos((float)ix*angleIncRadius) * newRad;
                 vert.z = sin((float)ix*angleIncRadius) * newRad;
                 vert.y = halfH;
 
                 tcoord.x = (float)ix/((float)_radiusSegments-1.f);
-                tcoord.y = 1.f - mapValue(iy, 0, capSegs-1, minTexYNormalized, maxTexYNormalized, true);
+                tcoord.y = 1.f - remap(iy, 0, capSegs-1, minTexYNormalized, maxTexYNormalized, true);
 
                 mesh.addTexCoord( tcoord );
                 mesh.addVertex( vert );
@@ -806,7 +806,7 @@ Mesh cone( float radius, float _height, int _radiusSegments, int _heightSegments
     for (int iy = 0; iy < _heightSegments; iy++) {
         for (int ix = 0; ix < _radiusSegments; ix++) {
 
-            newRad = mapValue((float)iy, 0, _heightSegments-1, 0.0, radius, true);
+            newRad = remap((float)iy, 0, _heightSegments-1, 0.0, radius, true);
             vert.x = cos((float)ix*angleIncRadius) * newRad;
             vert.y = heightInc*((float)iy) - halfH;
             vert.z = sin((float)ix*angleIncRadius) * newRad;
@@ -865,13 +865,13 @@ Mesh cone( float radius, float _height, int _radiusSegments, int _heightSegments
     normal = glm::vec3(0.f, 1.f, 0.f);
     for (int iy = 0; iy < capSegs; iy++) {
         for (int ix = 0; ix < _radiusSegments; ix++) {
-            newRad = mapValue((float)iy, 0, capSegs-1, radius, 0.0, true);
+            newRad = remap((float)iy, 0, capSegs-1, radius, 0.0, true);
             vert.x = cos((float)ix*angleIncRadius) * newRad;
             vert.z = sin((float)ix*angleIncRadius) * newRad;
             vert.y = halfH;
 
             tcoord.x = (float)ix/((float)_radiusSegments-1.f);
-            tcoord.y = 1.f - mapValue(iy, 0, capSegs-1, maxTexYNormalized, 1.f, true);
+            tcoord.y = 1.f - remap(iy, 0, capSegs-1, maxTexYNormalized, 1.f, true);
 
             mesh.addTexCoord( tcoord );
             mesh.addVertex( vert );

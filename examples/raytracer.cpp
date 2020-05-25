@@ -96,13 +96,13 @@ int main(int argc, char **argv) {
 
     // Set up conext
     const float aspect_ratio = 16.0f / 9.0f;
-    const int image_width = 1024 * 0.5;
+    const int image_width = 1024;// * 0.5;
     const int image_height = static_cast<int>(image_width / aspect_ratio);
     const float samples_per_pixel = 10;
     const float over_samples = 1.0f/samples_per_pixel; 
     const int max_depth = 50;
     int branches = 10;
-    bool debug = true;
+    bool debug = false;
 
     // Scene
     glm::vec3 lookfrom(3.5f, 0.5f, 3.0f);
@@ -158,7 +158,7 @@ int main(int argc, char **argv) {
     Mesh head = loadPly("head.ply");
     center(head);
     scale(head, 0.15f);
-    translateY(head, 0.1f);
+    translateY(head, 0.4f);
     scene.push_back( Hittable(head.getTriangles(), branches, debug) );
     Mesh h = scene[ scene.size()-1 ].getMesh();
     savePly("h.ply", h, false);

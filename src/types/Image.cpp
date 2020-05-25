@@ -63,9 +63,14 @@ void Image::setData(size_t _index, const float* _array1D, int _n) {
         return;
     }
 
+    std::memcpy(&data[_index], _array1D, _n * sizeof(float));
     // memcpy(&data[_index], _array1D, _n);
-    for (size_t i = 0; i < _n; i++)
-        data[_index + i] = _array1D[i];
+    // for (size_t i = 0; i < _n; i++)
+    //     data[_index + i] = _array1D[i];
+}
+
+void Image::setColors(const float* _array2D, int _m, int _n) {
+    std::memcpy(&data[0], _array2D, _m * _n * sizeof(float));
 }
 
 }

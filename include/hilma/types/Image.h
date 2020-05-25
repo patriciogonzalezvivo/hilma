@@ -34,6 +34,7 @@ public:
     void        setData(size_t _x, size_t _y, const float* _array1D, int _n ) { setData(getIndex(_x, _y), _array1D, _n); }
     void        setColor(size_t _x, size_t _y, const glm::vec3& _color) { setData(_x, _y, &_color[0], 3); }
     void        setColor(size_t _x, size_t _y, const glm::vec4& _color) { setData(_x, _y, &_color[0], std::min(4, channels)); }
+    void        setColors(const float* _array2D, int _m, int _n);
 
 private:
     float*      data;
@@ -45,9 +46,19 @@ private:
     friend bool loadJpg( const std::string&, Image&, int );
     friend bool savePng( const std::string&, Image& );
     friend bool loadPng( const std::string&, Image&, int );
-    friend bool loadHdr( const std::string&, Image& );
     friend bool saveHdr( const std::string&, Image& );
-    
+    friend bool loadHdr( const std::string&, Image&, int );
+
+    friend void sdf(Image&);
+    friend void flip(Image&);
+    friend void sqrt(Image&);
+    friend void invert(Image&);
+    friend void autolevel(Image&);
+    friend void gamma(Image&, float);
+    friend void threshold(Image&, float);
+    friend glm::vec2 getRange(const Image&);
+    friend void remap(Image&, float, float, float, float, bool);
+    friend Image copy(const Image&);
 };
 
 typedef std::shared_ptr<Image> ImagePtr;

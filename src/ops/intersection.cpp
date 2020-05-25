@@ -229,8 +229,8 @@ IntersectionData intersection(const Line& _line, const Plane& _plane) {
     
     float dist1 = PointPlaneDistance(_line[0], _plane);
     float dist2 = PointPlaneDistance(_line[1], _plane);
-    int pos1 = signValue(dist1);
-    int pos2 = signValue(dist2);
+    int pos1 = sign(dist1);
+    int pos2 = sign(dist2);
     
     if (pos1==pos2) {
         idata.hit = false;
@@ -484,9 +484,9 @@ IntersectionData intersection(const Plane& _plane, const Triangle& _triangle) {
     float dist2 = PointPlaneDistance(tp1, _plane);
     float dist3 = PointPlaneDistance(tp2, _plane);
     
-    int pos1 = signValue(dist1);
-    int pos2 = signValue(dist2);
-    int pos3 = signValue(dist3);
+    int pos1 = sign(dist1);
+    int pos2 = sign(dist2);
+    int pos3 = sign(dist3);
     
     if (pos1==pos2 && pos1==pos3) {
         idata.hit = false;

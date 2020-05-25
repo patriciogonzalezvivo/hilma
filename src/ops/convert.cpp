@@ -55,8 +55,8 @@ Mesh Convert::toSurface(const std::vector<std::vector<T>>& _polygon) {
 
     for (size_t i = 0; i < mesh.getVerticesTotal(); i++) {
         glm::vec3 p = mesh.getVertices()[i];
-        mesh.addTexCoord(   mapValue(p.x, bb.min.x, bb.max.x, 0.0f, 1.0f, true),
-                            mapValue(p.y, bb.min.y, bb.max.y, 0.0f, 1.0f, true) );
+        mesh.addTexCoord(   remap(p.x, bb.min.x, bb.max.x, 0.0f, 1.0f, true),
+                            remap(p.y, bb.min.y, bb.max.y, 0.0f, 1.0f, true) );
     }
 
     std::vector<uint32_t> indices = mapbox::earcut<uint32_t>(_polygon);

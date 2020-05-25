@@ -2,7 +2,6 @@
 
 #include "hilma/types/Mesh.h"
 #include "hilma/types/BoundingBox.h"
-#include "hilma/types/Image.h"
 
 namespace hilma {
 
@@ -21,8 +20,5 @@ glm::vec3               getCentroid(const std::vector<glm::vec3>& _points);
 
 // 3D
 Mesh                    getSmoothNormals(const Mesh& _mesh, float _angle);
-
-// Textures
-Image                   getNormalMap(const Image& _heightmap, const float _zScale);
 
 }

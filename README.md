@@ -85,6 +85,7 @@ Some of the code is based on:
 * [Peter Shirley's Ray Tracing in One Weekend ](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
 * [Ray/Triangle intersection](https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle)
 * [Michael Fogleman's Heightmap meshing utility](https://github.com/fogleman/hmm)
+* [Felzenszwalb page at Brown University for Image to SDF](https://cs.brown.edu/people/pfelzens/dt/)
 
 # License
 

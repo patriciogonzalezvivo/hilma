@@ -5,6 +5,7 @@
 
 namespace hilma {
 
+Image           loadJpg(const std::string& _filename, int _channels = 0);
 bool            loadJpg(const std::string& _filename, Image& _image, int _channels = 0);
 unsigned char*  loadJpg(const std::string& _filename, int* _width, int* _height, int* _channels);
 

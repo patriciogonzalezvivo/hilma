@@ -389,40 +389,5 @@ Mesh getSmoothNormals(const Mesh& _mesh, float _angle) {
     return rta;
 }
 
-Image getNormalMap(const Image& _heightmap, const float _zScale) {
-    const int w = _heightmap.getWidth() - 1;
-    const int h = _heightmap.getHeight() - 1;
-    std::vector<glm::vec3> result(w * h);
-    int i = 0;
-    for (int y0 = 0; y0 < h; y0++) {
-        const int y1 = y0 + 1;
-        const float yc = y0 + 0.5f;
-        for (int x0 = 0; x0 < w; x0++) {
-            const int x1 = x0 + 1;
-            const float xc = x0 + 0.5f;
-            const float z00 = _heightmap.getData(x0, y0) * -_zScale;
-            const float z01 = _heightmap.getData(x0, y1) * -_zScale;
-            const float z10 = _heightmap.getData(x1, y0) * -_zScale;
-            const float z11 = _heightmap.getData(x1, y1) * -_zScale;
-            const float zc = (z00 + z01 + z10 + z11) / 4.f;
-            const glm::vec3 p00(x0, y0, z00);
-            const glm::vec3 p01(x0, y1, z01);
-            const glm::vec3 p10(x1, y0, z10);
-            const glm::vec3 p11(x1, y1, z11);
-            const glm::vec3 pc(xc, yc, zc);
-            const glm::vec3 n0 = glm::triangleNormal(pc, p00, p10);
-            const glm::vec3 n1 = glm::triangleNormal(pc, p10, p11);
-            const glm::vec3 n2 = glm::triangleNormal(pc, p11, p01);
-            const glm::vec3 n3 = glm::triangleNormal(pc, p01, p00);
-            result[i] = glm::normalize(n0 + n1 + n2 + n3);
-            i++;
-        }
-    }
-
-    Image rta = Image(w + 1, h + 1, 3);
-    rta.setData(0, &result[0].r, result.size() * 3);
-    return rta;
-}
-
 }
 

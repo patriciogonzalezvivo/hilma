@@ -46,7 +46,7 @@ inline glm::vec3 random_in_unit_sphere() {
 inline glm::vec3 random_unit_vector() {
     float a = randomf(0.0f, TAU);
     float z = randomf(-1.0f, 1.0f);
-    float r = sqrt(1.0f - z*z);
+    float r = std::sqrt(1.0f - z*z);
     return glm::vec3(r*cos(a), r*sin(a), z);
 }
 
@@ -66,7 +66,7 @@ inline glm::vec3 random_in_unit_disk() {
     }
 }
 
-inline float mapValue(const float& _value, const float& _inputMin, const float& _inputMax, const float& _outputMin, const float& _outputMax, bool _clamp) {
+inline float remap(const float& _value, const float& _inputMin, const float& _inputMax, const float& _outputMin, const float& _outputMax, bool _clamp) {
     if (fabs(_inputMin - _inputMax) < std::numeric_limits<float>::epsilon()) { return _outputMin; } else {
         float outVal = ((_value - _inputMin) / (_inputMax - _inputMin) * (_outputMax - _outputMin) + _outputMin);
 
@@ -134,17 +134,24 @@ inline float clamp(float value, float min, float max) {
 }
 
 inline glm::vec3 getScaled(const glm::vec3 &_vec, float _length) {
-    float l = (float)sqrt(_vec.x*_vec.x + _vec.y*_vec.y + _vec.z*_vec.z);
+    float l = (float) std::sqrt(_vec.x*_vec.x + _vec.y*_vec.y + _vec.z*_vec.z);
     if( l > 0 )
         return glm::vec3( (_vec.x/l)*_length, (_vec.y/l)*_length, (_vec.z/l)*_length );
     else
         return glm::vec3();
 }
 
-inline int signValue(float _n) {
-    if( _n > 0 ) return 1;
-    else if(_n < 0) return -1;
-    else return 0;
-}
+// inline int signValue(float _n) {
+//     if( _n > 0 ) return 1;
+//     else if(_n < 0) return -1;
+//     else return 0;
+// }
+
+template <class T>
+inline int sign(const T &x) { return (x >= 0 ? 1 : -1); };
+
+
+template <class T>
+inline T square(const T &x) { return x*x; };
 
 }

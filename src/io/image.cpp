@@ -36,9 +36,14 @@ bool load(const std::string& _filename, Image& _image, int _channels) {
     return true;
 }
 
-
 bool loadPng(const std::string& _filename, Image& _image, int _channels) {
     return load(_filename, _image, _channels);
+}
+
+Image loadPng(const std::string& _filename, int _channels) {
+    Image rta;
+    load(_filename, rta, _channels);
+    return rta;
 }
 
 unsigned char* loadPng(const std::string& _filename, int* _width, int* _height, int* _channels) {
@@ -49,18 +54,30 @@ bool loadJpg(const std::string& _filename, Image& _image, int _channels) {
     return load(_filename, _image, _channels);
 }
 
+Image loadJpg(const std::string& _filename, int _channels) {
+    Image rta;
+    load(_filename, rta, _channels);
+    return rta;
+}
+
 unsigned char* loadJpg(const std::string& _filename, int* _width, int* _height, int* _channels) {
     return stbi_load(_filename.c_str(), _width, _height, _channels, 0);
 }
 
-bool loadHdr(const std::string& _filename, Image& _image ) {
+bool loadHdr(const std::string& _filename, Image& _image, int _channels ) {
     _image.deAllocate();
-    _image.data = stbi_loadf(_filename.c_str(), &_image.width, &_image.height, &_image.channels, 0);
+    _image.data = stbi_loadf(_filename.c_str(), &_image.width, &_image.height, &_image.channels,  _channels);
 
     if (!_image.data)
         return false;
 
     return true;
+}
+
+Image   loadHdr(const std::string& _filename, int _channel) {
+    Image rta;
+    loadHdr(_filename, rta, _channel);
+    return rta;
 }
 
 float* loadHdr(const std::string& _filename, int* _width, int* _height, int* _channels) {

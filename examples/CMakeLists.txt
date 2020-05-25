@@ -29,3 +29,6 @@ target_link_libraries (terrain PRIVATE hilma)
 
 add_executable (load load.cpp)
 target_link_libraries (load PRIVATE hilma)
+
+add_executable (process process.cpp)
+target_link_libraries (process PRIVATE hilma)

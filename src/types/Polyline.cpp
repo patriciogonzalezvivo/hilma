@@ -440,7 +440,7 @@ Polyline Polyline::getSmoothed(int smoothingSize, float smoothingShape) const {
     weights.resize(smoothingSize);
     // side weights
     for (int i = 1; i < smoothingSize; i++) {
-        float curWeight = mapValue(i, 0, smoothingSize, 1, smoothingShape, false);
+        float curWeight = remap(i, 0, smoothingSize, 1, smoothingShape, false);
         weights[i] = curWeight;
     }
         
@@ -831,7 +831,7 @@ float Polyline::getIndexAtLength(float length) const {
         if (distAt1 <= length) {         // if Length at i1 is less than desired Length (this is good)
             distAt2 = lengths[i1+1];
             if (distAt2 >= length) {
-                float t = mapValue(length, distAt1, distAt2, 0.0f, 1.0f, false);
+                float t = remap(length, distAt1, distAt2, 0.0f, 1.0f, false);
                 return i1 + t;
             } 
             else

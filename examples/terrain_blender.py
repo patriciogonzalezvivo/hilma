@@ -47,7 +47,7 @@ def add_mesh(name, _mesh, col_name="Collection"):
     mesh.update()
     mesh.validate()
 
-heightmap = Image();
+heightmap = Image()
 loadPng("gale.png", heightmap, 1)
 terrain = toTerrain(heightmap, 100.0, 0.005, 1.0)
 center(terrain)
