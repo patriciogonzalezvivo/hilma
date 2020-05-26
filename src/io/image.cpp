@@ -26,7 +26,6 @@ bool load(const std::string& _filename, Image& _image, int _channels) {
     if (!pixels)
         return false;
 
-    _image.deAllocate();
     _image.allocate(width, height, channels);
     int total = width * height * channels;
     const float m = 1.f / 65535.f;
@@ -66,14 +65,14 @@ unsigned char* loadJpg(const std::string& _filename, int* _width, int* _height, 
 }
 
 bool loadHdr(const std::string& _filename, Image& _image, int _channels ) {
-    _image.deAllocate();
-
     float *pixels = stbi_loadf(_filename.c_str(), &_image.width, &_image.height, &_image.channels, _channels);
 
     if (!pixels)
         return false;
 
     int total = _image.width * _image.height * _image.channels;
+    if (total != _image.data.size())
+        _image.data.resize(total);
     std::memcpy(&_image.data[0], pixels, total * sizeof(float));
 
     return true;
