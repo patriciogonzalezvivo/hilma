@@ -20,7 +20,7 @@ public:
     
     const glm::vec3& operator[](size_t _index) const { return points[_index]; }
     const glm::vec3& getPoint(size_t _index) const { return points[_index]; }
-
+    glm::vec3        getCentroid() const { return (points[0] + points[1]) * 0.5f; }
     float            getMagintude() const { return glm::length(direction); }
     const glm::vec3& getDireciton() const { return direction; }
     glm::vec3        getAt(float _t) const { return points[0] + direction * _t; }

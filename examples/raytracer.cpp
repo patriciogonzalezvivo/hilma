@@ -7,7 +7,6 @@
 #include "glm/gtx/norm.hpp"
 
 #include "hilma/math.h"
-#include "hilma/text.h"
 #include "hilma/timer.h"
 
 #include "hilma/types/Camera.h"
@@ -94,36 +93,31 @@ glm::vec3 ray_color(const Ray& _ray, const std::vector<Hittable>& _hittables, in
 
 int main(int argc, char **argv) {
 
-    // Set up conext
+    // IMAGE
     const float aspect_ratio = 16.0f / 9.0f;
-    const int image_width = 1024;// * 0.5;
-    const int image_height = static_cast<int>(image_width / aspect_ratio);
-    const float samples_per_pixel = 10;
-    const float over_samples = 1.0f/samples_per_pixel; 
-    const int max_depth = 50;
-    int branches = 10;
-    bool debug = false;
+    const int image_width = 1024*0.5;
+    Image image = Image(image_width, static_cast<int>(image_width / aspect_ratio), 3);
 
-    // Scene
+    // CAMERA
     glm::vec3 lookfrom(3.5f, 0.5f, 3.0f);
-    // lookfrom = glm::vec3(0.0f, 0.0f, 2.f);
     glm::vec3 lookat(0.0f, 0.0f, 0.0f);
     glm::vec3 vup(0.0f, -1.0f, 0.0f);
     float dist_to_focus = glm::length(lookfrom-lookat);
+    float dov = 35.0f;
     float aperture = 0.05;
-    Camera cam = Camera(lookfrom, lookat, vup,
-                        35.0f,
-                        aspect_ratio, aperture, dist_to_focus);
+
+    Camera cam = Camera(lookfrom, lookat, vup, dov, aspect_ratio, aperture, dist_to_focus);
+
+    // SCENE
+    int branches = 10;
+    bool debug = false;
 
     std::vector<Hittable> scene;
+    Mesh scene_mesh;
 
     Material metal = Material("metal");
     metal.set("metallic", 1.0f);
     metal.set("roughness", 0.0f);
-
-    // Material plastic = Material("plastic");
-    // plastic.set("diffuse", glm::vec3(0.3,0.3,1.0));
-    // plastic.set("roughness", 0.2);
 
     Material checker = Material("Checker");
     checker.set("diffuse", "default.png");
@@ -154,20 +148,21 @@ int main(int argc, char **argv) {
     translateZ(plane, -0.6f);
     rotateX(plane, -PI/2.0f);
     scene.push_back( Hittable(plane.getTriangles(), 0, false) );
+    scene_mesh.append(plane);
 
     Mesh head = loadPly("head.ply");
     center(head);
     scale(head, 0.15f);
     translateY(head, 0.4f);
     scene.push_back( Hittable(head.getTriangles(), branches, debug) );
-    Mesh h = scene[ scene.size()-1 ].getMesh();
-    savePly("h.ply", h, false);
+    scene_mesh.append(head);
 
     // Mesh icosphere = hilma::icosphere(0.5f, 2);
     // icosphere.setMaterial(metal);
     // // icosphere.setMaterial(checker);
     // // icosphere.setMaterial(earth);
     // scene.push_back( Hittable(icosphere.getTriangles(), branches, debug) );
+    // scene_mesh.append(icosphere);
 
     Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
     // cone.setMaterial(plastic);
@@ -176,45 +171,23 @@ int main(int argc, char **argv) {
     rotateX(cone, PI);
     translateX(cone, -2.0f);
     scene.push_back( Hittable(cone.getTriangles(), branches, debug) );
+    scene_mesh.append(cone);
 
     Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
     // cylinder.setMaterial(metal);
     cylinder.setMaterial(checker);
     translateX(cylinder, 2.0f);
     scene.push_back( Hittable(cylinder.getTriangles(), branches, debug) );
+    scene_mesh.append(cylinder);
 
-    // RAYTRACER
+    // saveObj("raytracer.obj", scene_mesh);
+    // savePly("raytracer.ply", scene_mesh, false);
+
+    // RAYTRACE
     //
     Timer timer;
     timer.start();
-    std::cout << std::endl;
-    
-    const int totalPixels = image_width * image_height;
-    const float totalRays = image_width * image_height * samples_per_pixel;
-    Image image = Image(image_width, image_height, 3);
-
-    for (int y = 0; y < image_height; ++y) {
-        for (int x = 0; x < image_width; ++x) {
-            int i = y * image_width + x;
-
-            glm::vec3 pixel_color(0.0f, 0.0f, 0.0f);
-            for (int s = 0; s < samples_per_pixel; ++s) {
-                float u = (x + randomf()) / (image_width-1);
-                float v = (y + randomf()) / (image_height-1);
-
-                Ray ray = cam.getRay(u, v);
-                pixel_color += ray_color(ray, scene, max_depth);
-            }
-
-            pixel_color = pixel_color * over_samples;
-            pixel_color = sqrt(pixel_color);
-            image.setColor( image.getIndex(x, y) , pixel_color);
-            
-            printProgressBar("RayTracing -", i / float(totalPixels), 100 );
-
-        }
-    }
-
+    raytrace(image, cam, scene, 10, 50, ray_color);    
     timer.stop();
 
     const float time_raycasting = timer.get() / 1000.f;
