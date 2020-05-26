@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <vector>
 #include "glm/glm.hpp"
 
 namespace hilma {
@@ -9,11 +10,15 @@ class Image {
 public:
 
     Image();
-    Image(size_t _width, size_t _height, size_t _channels);
-    virtual ~Image();
+    Image(const Image& _mother);
+    Image(int _width, int _height, int _channels);
+    Image(const uint8_t* _array3D, int _height, int _width, int _channels);
+    
+    virtual     ~Image();
+    // bool        loadData(const uint8_t* _array3D, int _height, int _width, int _channels);
 
     bool        allocate(size_t _width, size_t _height, size_t _channels);
-    bool        isAllocated() const { return data != nullptr; }
+    bool        isAllocated() const { return data.size() != 0; }
 
     void        deAllocate();
 
@@ -23,24 +28,20 @@ public:
     size_t      getIndex(size_t _x, size_t _y) const { return (_y * width + _x) * channels; };
     size_t      getIndexUV(float _u, float _v) const { return getIndex(_u * width, _v * height); }
 
-    float       getData(size_t _index) const;
+    float       getValue(size_t _index) const;
     glm::vec4   getColor(size_t index) const;
     
-    float       getData(size_t _x, size_t _y) const { return getData(getIndex(_x, _y)); };
-    glm::vec4   getColor(size_t _x, size_t _y) const { return getColor(getIndex(_x, _y)); };
-
-    void        setData(size_t _index, float _data);
-    void        setData(size_t _index, const float* _array1D, int _n);
-    void        setData(size_t _x, size_t _y, const float* _array1D, int _n ) { setData(getIndex(_x, _y), _array1D, _n); }
-    void        setColor(size_t _x, size_t _y, const glm::vec3& _color) { setData(_x, _y, &_color[0], 3); }
-    void        setColor(size_t _x, size_t _y, const glm::vec4& _color) { setData(_x, _y, &_color[0], std::min(4, channels)); }
+    void        setValue(size_t _index, float _data);
+    void        setValue(size_t _index, const float* _array1D, int _n);
+    void        setColor(size_t _index, const glm::vec3& _color) { setValue( _index, &_color[0], 3); }
+    void        setColor(size_t _index, const glm::vec4& _color) { setValue( _index, &_color[0], std::min(4, channels)); }
     void        setColors(const float* _array2D, int _m, int _n);
 
 private:
-    float*      data;
-    int         width;
-    int         height;
-    int         channels;
+    std::vector<float>  data;
+    int                 width;
+    int                 height;
+    int                 channels;
 
     friend bool saveJpg( const std::string&, Image& );
     friend bool loadJpg( const std::string&, Image&, int );
@@ -58,7 +59,6 @@ private:
     friend void threshold(Image&, float);
     friend glm::vec2 getRange(const Image&);
     friend void remap(Image&, float, float, float, float, bool);
-    friend Image copy(const Image&);
 };
 
 typedef std::shared_ptr<Image> ImagePtr;

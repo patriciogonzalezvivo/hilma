@@ -17,15 +17,6 @@
 
 namespace hilma {
 
-Image copy(const Image& _image) {
-    Image rta = Image(_image.getWidth(), _image.getHeight(), _image.getChannels());
-    int total = _image.getWidth() * _image.getHeight() * _image.getChannels();
-
-    std::memcpy(&rta.data[0], &_image.data[0], total * sizeof(float) );
-
-    return rta;
-}
-
 void sqrt(Image& _image) {
     int total = _image.width * _image.height * _image.channels;
     for (int i = 0; i < total; i++)
@@ -72,7 +63,7 @@ void autolevel(Image& _image){
 void flip(Image& _image) {
     const size_t stride = _image.width * _image.channels;
     float *row = (float*)malloc(stride * sizeof(float));
-    float *low = _image.data;
+    float *low = &_image.data[0];
     float *high = &_image.data[(_image.height - 1) * stride];
     for (; low < high; low += stride, high -= stride) {
         std::memcpy(row, low, stride * sizeof(float));
@@ -241,10 +232,10 @@ Image toSdf(const Image& _image, float _on) {
 
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            if ( _image.getData( _image.getIndex(x, y) ) == _on)
-	            rta.setData( rta.getIndex(x, y), 0.0f);
+            if ( _image.getValue( _image.getIndex(x, y) ) == _on)
+	            rta.setValue( rta.getIndex(x, y), 0.0f);
             else
-                rta.setData( rta.getIndex(x, y), INF);
+                rta.setValue( rta.getIndex(x, y), INF);
         }
     }
 
@@ -263,10 +254,10 @@ Image toNormalMap(const Image& _heightmap, float _zScale) {
         for (int x0 = 0; x0 < w; x0++) {
             const int x1 = x0 + 1;
             const float xc = x0 + 0.5f;
-            const float z00 = _heightmap.getData(x0, y0) * -_zScale;
-            const float z01 = _heightmap.getData(x0, y1) * -_zScale;
-            const float z10 = _heightmap.getData(x1, y0) * -_zScale;
-            const float z11 = _heightmap.getData(x1, y1) * -_zScale;
+            const float z00 = _heightmap.getValue( _heightmap.getIndex(x0, y0) ) * -_zScale;
+            const float z01 = _heightmap.getValue( _heightmap.getIndex(x0, y1) ) * -_zScale;
+            const float z10 = _heightmap.getValue( _heightmap.getIndex(x1, y0) ) * -_zScale;
+            const float z11 = _heightmap.getValue( _heightmap.getIndex(x1, y1) ) * -_zScale;
             const float zc = (z00 + z01 + z10 + z11) / 4.f;
             const glm::vec3 p00(x0, y0, z00);
             const glm::vec3 p01(x0, y1, z01);
@@ -294,9 +285,9 @@ Image toLuma(const Image& _image) {
     Image rta = Image(width, height, 1);
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
-            glm::vec4 c = _image.getColor(x, y);
+            glm::vec4 c = _image.getColor( _image.getIndex(x, y) );
             float value = glm::dot(glm::vec3(c.x, c.y, c.z), glm::vec3(0.2126f, 0.7152f, 0.0722f));
-            rta.setData(rta.getIndex(x, y), value);
+            rta.setValue( rta.getIndex(x, y), value);
         }
     }
 

@@ -546,9 +546,9 @@ std::pair<glm::ivec2, float> FindCandidate( const Image& _image, const glm::ivec
 
     // pre-multiplied z values at vertices
     const float a = edge(p0, p1, p2);
-    const float z0 = _image.getData(p0.x, p0.y) / a;
-    const float z1 = _image.getData(p1.x, p1.y) / a;
-    const float z2 = _image.getData(p2.x, p2.y) / a;
+    const float z0 = _image.getValue( _image.getIndex(p0.x, p0.y) ) / a;
+    const float z1 = _image.getValue( _image.getIndex(p1.x, p1.y) ) / a;
+    const float z2 = _image.getValue( _image.getIndex(p2.x, p2.y) ) / a;
 
     // iterate over pixels in bounding box
     float maxError = 0;
@@ -576,7 +576,7 @@ std::pair<glm::ivec2, float> FindCandidate( const Image& _image, const glm::ivec
 
                 // compute z using barycentric coordinates
                 const float z = z0 * w0 + z1 * w1 + z2 * w2;
-                const float dz = std::abs(z - _image.getData(x, y));
+                const float dz = std::abs(z - _image.getValue( _image.getIndex(x, y) ) );
                 if (dz > maxError) {
                     maxError = dz;
                     maxPoint = glm::ivec2(x, y);
@@ -982,7 +982,7 @@ Mesh toTerrain( const Image& _image,
     const int h1 = h - 1;
 
     for (const glm::ivec2 &p : data.points) {
-        points.emplace_back(p.x, h1 - p.y, _image.getData(p.x, p.y) * _zScale);
+        points.emplace_back(p.x, h1 - p.y, _image.getValue( _image.getIndex(p.x, p.y) ) * _zScale);
         texcoords.emplace_back(p.x/float(w1), 1.0f-p.y/float(h1));
     }
 

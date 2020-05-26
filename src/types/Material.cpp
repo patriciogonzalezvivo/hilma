@@ -63,8 +63,7 @@ glm::vec3 Material::getColor(const std::string& _property, const glm::vec2& _uv)
         MaterialPropertyType type = properties.find(_property)->second;
         if (type == TEXTURE) {
             const ImagePtr tex = textures.find(_property)->second;
-            return tex->getColor(   _uv.x * tex->getWidth(), 
-                                    _uv.y * tex->getHeight() );
+            return tex->getColor( tex->getIndexUV(_uv.x, _uv.y) );
         }
         else if (type == COLOR)
             return colors.find(_property)->second;
@@ -92,8 +91,7 @@ float Material::getValue(const std::string& _property, const glm::vec2& _uv) con
         MaterialPropertyType type = properties.find(_property)->second;
         if (type == TEXTURE) {
             const ImagePtr tex = textures.find(_property)->second;
-            return tex->getColor(   _uv.x * tex->getWidth(), 
-                                    _uv.y * tex->getHeight() )[0];
+            return tex->getColor( tex->getIndexUV( _uv.x, _uv.y ) )[0];
         }
         else if (type == COLOR)
             return colors.find(_property)->second.x;

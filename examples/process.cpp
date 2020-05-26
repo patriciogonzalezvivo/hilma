@@ -15,30 +15,30 @@ int main(int argc, char **argv) {
 
     Image img = loadJpg("earth.jpg");
     
-    Image img_gamma = copy(img);
+    Image img_gamma = Image(img);
     gamma(img_gamma, 2.2);
     savePng("img_gamma.png", img_gamma);
 
-    Image img_invert = copy(img);
+    Image img_invert = Image(img);
     invert(img_invert);
     savePng("img_invert.png", img_invert);
 
-    Image img_autolevel = copy(img);
+    Image img_autolevel = Image(img);
     autolevel(img_autolevel);
     savePng("img_autolevel.png", img_autolevel);
 
-    Image img_threshold = copy(img);
+    Image img_threshold = Image(img);
     threshold(img_threshold, 0.5f);
     savePng("img_threshold.png", img_threshold);
 
-    Image img_flip = copy(img);
+    Image img_flip = Image(img);
     flip(img_flip);
     savePng("img_flip.png", img_flip);
     
     Image luma = toLuma(img);
     savePng("img_luma.png", luma);
 
-    Image luma_threshold = copy(luma);
+    Image luma_threshold = Image(luma);
     threshold(luma_threshold, 0.5f);
     savePng("img_luma_threshold.png", luma_threshold);
 
@@ -49,6 +49,5 @@ int main(int argc, char **argv) {
     Image normalmap = toNormalMap(heightmap, -10.0);
     savePng("normalmap.png", normalmap);
     
-
     return 1;
 }

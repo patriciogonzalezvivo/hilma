@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <stdio.h>
+#include <cstring>
 // #include <png.h>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -30,7 +31,7 @@ bool load(const std::string& _filename, Image& _image, int _channels) {
     int total = width * height * channels;
     const float m = 1.f / 65535.f;
     for (int i = 0; i < total; i++)
-        _image.setData(i, float(pixels[i]) * m);
+        _image.setValue(i, float(pixels[i]) * m);
     
     delete pixels;
     return true;
@@ -66,10 +67,14 @@ unsigned char* loadJpg(const std::string& _filename, int* _width, int* _height, 
 
 bool loadHdr(const std::string& _filename, Image& _image, int _channels ) {
     _image.deAllocate();
-    _image.data = stbi_loadf(_filename.c_str(), &_image.width, &_image.height, &_image.channels,  _channels);
 
-    if (!_image.data)
+    float *pixels = stbi_loadf(_filename.c_str(), &_image.width, &_image.height, &_image.channels, _channels);
+
+    if (!pixels)
         return false;
+
+    int total = _image.width * _image.height * _image.channels;
+    std::memcpy(&_image.data[0], pixels, total * sizeof(float));
 
     return true;
 }
@@ -91,7 +96,7 @@ bool saveHdr(const std::string& _filename, const float* _pixels, int _width, int
 }
 
 bool saveHdr(const std::string& _filename, Image& _image) {
-    return stbi_write_hdr(_filename.c_str(), _image.width, _image.height, _image.channels, _image.data);
+    return stbi_write_hdr(_filename.c_str(), _image.width, _image.height, _image.channels, &_image.data[0]);
 }
 
 bool savePng(const std::string& _filename, const unsigned char* _pixels, int _width, int _height, int _channels) {

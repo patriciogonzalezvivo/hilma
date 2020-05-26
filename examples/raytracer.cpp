@@ -208,7 +208,7 @@ int main(int argc, char **argv) {
 
             pixel_color = pixel_color * over_samples;
             pixel_color = sqrt(pixel_color);
-            image.setColor(x, y, pixel_color);
+            image.setColor( image.getIndex(x, y) , pixel_color);
             
             printProgressBar("RayTracing -", i / float(totalPixels), 100 );
 

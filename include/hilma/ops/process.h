@@ -4,7 +4,6 @@
 
 namespace hilma {
 
-Image   copy(const Image& _image);
 void    sqrt(Image& _image);
 void    invert(Image& _image);
 void    gamma(Image& _image, float _gamma);
