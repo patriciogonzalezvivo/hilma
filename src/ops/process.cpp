@@ -10,6 +10,10 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/normal.hpp>
 
+#ifdef OPENIMAGEDENOISE_SUPPORT
+#include <OpenImageDenoise/oidn.hpp>
+#endif
+
 #define	RED_WEIGHT	    0.299
 #define GREEN_WEIGHT	0.587
 #define BLUE_WEIGHT	    0.114
@@ -118,68 +122,36 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
 */
 
 /* dt of 1d function using squared distance */
-// static float *dt(float *f, int n) {
-//     float *d = new float[n];
-//     int *v = new int[n];
-//     float *z = new float[n+1];
-//     int k = 0;
-//     v[0] = 0;
-//     z[0] = -INF;
-//     z[1] = +INF;
-//     for (int q = 1; q <= n-1; q++) {
-//         float s  = ((f[q] + square(q)) - (f[v[k]] + square(v[k]))) / (2 * q - 2*v[k]);
-//         while (s <= z[k]) {
-//             k--;
-//             s  = ((f[q]+square(q))-(f[v[k]]+square(v[k])))/(2*q-2*v[k]);
-//         }
-//         k++;
-//         v[k] = q;
-//         z[k] = s;
-//         z[k+1] = +INF;
-//     }
-
-//     k = 0;
-//     for (int q = 0; q <= n-1; q++) {
-//         while (z[k+1] < q)
-//             k++;
-//         d[q] = square(q-v[k]) + f[v[k]];
-//     }
-
-//     delete [] v;
-//     delete [] z;
-//     return d;
-// }
-
 static float *dt(float *f, int n) {
-  float *d = new float[n];
-  int *v = new int[n];
-  float *z = new float[n+1];
-  int k = 0;
-  v[0] = 0;
-  z[0] = -INF;
-  z[1] = +INF;
-  for (int q = 1; q <= n-1; q++) {
-    float s  = ((f[q]+square(q))-(f[v[k]]+square(v[k])))/(2*q-2*v[k]);
-    while (s <= z[k]) {
-      k--;
-      s  = ((f[q]+square(q))-(f[v[k]]+square(v[k])))/(2*q-2*v[k]);
+    float *d = new float[n];
+    int *v = new int[n];
+    float *z = new float[n+1];
+    int k = 0;
+    v[0] = 0;
+    z[0] = -INF;
+    z[1] = +INF;
+    for (int q = 1; q <= n-1; q++) {
+        float s  = ((f[q]+square(q))-(f[v[k]]+square(v[k])))/(2*q-2*v[k]);
+        while (s <= z[k]) {
+            k--;
+            s  = ((f[q]+square(q))-(f[v[k]]+square(v[k])))/(2*q-2*v[k]);
+        }
+        k++;
+        v[k] = q;
+        z[k] = s;
+        z[k+1] = +INF;
     }
-    k++;
-    v[k] = q;
-    z[k] = s;
-    z[k+1] = +INF;
-  }
 
-  k = 0;
-  for (int q = 0; q <= n-1; q++) {
-    while (z[k+1] < q)
-      k++;
-    d[q] = square(q-v[k]) + f[v[k]];
-  }
+    k = 0;
+    for (int q = 0; q <= n-1; q++) {
+        while (z[k+1] < q)
+        k++;
+        d[q] = square(q-v[k]) + f[v[k]];
+    }
 
-  delete [] v;
-  delete [] z;
-  return d;
+    delete [] v;
+    delete [] z;
+    return d;
 }
 
 /* dt of 2d function using squared distance */
@@ -292,6 +264,44 @@ Image toLuma(const Image& _image) {
     }
 
     return rta;
+}
+
+Image   denoise(const Image& _color, Image& _normal, const Image& _albedo, bool _hdr) {
+#ifndef OPENIMAGEDENOISE_SUPPORT
+    std::cout << "Hilma was compiled without support for OpenImageDenoise. Please install it on your system and recompile hilma" << std::endl;
+    return _color;
+
+#else
+    if (_color.getChannels() != 3) {
+        std::cout << "input image need to have 3 channels (RGB)" << std::endl;
+        return _color;
+    }
+
+    Image out = Image(_color);
+
+    // Create an Intel Open Image Denoise device
+    oidn::DeviceRef device = oidn::newDevice();
+    device.commit();
+
+    // Create a denoising filter
+    oidn::FilterRef filter = device.newFilter("RT"); // generic ray tracing filter
+    filter.setImage("color", (void*)&_color.data[0],  oidn::Format::Float3, _color.getWidth(), _color.getHeight());
+    filter.setImage("albedo", (void*)&_albedo.data[0], oidn::Format::Float3, _albedo.getWidth(), _albedo.getHeight()); // optional
+    filter.setImage("normal", (void*)&_normal.data[0], oidn::Format::Float3, _normal.getWidth(), _normal.getHeight()); // optional
+    filter.setImage("output", (void*)&out.data[0], oidn::Format::Float3, out.getWidth(), out.getHeight());
+    filter.set("hdr", _hdr); // image is HDR
+    filter.commit();
+
+    // Filter the image
+    filter.execute();
+
+    // Check for errors
+    const char* errorMessage;
+    if (device.getError(errorMessage) != oidn::Error::None)
+    std::cout << "Error: " << errorMessage << std::endl;
+
+    return out;
+#endif
 }
 
 }

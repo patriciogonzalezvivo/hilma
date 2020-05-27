@@ -31,6 +31,7 @@ struct HitRecord {
     bool                frontFace   = false;
 };
 
+
 class Hittable : public BoundingBox {
 public:
     Hittable( const std::vector<Line>& _lines, int _branches);
@@ -50,10 +51,11 @@ private:
     bool                        leaf;
 };
 
-bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Line>& _lines,         HitRecord& _rec);
-bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Triangle>& _triangles, HitRecord& _rec);
-bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Hittable>& _hittables, HitRecord& _rec);
+bool hit(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Line>& _lines,         HitRecord& _rec);
+bool hit(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Triangle>& _triangles, HitRecord& _rec);
+bool hit(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Hittable>& _hittables, HitRecord& _rec);
 
 void raytrace(Image& _image, const Camera& _cam, const std::vector<Hittable>& _scene, int _samples, int _maxDepth, std::function<glm::vec3(const Ray&, const std::vector<Hittable>&, int)> _rayColor);
+void raytrace_multithread(Image& _image, const Camera& _cam, const std::vector<Hittable>& _scene, int _samples, int _maxDepth, std::function<glm::vec3(const Ray&, const std::vector<Hittable>&, int)> _rayColor);
 
 }

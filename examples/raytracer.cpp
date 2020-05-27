@@ -30,7 +30,7 @@ glm::vec3 ray_color(const Ray& _ray, const std::vector<Hittable>& _hittables, in
         return glm::vec3(0.0f);
 
     HitRecord rec;
-    if ( raytrace(_ray, 0.001, 1000.0, _hittables, rec) ) {
+    if ( hit(_ray, 0.001, 1000.0, _hittables, rec) ) {
 
         if (!rec.frontFace)
             return glm::vec3(0.0f);
@@ -80,22 +80,22 @@ glm::vec3 ray_color(const Ray& _ray, const std::vector<Hittable>& _hittables, in
         target += random_unit_vector() * roughtness;
 
         Ray scattered(rec.position, target);
-        // if ((dot(scattered.getDirection(), rec.normal) > 0))
         return emissive + attenuation * ray_color( scattered, _hittables, _depth-1 );
-        // return glm::vec3(0.0f);
     }
 
-    // return glm::vec3(0.0f);
-    glm::vec3 unit_direction = normalize(_ray.getDirection() );
-    float t = 0.5f * (unit_direction.y + 1.0f);
-    return glm::mix(glm::vec3(1.0f), glm::vec3(0.5f, 0.7f, 1.0f), t);
+    return glm::vec3(0.0f);
+    // glm::vec3 unit_direction = normalize(_ray.getDirection() );
+    // float t = 0.5f * (unit_direction.y + 1.0f);
+    // return glm::mix(glm::vec3(1.0f), glm::vec3(0.5f, 0.7f, 1.0f), t);
 }
 
 int main(int argc, char **argv) {
 
     // IMAGE
     const float aspect_ratio = 16.0f / 9.0f;
-    const int image_width = 1024*0.5;
+    const int image_width = 1024 * 2;
+    const int samples = 10;
+    const int maxDepth = 50;
     Image image = Image(image_width, static_cast<int>(image_width / aspect_ratio), 3);
 
     // CAMERA
@@ -104,7 +104,7 @@ int main(int argc, char **argv) {
     glm::vec3 vup(0.0f, -1.0f, 0.0f);
     float dist_to_focus = glm::length(lookfrom-lookat);
     float dov = 35.0f;
-    float aperture = 0.05;
+    float aperture = 0.15;
 
     Camera cam = Camera(lookfrom, lookat, vup, dov, aspect_ratio, aperture, dist_to_focus);
 
@@ -115,14 +115,17 @@ int main(int argc, char **argv) {
     std::vector<Hittable> scene;
     Mesh scene_mesh;
 
-    Material metal = Material("metal");
+    Material metal = Material("Metal");
     metal.set("metallic", 1.0f);
     metal.set("roughness", 0.0f);
 
     Material checker = Material("Checker");
     checker.set("diffuse", "default.png");
 
-    // Material earth = Material("Checker");
+    Material light = Material("Light");
+    light.set("emissive", glm::vec3(1.0f));
+
+    // Material earth = Material("earth");
     // earth.set("diffuse", "earth.jpg");
     // earth.set("roughness", "earth.png");
 
@@ -143,19 +146,26 @@ int main(int argc, char **argv) {
     // translateY(terrain, -1.0f);
     // scene.push_back( Hittable(terrain, branches, debug) );
 
-    Mesh plane = hilma::plane(6.0f, 6.0f, 1, 1);
+    Mesh light_area = hilma::plane(4.0f, 4.0f, 1, 1);
+    light_area.setMaterial(light);
+    rotateX(light_area, PI/2.0f);
+    translateY(light_area, 2.0f);
+    scene.push_back( Hittable(light_area.getTriangles(), 0, false) );
+    // scene_mesh.append(light_area);
+
+    Mesh plane = hilma::plane(10.0f, 10.0f, 1, 1);
     plane.setMaterial(checker);
     translateZ(plane, -0.6f);
     rotateX(plane, -PI/2.0f);
     scene.push_back( Hittable(plane.getTriangles(), 0, false) );
-    scene_mesh.append(plane);
+    // scene_mesh.append(plane);
 
     Mesh head = loadPly("head.ply");
     center(head);
     scale(head, 0.15f);
     translateY(head, 0.4f);
     scene.push_back( Hittable(head.getTriangles(), branches, debug) );
-    scene_mesh.append(head);
+    // scene_mesh.append(head);
 
     // Mesh icosphere = hilma::icosphere(0.5f, 2);
     // icosphere.setMaterial(metal);
@@ -171,14 +181,14 @@ int main(int argc, char **argv) {
     rotateX(cone, PI);
     translateX(cone, -2.0f);
     scene.push_back( Hittable(cone.getTriangles(), branches, debug) );
-    scene_mesh.append(cone);
+    // scene_mesh.append(cone);
 
     Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
     // cylinder.setMaterial(metal);
     cylinder.setMaterial(checker);
     translateX(cylinder, 2.0f);
     scene.push_back( Hittable(cylinder.getTriangles(), branches, debug) );
-    scene_mesh.append(cylinder);
+    // scene_mesh.append(cylinder);
 
     // saveObj("raytracer.obj", scene_mesh);
     // savePly("raytracer.ply", scene_mesh, false);
@@ -187,7 +197,7 @@ int main(int argc, char **argv) {
     //
     Timer timer;
     timer.start();
-    raytrace(image, cam, scene, 10, 50, ray_color);    
+    raytrace_multithread(image, cam, scene, samples, maxDepth, ray_color);
     timer.stop();
 
     const float time_raycasting = timer.get() / 1000.f;
@@ -195,7 +205,8 @@ int main(int argc, char **argv) {
 
     int totalTriangles = 0;
     for (size_t i = 0; i < scene.size(); i++)
-        totalTriangles += scene[i].getTotalTriangles();    
+        totalTriangles += scene[i].getTotalTriangles();   
+
     std::cout << "                  Total number of triangles : " << totalTriangles << std::endl;
     std::cout << "              Total number of ray-box tests : " << getTotalRayBoundingBoxTests() << std::endl;
     std::cout << "        Total number of ray-triangles tests : " << getTotalRayTriangleTests() << std::endl; 
@@ -204,6 +215,46 @@ int main(int argc, char **argv) {
     std::cout << "    Total number of ray-lines intersections : " << getTotalLineLineIntersections() << std::endl;
 
     savePng("raytracer.png", image);
+
+    // PRINT NORMAL and ALBEDO FOR DENOISER
+    cam = Camera(lookfrom, lookat, vup, dov, aspect_ratio, 0.0f, dist_to_focus);
+
+    hilma::Image normal= Image(image);
+    raytrace_multithread(normal, cam, scene, 10, 1, [](const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
+        HitRecord rec;
+        if ( hit(_ray, 0.001, 1000.0, _hittables, rec) )
+            if (rec.triangle != nullptr)
+                return rec.triangle->getNormal(rec.barycentric) * 0.5f + 0.5f;
+        
+        return glm::vec3(0.0f);
+    } );
+    savePng("raytracer_normal.png", normal);
+
+    hilma::Image albedo = Image(image);
+    raytrace_multithread(albedo, cam, scene, 10, 1, [](const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
+        HitRecord rec;
+        if ( hit(_ray, 0.001, 1000.0, _hittables, rec) ) {
+            glm::vec3 attenuation = glm::vec3(1.0f);
+
+            if (rec.triangle != nullptr) {
+                if (rec.triangle->material != nullptr) {
+                    bool haveUV = rec.triangle->haveTexCoords();
+                    glm::vec2 uv;
+                    if (haveUV) uv = rec.triangle->getTexCoord(rec.barycentric);
+                    uv.x = 1.0f - uv.x;
+                    if ( rec.triangle->material->haveProperty("diffuse") )
+                        if ( haveUV ) attenuation = rec.triangle->material->getColor("diffuse", uv);
+                        else attenuation = rec.triangle->material->getColor("diffuse");
+                }
+            }
+            return attenuation;
+        }
+        return glm::vec3(0.0f);
+    } );
+    savePng("raytracer_albedo.png", albedo);
+
+    Image denoised = denoise(image, normal, albedo, true);
+    savePng("raytracer_denoised.png", denoised);
 
     return 0;
 }

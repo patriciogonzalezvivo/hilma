@@ -19,6 +19,13 @@ public:
     bool        allocate(size_t _width, size_t _height, size_t _channels);
     bool        isAllocated() const { return data.size() != 0; }
 
+    int         getWidth() const { return width;}
+    int         getHeight() const { return height;};
+    int         getChannels() const { return channels;};
+
+    size_t      getIndex(size_t _x, size_t _y) const { return (_y * width + _x) * channels; };
+    size_t      getIndexUV(float _u, float _v) const { return getIndex(_u * width, _v * height); }
+
     void        set(const uint8_t* _array3D, int _height, int _width, int _channels);
 
     void        setValue(size_t _index, float _data);
@@ -30,13 +37,6 @@ public:
     void        setColors(const float* _array2D, int _m, int _n);
 
     void        get(uint8_t **_array3D, int *_height, int *_width, int *_channels);
-
-    int         getWidth() const { return width;}
-    int         getHeight() const { return height;};
-    int         getChannels() const { return channels;};
-
-    size_t      getIndex(size_t _x, size_t _y) const { return (_y * width + _x) * channels; };
-    size_t      getIndexUV(float _u, float _v) const { return getIndex(_u * width, _v * height); }
 
     float       getValue(size_t _index) const;
     glm::vec4   getColor(size_t _index) const;
@@ -63,6 +63,7 @@ private:
     friend void threshold(Image&, float);
     friend glm::vec2 getRange(const Image&);
     friend void remap(Image&, float, float, float, float, bool);
+    friend Image denoise(const Image&, Image&, const Image&, bool);
 };
 
 typedef std::shared_ptr<Image> ImagePtr;

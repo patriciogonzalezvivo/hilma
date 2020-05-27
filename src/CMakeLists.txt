@@ -13,16 +13,29 @@ file(GLOB TYPES_SOURCE "${PROJECT_SOURCE_DIR}/src/types/*.cpp")
 set(INCLUDE_FOLDER "${PROJECT_SOURCE_DIR}/include")
 set(INCLUDE_SWIG_FILE "${PROJECT_SOURCE_DIR}/${PROJECT_NAME}.i")
 
+find_package(Threads)
+
+find_package(OpenImageDenoise)
+
 # C++ LIBRAY
 #
 add_library(hilma ${ROOT_SOURCE} ${IO_SOURCE} ${OPS_SOURCE} ${TYPES_SOURCE})
 
+if( OpenImageDenoise_FOUND )
+  message(STATUS "Compiling with OpenImageDenoise support")
+  add_definitions(-DOPENIMAGEDENOISE_SUPPORT)
+  target_link_libraries(hilma OpenImageDenoise)
+endif()
+
+
 # We need this directory, and users of our library will need it too
 target_include_directories(hilma PUBLIC ${INCLUDE_FOLDER})
+target_link_libraries (hilma Threads::Threads)
 
 # IDEs should put the headers in a nice place
 source_group(   TREE ${INCLUDE_FOLDER} 
                 PREFIX "Header Files" FILES ${ROOT_HEADER})
+
 
 install(TARGETS ${PROJECT_NAME} DESTINATION lib)
 install(FILES ${ROOT_HEADER} DESTINATION include/hilma)

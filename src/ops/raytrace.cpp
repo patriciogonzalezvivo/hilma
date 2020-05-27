@@ -10,6 +10,11 @@
 #include "hilma/text.h"
 #include "hilma/ops/intersection.h"
 
+#include <thread>
+#include <mutex>
+#include <atomic>
+#include <condition_variable>
+
 namespace hilma {
 
 bool triangle_compare(const Triangle& a, const Triangle& b, int axis) {
@@ -148,44 +153,9 @@ Mesh Hittable::getMesh() {
     return mesh;
 }
 
-bool Hittable::hit(const Ray& _ray, float _minDistance, float _maxDistance, HitRecord& _rec) const {
-    if ( !intersection(_ray, (BoundingBox)*this, _minDistance, _maxDistance) )
-        return false;
-
-    bool hit_anything = false;
-
-    if (!leaf) {
-        bool hit_left = left->hit(_ray, _minDistance, _maxDistance, _rec);
-        bool hit_right = right->hit(_ray, _minDistance, hit_left ? _rec.distance : _maxDistance, _rec);
-
-        return hit_left || hit_right;
-    }
-    else {
-        HitRecord tmp_rec;
-        float closest_so_far = _maxDistance;
-        if ( raytrace(_ray, _minDistance, closest_so_far, triangles, tmp_rec) ) {
-            if ( tmp_rec.distance < closest_so_far ) {
-                hit_anything = true;
-                closest_so_far = tmp_rec.distance;
-                _rec = tmp_rec;
-            }
-        }
-
-        if ( raytrace(_ray, _minDistance, closest_so_far, lines, tmp_rec) ) {
-            if (tmp_rec.distance < closest_so_far) {
-                hit_anything = true;
-                closest_so_far = tmp_rec.distance;
-                _rec = tmp_rec;
-            }
-        }
-    }
-
-    return hit_anything;
-}
-
 // Ray / Line
 
-bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Line>& _lines, HitRecord& _rec) {
+bool hit(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Line>& _lines, HitRecord& _rec) {
     Line ray = Line(_ray.getOrigin(), _ray.getAt(std::min(100.0f, _maxDistance)));
 
     HitRecord tmp_rec;
@@ -210,7 +180,7 @@ bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std
 }
 
 // RAY / TRIANGLE 
-bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Triangle>& _triangles, HitRecord& _rec) {
+bool hit(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Triangle>& _triangles, HitRecord& _rec) {
 
     bool hit_anything = false;
     float closest_so_far = _maxDistance;
@@ -241,8 +211,8 @@ bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std
 
 
 // RAY HITTABLE
-
-bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Hittable>& _hittables, HitRecord& _rec) {
+//
+bool hit(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Hittable>& _hittables, HitRecord& _rec) {
 
     bool hit_anything = false;
     float closest_so_far = _maxDistance;
@@ -261,6 +231,44 @@ bool raytrace(const Ray& _ray, float _minDistance, float _maxDistance, const std
 
     return hit_anything;
 }
+
+bool Hittable::hit(const Ray& _ray, float _minDistance, float _maxDistance, HitRecord& _rec) const {
+    if ( !intersection(_ray, (BoundingBox)*this, _minDistance, _maxDistance) )
+        return false;
+
+    bool hit_anything = false;
+
+    if (!leaf) {
+        bool hit_left = left->hit(_ray, _minDistance, _maxDistance, _rec);
+        bool hit_right = right->hit(_ray, _minDistance, hit_left ? _rec.distance : _maxDistance, _rec);
+
+        return hit_left || hit_right;
+    }
+    else {
+        HitRecord tmp_rec;
+        float closest_so_far = _maxDistance;
+        if ( hilma::hit(_ray, _minDistance, closest_so_far, triangles, tmp_rec) ) {
+            if ( tmp_rec.distance < closest_so_far ) {
+                hit_anything = true;
+                closest_so_far = tmp_rec.distance;
+                _rec = tmp_rec;
+            }
+        }
+
+        if ( hilma::hit(_ray, _minDistance, closest_so_far, lines, tmp_rec) ) {
+            if (tmp_rec.distance < closest_so_far) {
+                hit_anything = true;
+                closest_so_far = tmp_rec.distance;
+                _rec = tmp_rec;
+            }
+        }
+    }
+
+    return hit_anything;
+}
+
+
+
 
 void raytrace(  Image& _image, const Camera& _cam, const std::vector<Hittable>& _scene, int _samplesPerPixel, int _maxDepth, 
                 std::function<glm::vec3(const Ray&, const std::vector<Hittable>&, int)> _rayColor) {
@@ -291,6 +299,113 @@ void raytrace(  Image& _image, const Camera& _cam, const std::vector<Hittable>& 
             _image.setColor( _image.getIndex(x, y) , pixel_color);
             
             printProgressBar("RayTracing -", i / float(totalPixels), 100 );
+        }
+    }
+}
+
+std::mutex writeM;
+
+struct BlockJob {
+    int rowStart;
+    int rowEnd;
+    int colSize;
+    int spp;
+    std::vector<int> index;
+    std::vector<glm::vec3> colors;
+};
+
+void raytrace_thread(BlockJob _job, std::vector<BlockJob>& imageBlocks, int _ny, 
+                    const Camera& _cam, const std::vector<Hittable>& _scene, int _maxDepth,
+                    std::mutex& mutex, std::condition_variable& cv, std::atomic<int>& _completedThreads,
+                    std::function<glm::vec3(const Ray&, const std::vector<Hittable>&, int)> _rayColor) {
+    
+    for (int j = _job.rowStart; j < _job.rowEnd; ++j) {
+        for (int i = 0; i < _job.colSize; ++i) {
+
+            glm::vec3 pixel_color(0.0f, 0.0f, 0.0f);
+            for (int s = 0; s < _job.spp; ++s) {
+                float u = float(i + randomf()) / float(_job.colSize);
+                float v = float(j + randomf()) / float(_ny);
+
+                Ray ray = _cam.getRay(u, v);
+                pixel_color += _rayColor(ray, _scene, _maxDepth);
+            }
+
+            pixel_color /= float(_job.spp);
+            pixel_color = sqrt(pixel_color);
+
+            _job.index.push_back( (j * _job.colSize + i) * 3);
+            _job.colors.push_back(pixel_color);
+        }
+    }
+
+    {
+        std::lock_guard<std::mutex> lock(mutex);
+        imageBlocks.push_back(_job);
+        _completedThreads++;
+        cv.notify_one();
+    }
+}
+
+void raytrace_multithread(Image& _image, const Camera& _cam, const std::vector<Hittable>& _scene, int _samples, int _maxDepth, 
+                            std::function<glm::vec3(const Ray&, const std::vector<Hittable>&, int)> _rayColor) {
+
+    int nx = _image.getWidth();
+    int ny = _image.getHeight();
+    int ns = _samples;
+
+    const int nThreads = std::thread::hardware_concurrency();
+    int rowsPerThread = ny / nThreads;
+    int leftOver = ny % nThreads;
+
+    std::mutex mutex;
+    std::condition_variable cvResults;
+    std::vector<BlockJob> imageBlocks;
+    std::atomic<int> completedThreads = { 0 };
+    std::vector<std::thread> threads;
+
+    for (int i = 0; i < nThreads; ++i) {
+        BlockJob job;
+        job.rowStart = i * rowsPerThread;
+        job.rowEnd = job.rowStart + rowsPerThread;
+        if (i == nThreads - 1)
+            job.rowEnd = job.rowStart + rowsPerThread + leftOver;
+
+        job.colSize = nx;
+        job.spp = ns;
+
+        std::thread t(  [   job, &imageBlocks, ny, 
+                            _cam, _scene, _maxDepth,
+                            &mutex, &cvResults, &completedThreads,
+                            _rayColor]() {
+            raytrace_thread(job, imageBlocks, ny, 
+                            _cam, _scene, _maxDepth,
+                            mutex, cvResults, completedThreads,
+                            _rayColor);
+        });
+        threads.push_back(std::move(t));
+    }
+
+    // launched jobs. need to build image.
+    // wait for number of jobs = pixel count
+    {
+        std::unique_lock<std::mutex> lock(mutex);
+        cvResults.wait(lock, [&completedThreads, &nThreads] {
+            printProgressBar("RayTracing -", completedThreads / float(nThreads), 100 );
+            return completedThreads == nThreads;
+        });
+    }
+
+    for (std::thread& t : threads)
+        t.join();
+
+    for (BlockJob job : imageBlocks) {
+        int index = job.rowStart;
+        int colorIndex = 0;
+        for (glm::vec3& col : job.colors) {
+            // glm::vec2 pos = job.index[colorIndex];
+            _image.setColor( job.index[colorIndex] , col);
+            ++colorIndex;
         }
     }
 
