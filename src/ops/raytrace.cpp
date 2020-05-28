@@ -164,7 +164,7 @@ bool hit(const Ray& _ray, float _minDistance, float _maxDistance, const std::vec
 
     glm::vec3 ip;
     for (size_t i = 0; i < _lines.size(); i++) {
-        if (intersection(ray, _lines[i], ip, 0.01)) {
+        if (intersection(ray, _lines[i], ip, 0.005)) {
             tmp_rec.distance = glm::length(_ray.getOrigin() - ip);
             if (tmp_rec.distance < closest_so_far) {
                 closest_so_far = tmp_rec.distance;

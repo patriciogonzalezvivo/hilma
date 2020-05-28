@@ -265,8 +265,19 @@ bool savePly( const std::string& _filename, Mesh& _mesh, bool _binnary, bool _co
     file.get_comments().push_back("generated with Hilma by Patricio Gonzalez Vivo" );
 
     if (_mesh.haveMaterials()) {
+        std::vector<std::string> mats = _mesh.getMaterialsNames();
+        std::string diffuseMap = "";
+
+        for (size_t i = 0; i < mats.size(); i++) {
+            MaterialPtr mat = _mesh.getMaterial(mats[i]);
+            if (mat != nullptr)
+                if (mat->haveProperty("diffuse")) {
+                    diffuseMap = mat->getImagePath("diffuse");
+                    break;
+                }
+        }
+
         MaterialConstPtr mat = _mesh.getMaterialForFaceIndex(0);
-        std::string diffuseMap = mat->getImagePath("diffuse");
         if (diffuseMap.size() > 0)
             file.get_comments().push_back("TextureFile " + diffuseMap);
     }

@@ -507,6 +507,33 @@ std::vector<Line>   toLines(const BoundingBox& _bbox) {
     return lines;
 }
 
+std::vector<Line>   toLines(const std::vector<Triangle>& _triangles) {
+    std::vector<Line> lines;
+    
+    for (size_t i = 0; i < _triangles.size(); i++) {
+        Line l1 = Line(_triangles[i][0], _triangles[i][1]);
+        Line l2 = Line(_triangles[i][1], _triangles[i][2]);
+        Line l3 = Line(_triangles[i][2], _triangles[i][0]);
+
+        if (_triangles[i].haveColors()) {
+            l1.setColor(0, _triangles[i].getColor(0));
+            l1.setColor(1, _triangles[i].getColor(1));
+            l2.setColor(0, _triangles[i].getColor(1));
+            l2.setColor(1, _triangles[i].getColor(2));
+            l3.setColor(0, _triangles[i].getColor(2));
+            l3.setColor(1, _triangles[i].getColor(0));
+        }
+        lines.push_back(l1);
+        lines.push_back(l2);
+        lines.push_back(l3);
+    }
+
+    // TODO:
+    //      - REMOVE DUPLICATES
+    //
+    return lines;
+}
+
 Mesh toMeshEdges(const BoundingBox& _bbox) {
     std::vector<Line> lines = toLines(_bbox);
 

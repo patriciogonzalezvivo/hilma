@@ -163,10 +163,11 @@ public:
     MaterialPtr getMaterial(const std::string& _name) const;
     bool        haveMaterials() const { return !materialsByIndices.empty(); }
     
+    void        printMaterials() const;
     std::vector<std::string> getMaterialsNames() const;
     MaterialConstPtr getMaterialForFaceIndex(size_t _index) const;
 
-    Mesh        getMeshForIndices(size_t _start, size_t _end) const;
+    Mesh                getMeshForIndices(size_t _start, size_t _end) const;
     std::vector<Mesh>   getMeshesByMaterials() const;
 
 private:

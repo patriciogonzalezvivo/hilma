@@ -345,7 +345,7 @@ bool saveObj( const std::string& _filename, const Mesh& _mesh ) {
     }
 
     saveMaterials(_filename.substr(0,_filename.size()-3) + "mtl", _mesh);
-
+    
     // https://github.com/libigl/libigl/blob/master/include/igl/writeOBJ.cpp
     fprintf(obj_file,"# generated with Hilma by Patricio Gonzalez Vivo\n");
     fprintf(obj_file,"o %s\n", _mesh.getName().c_str());
@@ -372,15 +372,15 @@ bool saveObj( const std::string& _filename, const Mesh& _mesh ) {
         // fprintf(obj_file,"\n");
     }
 
-    bool materials = _mesh.getMaterialsNames().size() > 0;
+    bool materials = _mesh.haveMaterials();
     if (_mesh.haveFaceIndices()) {
         std::vector<glm::ivec3> faces = _mesh.getTrianglesIndices();
         std::string last_material = "";
         for (size_t i = 0; i < faces.size(); i++) {
 
-            if (materials) {
-                std::string matname = _mesh.getMaterialForFaceIndex(faces[i][0])->name;
-                if (matname != last_material) {
+            std::string matname = _mesh.getMaterialForFaceIndex( faces[i][0] )->name;
+            if (matname != last_material) {
+                if (materials) {
                     fprintf(obj_file, "usemtl %s\n", matname.c_str() );
                     last_material = matname;
                 }

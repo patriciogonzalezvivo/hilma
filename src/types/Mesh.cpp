@@ -75,7 +75,6 @@ void Mesh::append(const Mesh& _mesh) {
     if (_mesh.haveFaceIndices()) {
         std::string lastMaterialName = "";
         for (size_t i = 0; i < _mesh.faceIndices.size(); i++) {
-            addFaceIndex(vertexIndexOffset + _mesh.faceIndices[i]);
             if (_mesh.haveMaterials()) {
                 MaterialConstPtr material = _mesh.getMaterialForFaceIndex(i);
                 if (material != NULL) {
@@ -85,6 +84,7 @@ void Mesh::append(const Mesh& _mesh) {
                     }
                 }
             }
+            addFaceIndex(vertexIndexOffset + _mesh.faceIndices[i]);
         }
     }
 
@@ -759,7 +759,9 @@ void Mesh::addMaterial(const Material& _material, int _index) {
     if (_index < 0)
         _index = faceIndices.size();
 
-    materialsByName[_material.name] = std::make_shared<Material>(_material);
+    if (materialsByName.find(_material.name) == materialsByName.end())
+        materialsByName[_material.name] = std::make_shared<Material>(_material);
+
     IndexMaterial in_mat(_index, materialsByName[_material.name] );
     materialsByIndices.push_back(in_mat);
 }
@@ -768,6 +770,10 @@ MaterialPtr Mesh::getMaterial(const std::string& _name) const {
     return materialsByName.find(_name)->second;
 }
 
+void Mesh::printMaterials() const {
+    for (size_t i = 0 ; i < materialsByIndices.size(); i++)
+        std::cout << materialsByIndices[i].first << " " << materialsByIndices[i].second->name << std::endl; 
+}
 std::vector<std::string> Mesh::getMaterialsNames() const {
     std::vector<std::string> names;
     for (MaterialsByName::const_iterator it = materialsByName.begin(); it != materialsByName.end(); it++ )

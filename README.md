@@ -5,7 +5,8 @@ Hilma is 3D geometry library in C++ with Python bindings (with support for Numpy
 
 Dependencies:
 
-* [glm](https://github.com/g-truc/glm)
+* [GLM](https://github.com/g-truc/glm) required
+* [OpenImageDenoise](https://github.com/OpenImageDenoise/oidn) optional
 
 ## Compile and install Hilma
 
