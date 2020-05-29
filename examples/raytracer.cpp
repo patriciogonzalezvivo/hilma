@@ -12,7 +12,6 @@
 #include "hilma/types/Camera.h"
 #include "hilma/types/Image.h"
 
-#include "hilma/ops/convert.h"
 #include "hilma/ops/generate.h"
 #include "hilma/ops/transform.h"
 #include "hilma/ops/raytrace.h"
@@ -110,7 +109,6 @@ int main(int argc, char **argv) {
 
     // SCENE
     int branches = 10;
-    bool debug = false;
 
     std::vector<Hittable> scene;
     Mesh scene_mesh;
@@ -134,7 +132,7 @@ int main(int argc, char **argv) {
     // translateY(cornell, 0.4f);
     // translateZ(cornell, -2.0f);
     // saveObj("cornell.obj", cornell);
-    // scene.push_back( Hittable(cornell, branches, debug) );
+    // scene.push_back( Hittable(cornell, branches) );
 
     // Image heightmap;
     // loadPng("gale.png", heightmap, 1);
@@ -144,34 +142,34 @@ int main(int argc, char **argv) {
     // rotateX(terrain, -PI/2.0f);
     // scale(terrain, 0.1);
     // translateY(terrain, -1.0f);
-    // scene.push_back( Hittable(terrain, branches, debug) );
+    // scene.push_back( Hittable(terrain, branches) );
 
     Mesh light_area = hilma::plane(4.0f, 4.0f, 1, 1);
     light_area.setMaterial(light);
     rotateX(light_area, PI/2.0f);
     translateY(light_area, 2.0f);
-    scene.push_back( Hittable(light_area.getTriangles(), 0, false) );
+    scene.push_back( Hittable(light_area.getTriangles(), 0) );
     scene_mesh.append(light_area);
 
     Mesh plane = hilma::plane(10.0f, 10.0f, 1, 1);
     plane.setMaterial(checker);
     translateZ(plane, -0.6f);
     rotateX(plane, -PI/2.0f);
-    scene.push_back( Hittable(plane.getTriangles(), 0, false) );
+    scene.push_back( Hittable(plane.getTriangles(), 0) );
     scene_mesh.append(plane);
 
     Mesh head = loadPly("head.ply");
     center(head);
     scale(head, 0.15f);
     translateY(head, 0.4f);
-    scene.push_back( Hittable(head.getTriangles(), branches, debug) );
+    scene.push_back( Hittable(head.getTriangles(), branches) );
     scene_mesh.append(head);
 
     // Mesh icosphere = hilma::icosphere(0.5f, 2);
     // icosphere.setMaterial(metal);
     // // icosphere.setMaterial(checker);
     // // icosphere.setMaterial(earth);
-    // scene.push_back( Hittable(icosphere.getTriangles(), branches, debug) );
+    // scene.push_back( Hittable(icosphere.getTriangles(), branches) );
     // scene_mesh.append(icosphere);
 
     Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
@@ -180,14 +178,14 @@ int main(int argc, char **argv) {
     cone.setMaterial(checker);
     rotateX(cone, PI);
     translateX(cone, -2.0f);
-    scene.push_back( Hittable(cone.getTriangles(), branches, debug) );
+    scene.push_back( Hittable(cone.getTriangles(), branches) );
     scene_mesh.append(cone);
 
     Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
     // cylinder.setMaterial(metal);
     cylinder.setMaterial(checker);
     translateX(cylinder, 2.0f);
-    scene.push_back( Hittable(cylinder.getTriangles(), branches, debug) );
+    scene.push_back( Hittable(cylinder.getTriangles(), branches) );
     scene_mesh.append(cylinder);
 
     saveObj("raytracer.obj", scene_mesh);

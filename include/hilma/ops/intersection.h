@@ -35,7 +35,6 @@ struct IntersectionData {
 };
 
 
-// Ray
 float               distance(const glm::vec3& _point, const Plane& _plane);
 IntersectionData    intersection(const Ray& _ray, const Plane& _plane);
 

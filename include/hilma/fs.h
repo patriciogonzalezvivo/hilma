@@ -4,6 +4,8 @@
 #include <sys/stat.h>
 // #include <fstream>      // File
 
+namespace hilma {
+
 inline bool urlExists(const std::string& _name) {
     struct stat buffer;
     return (stat (_name.c_str(), &buffer) == 0);
@@ -34,4 +36,6 @@ inline std::string getBaseDir(const std::string& _filepath) {
 #endif
 
     return base_dir;
+}
+
 }

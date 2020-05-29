@@ -1,12 +1,9 @@
 #include "hilma/ops/compute.h"
 
+#include "hilma/text.h"
+
 #include <algorithm>
 #include <map>
-
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/normal.hpp>
-
-#include "hilma/text.h"
 
 namespace hilma {
 
@@ -263,50 +260,6 @@ BoundingBox getBoundingBox(const std::vector<glm::vec3>& _points ) {
     
     return bbox;
 }
-
-
-
-// void computeSmoothingNormals(const Mesh& _mesh) {
-//     std::vector<glm::vec3> smoothVertexNormals;
-
-//     std::map<int, glm::vec3>::iterator iter;
-//     for (size_t f = 0; f < _shape.mesh.indices.size() / 3; f++) {
-//         // Get the three indexes of the face (all faces are triangular)
-//         tinyobj::index_t idx0 = _shape.mesh.indices[3 * f + 0];
-//         tinyobj::index_t idx1 = _shape.mesh.indices[3 * f + 1];
-//         tinyobj::index_t idx2 = _shape.mesh.indices[3 * f + 2];
-
-//         // Get the three vertex indexes and coordinates
-//         int vi[3];      // indexes
-//         vi[0] = idx0.vertex_index;
-//         vi[1] = idx1.vertex_index;
-//         vi[2] = idx2.vertex_index;
-
-//         glm::vec3 v[3];  // coordinates
-//         for (size_t i = 0; i < 3; i++)
-//             v[i] = getVertex(_attrib, vi[i]);
-
-//         // Compute the normal of the face
-//         glm::vec3 normal;
-//         calcNormal(v[0], v[1], v[2], normal);
-
-//         // Add the normal to the three vertexes
-//         for (size_t i = 0; i < 3; ++i) {
-//             iter = smoothVertexNormals.find(vi[i]);
-//             // add
-//             if (iter != smoothVertexNormals.end())
-//                 iter->second += normal;
-//             else
-//                 smoothVertexNormals[vi[i]] = normal;
-//         }
-//     }  // f
-
-//     // Normalize the normals, that is, make them unit vectors
-//     for (iter = smoothVertexNormals.begin(); iter != smoothVertexNormals.end(); iter++) {
-//         iter->second = glm::normalize(iter->second);
-//     }
-// }
-
 
 Mesh getSmoothNormals(const Mesh& _mesh, float _angle) {
     Mesh rta;

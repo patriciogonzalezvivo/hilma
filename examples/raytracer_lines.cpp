@@ -12,9 +12,10 @@
 #include "hilma/types/Camera.h"
 #include "hilma/types/Image.h"
 
-#include "hilma/ops/convert.h"
+
 #include "hilma/ops/generate.h"
 #include "hilma/ops/transform.h"
+#include "hilma/ops/convert_path.h"
 #include "hilma/ops/raytrace.h"
 #include "hilma/ops/intersection.h"
 

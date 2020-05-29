@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "hilma/types/Mesh.h"
-#include "hilma/ops/convert.h"
+#include "hilma/ops/convert_path.h"
 #include "hilma/ops/transform.h"
 #include "hilma/io/ply.h"
 

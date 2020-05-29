@@ -5,7 +5,7 @@
 
 #include "hilma/types/Mesh.h"
 #include "hilma/ops/compute.h"
-#include "hilma/ops/convert.h"
+#include "hilma/ops/convert_path.h"
 #include "hilma/io/ply.h"
 #include "hilma/io/stl.h"
 #include "hilma/io/obj.h"

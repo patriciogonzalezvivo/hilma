@@ -5,7 +5,7 @@
 
 #include "hilma/types/Mesh.h"
 #include "hilma/types/Polyline.h"
-#include "hilma/ops/convert.h"
+#include "hilma/ops/convert_path.h"
 #include "hilma/io/ply.h"
 
 int main(int argc, char **argv) {

@@ -1,546 +1,343 @@
-#include "hilma/ops/convert.h"
-#include "hilma/ops/earcut.h"
-
+#include "hilma/ops/convert_image.h"
 #include "hilma/math.h"
-#include "hilma/types/BoundingBox.h"
 
-#define GLM_ENABLE_EXPERIMENTAL
-#include "glm/gtx/rotate_vector.hpp"
-#include "glm/gtx/norm.hpp"
-#include <glm/gtx/hash.hpp>
+#include <stdio.h>
+#include <cstring>
+#include <vector>
+#include <iostream>
 
 #include <map>
 #include <unordered_map>
-
 #include <algorithm>
 
-namespace mapbox { namespace util {
+#define GLM_ENABLE_EXPERIMENTAL
+// #include "glm/gtx/rotate_vector.hpp"
+// #include "glm/gtx/norm.hpp"
+#include <glm/gtx/normal.hpp>
+#include <glm/gtx/hash.hpp>
 
-template <>
-struct nth<0, glm::vec2> {
-    inline static float get(const glm::vec2 &t) { return t.x; };
-};
-template <>
-struct nth<1, glm::vec2> {
-    inline static float get(const glm::vec2 &t) { return t.y; };
-};
+#ifdef OPENIMAGEDENOISE_SUPPORT
+#include <OpenImageDenoise/oidn.hpp>
+#endif
 
-template <>
-struct nth<0, glm::vec3> {
-    inline static float get(const glm::vec3 &t) { return t.x; };
-};
-template <>
-struct nth<1, glm::vec3> {
-    inline static float get(const glm::vec3 &t) { return t.y; };
-};
-
-}}
-
+#define	RED_WEIGHT	    0.299
+#define GREEN_WEIGHT	0.587
+#define BLUE_WEIGHT	    0.114
+#define INF             1E20
 
 namespace hilma {
 
-template <typename T>
-Mesh Convert::toSurface(const std::vector<std::vector<T>>& _polygon) {
-    Mesh mesh;
-
-    BoundingBox bb;
-    static const glm::vec3 upVector(0.0f, 0.0f, 1.0f);
-    for (size_t i = 0; i < _polygon.size(); i++) {
-        for (size_t j = 0; j < _polygon[i].size(); j++ ) {
-            mesh.addVertex( _polygon[i][j].x, _polygon[i][j].y, 0.0f );
-            mesh.addNormal( upVector );
-            bb.expand( _polygon[i][j].x, _polygon[i][j].y );
-        }
-    }
-
-    for (size_t i = 0; i < mesh.getVerticesTotal(); i++) {
-        glm::vec3 p = mesh.getVertices()[i];
-        mesh.addTexCoord(   remap(p.x, bb.min.x, bb.max.x, 0.0f, 1.0f, true),
-                            remap(p.y, bb.min.y, bb.max.y, 0.0f, 1.0f, true) );
-    }
-
-    std::vector<uint32_t> indices = mapbox::earcut<uint32_t>(_polygon);
-    for (size_t i = 0; i < indices.size(); i++)
-        mesh.addFaceIndex(indices[i]);
-
-    return mesh;
+void sqrt(Image& _image) {
+    int total = _image.width * _image.height * _image.channels;
+    for (int i = 0; i < total; i++)
+        _image.data[i] = std::sqrt(_image.data[i]);
 }
 
-template Mesh Convert::toSurface<glm::vec2>(const std::vector<std::vector<glm::vec2>>&); 
-template Mesh Convert::toSurface<glm::vec3>(const std::vector<std::vector<glm::vec3>>&); 
-
-template <typename T>
-Mesh Convert::toWall(const std::vector<std::vector<T>>& _polygon, float _maxHeight, float _minHeight) {
-    Mesh mesh;
-    
-    static const glm::vec3 upVector(0.0f, 0.0f, 1.0f);
-    glm::vec3 normalVector;
-
-    int lineN  = 0;
-    INDEX_TYPE vertexN = 0;
-    for (auto& line : _polygon) {
-        size_t lineSize = line.size();
-
-        for (size_t i = 0; i < lineSize - 1; i++) {
-
-            glm::vec3 a(line[i].x, line[i].y, 0.f);
-            glm::vec3 b(line[i+1].x, line[i+1].y, 0.f);
-
-            
-            normalVector = glm::cross(upVector, b - a);
-            normalVector = glm::normalize(normalVector);
-
-            if (std::isnan(normalVector.x)
-             || std::isnan(normalVector.y)
-             || std::isnan(normalVector.z)) {
-                continue;
-            }
-
-            // 1st vertex top
-            a.z = _maxHeight;
-            mesh.addVertex(a);
-            mesh.addNormal(normalVector);
-            mesh.addTexCoord(1.,1.);
-
-            // 2nd vertex top
-            b.z = _maxHeight;
-            mesh.addVertex(b);
-            mesh.addNormal(normalVector);
-            mesh.addTexCoord(0.,1.);
-
-            // 1st vertex bottom
-            a.z = _minHeight;
-            mesh.addVertex(a);
-            mesh.addNormal(normalVector);
-            mesh.addTexCoord(1.,0.);
-
-            // 2nd vertex bottom
-            b.z = _minHeight;
-            mesh.addVertex(b);
-            mesh.addNormal(normalVector);
-            mesh.addTexCoord(0.,0.);
-
-            // Start the index from the previous state of the vertex Data
-            if (lineN == 0) {
-                mesh.addTriangleIndices(vertexN, vertexN + 2, vertexN + 1);
-                mesh.addTriangleIndices(vertexN + 1, vertexN + 2, vertexN + 3);
-            }
-            else {
-                mesh.addTriangleIndices(vertexN, vertexN + 1, vertexN + 2);
-                mesh.addTriangleIndices(vertexN + 1, vertexN + 3, vertexN + 2);
-            }
-
-            vertexN += 4;
-        }
-
-        lineN++;
-    }
-
-    return mesh;
+void invert(Image& _image) {
+    int total = _image.width * _image.height * _image.channels;
+    for (int i = 0; i < total; i++)
+        _image.data[i] = 1.0f -_image.data[i];
 }
 
-template Mesh Convert::toWall<glm::vec2>(const std::vector<std::vector<glm::vec2>>&, float, float); 
-template Mesh Convert::toWall<glm::vec3>(const std::vector<std::vector<glm::vec3>>&, float, float); 
-
-// From Tangram
-// https://github.com/tangrams/tangram-es/blob/e4a323afeb310520456aec49e338614120a7ffa2/core/src/util/Modifys.cpp
-
-// Get 2D perpendicular of two points
-
-inline glm::vec2 perp2d(const glm::vec2& _v1, const glm::vec2& _v2 ) {
-    return glm::vec2(_v2.y - _v1.y, _v1.x - _v2.x);
+void gamma(Image& _image, float _gamma) {
+    int total = _image.width * _image.height * _image.channels;
+    for (int i = 0; i < total; i++)
+        _image.data[i] = std::pow(_image.data[i], _gamma);
 }
 
-// Helper function for polyline tesselation
-inline void addPolyLineVertex(const glm::vec2& _coord, const glm::vec2& _normal, const glm::vec2& _uv, Mesh& _mesh, float _width) {
-    if (_width > 0.0f) {
-        glm::vec2 p = _coord +_normal * _width;
-        _mesh.addVertex(p.x, p.y);
-        _mesh.addNormal(0.0f, 0.0f, 1.0f);
-    }
-    else {
-        // Collapsed spline 
-        _mesh.addVertex(_coord.x, _coord.y);
-        _mesh.addNormal(_normal.x, _normal.y, 0.0f);
-    }
-    _mesh.addTexCoord(_uv);
-}
+void autolevel(Image& _image){
+    float lo = 1.0f;
+    float hi = 0.0f;
 
-// Helper function for polyline tesselation; adds indices for pairs of vertices arranged like a line strip
-void indexPairs(size_t _nPairs, Mesh& _mesh) {
-    size_t nVertices = _mesh.getVerticesTotal();
-
-    for (size_t i = 0; i < _nPairs; i++) {
-        _mesh.addTriangleIndices(   nVertices - 2*i - 4,
-                                    nVertices - 2*i - 2,
-                                    nVertices - 2*i - 3 );
-
-        _mesh.addTriangleIndices(   nVertices - 2*i - 3,
-                                    nVertices - 2*i - 2,
-                                    nVertices - 2*i - 1 );
-    }
-}
-
-//  Tessalate a fan geometry between points A       B
-//  using their normals from a center        \ . . /
-//  and interpolating their UVs               \ p /
-//                                             \./
-//                                              C
-void addFan(const glm::vec2& _pC,
-            const glm::vec2& _nA, const glm::vec2& _nB, const glm::vec2& _nC,
-            const glm::vec2& _uA, const glm::vec2& _uB, const glm::vec2& _uC,
-            size_t _numTriangles, Mesh& _mesh, float _width) {
-
-    // Find angle difference
-    float cross = _nA.x * _nB.y - _nA.y * _nB.x; // z component of cross(_CA, _CB)
-    float angle = atan2f(cross, glm::dot(_nA, _nB));
-
-    size_t startIndex = _mesh.getVerticesTotal();
-
-    // Add center vertex
-    addPolyLineVertex(_pC, _nC, _uC, _mesh, _width);
-
-    // Add vertex for point A
-    addPolyLineVertex(_pC, _nA, _uA, _mesh, _width);
-
-    // Add radial vertices
-    glm::vec2 radial = _nA;
-    for (size_t i = 0; i < _numTriangles; i++) {
-        float frac = (i + 1)/(float)_numTriangles;
-        radial = glm::rotate(_nA, angle * frac);
-
-        glm::vec2 uv(0.0);
-        // if (_mesh.useTexCoords)
-        uv = (1.f - frac) * _uA + frac * _uB;
-
-        addPolyLineVertex(_pC, radial, uv, _mesh, _width);
-
-        // Add indices
-        _mesh.addTriangleIndices(  startIndex, // center vertex
-                            startIndex + i + (angle > 0 ? 1 : 2),
-                            startIndex + i + (angle > 0 ? 2 : 1) );
+    int total = _image.width * _image.height * _image.channels;
+    for (int i = 0; i < total; i++) {
+        float data = _image.data[i];
+        lo = std::min(lo, data);
+        hi = std::max(hi, data);
     }
 
-}
+    for (int i = 0; i < total; i++) {
+        float data = _image.data[i];
+        lo = std::min(lo, data);
+        hi = std::max(hi, data);
+    }
 
-// Function to add the vertices for line caps
-void addCap(const glm::vec2& _coord, const glm::vec2& _normal, int _numCorners, bool _isBeginning, Mesh& _mesh, float _width) {
-
-    float v = _isBeginning ? 0.f : 1.f; // length-wise tex coord
-
-    if (_numCorners < 1) {
-        // "Butt" cap needs no extra vertices
-        return;
-    } 
-    else if (_numCorners == 2) {
-        // "Square" cap needs two extra vertices
-        glm::vec2 tangent(-_normal.y, _normal.x);
-        addPolyLineVertex(_coord, _normal + tangent, {0.f, v}, _mesh, _width);
-        addPolyLineVertex(_coord, -_normal + tangent, {0.f, v}, _mesh, _width);
-        if (!_isBeginning) { // At the beginning of a line we can't form triangles with previous vertices
-            indexPairs(1, _mesh);
-        }
+    if (hi == lo) {
         return;
     }
 
-    // "Round" cap type needs a fan of vertices
-    glm::vec2 nA(_normal), nB(-_normal), nC(0.f, 0.f), uA(1.f, v), uB(0.f, v), uC(0.5f, v);
-    if (_isBeginning) {
-        nA *= -1.f; // To flip the direction of the fan, we negate the normal vectors
-        nB *= -1.f;
-        uA.x = 0.f; // To keep tex coords consistent, we must reverse these too
-        uB.x = 1.f;
-    }
-    addFan(_coord, nA, nB, nC, uA, uB, uC, _numCorners, _mesh, _width);
+    for (int i = 0; i < total; i++)
+        _image.data[i] =  (_image.data[i] - lo) / (hi - lo);
 }
 
-template <typename T>
-Mesh Convert::toSpline(const std::vector<T>& _polyline, float _width, JoinType _join, CapType _cap, float _miterLimit) { //}, bool _close) {;
-
-    Mesh mesh;
-    size_t startIndex = 0;
-    size_t endIndex = _polyline.size();
-    bool endCap = true;
-
-
-    float distance = 0; // Cumulative distance along the polyline.
-
-    size_t origLineSize = _polyline.size();
-
-    // endIndex/startIndex could be wrapped values, calculate lineSize accordingly
-    int lineSize = (int)((endIndex > startIndex) ?
-                   (endIndex - startIndex) :
-                   (origLineSize - startIndex + endIndex));
-    if (lineSize < 2) { return mesh; }
-
-    glm::vec2 coordCurr(_polyline[startIndex].x, 
-                        _polyline[startIndex].y);
-    // get the Point using wrapped index in the original line geometry
-    glm::vec2 coordNext(_polyline[(startIndex + 1) % origLineSize].x, 
-                        _polyline[(startIndex + 1) % origLineSize].y);
-    glm::vec2 normPrev, normNext, miterVec;
-
-    int cornersOnCap = (int)_cap;
-    int trianglesOnJoin = (int)_join;
-
-    // Process first point in line with an end cap
-    normNext = glm::normalize(perp2d(coordCurr, coordNext));
-
-    if (endCap)
-        addCap(coordCurr, normNext, cornersOnCap, true, mesh, _width);
-    
-    addPolyLineVertex(coordCurr, normNext, {1.0f, 0.0f}, mesh, _width); // right corner
-    addPolyLineVertex(coordCurr, -normNext, {0.0f, 0.0f}, mesh, _width); // left corner
-
-
-    // Process intermediate points
-    for (int i = 1; i < lineSize - 1; i++) {
-        // get the Point using wrapped index in the original line geometry
-        int nextIndex = (i + startIndex + 1) % origLineSize;
-
-        distance += glm::distance(coordCurr, coordNext);
-
-        coordCurr = coordNext;
-        coordNext.x = _polyline[nextIndex].x;
-        coordNext.y = _polyline[nextIndex].y;
-
-        if (coordCurr == coordNext)
-            continue;
-
-        normPrev = normNext;
-        normNext = glm::normalize(perp2d(coordCurr, coordNext));
-
-        // Compute "normal" for miter joint
-        miterVec = normPrev + normNext;
-
-        float scale = 1.f;
-
-        // normPrev and normNext are in the opposite direction
-        // in order to prevent NaN values, we use the perp
-        // vector of those two vectors
-        if (miterVec == glm::zero<glm::vec2>())
-            miterVec = perp2d(glm::vec3(normNext, 0.f), glm::vec3(normPrev, 0.f));
-        else
-            scale = 2.f / glm::dot(miterVec, miterVec);
-
-        miterVec *= scale;
-
-        if (glm::length2(miterVec) > glm::length2(_miterLimit)) {
-            trianglesOnJoin = 1;
-            miterVec *= _miterLimit / glm::length(miterVec);
-        }
-
-        float v = distance;
-
-        if (trianglesOnJoin == 0) {
-            // Join type is a simple miter
-
-            addPolyLineVertex(coordCurr, miterVec, {1.0, v}, mesh, _width); // right corner
-            addPolyLineVertex(coordCurr, -miterVec, {0.0, v}, mesh, _width); // left corner
-            indexPairs(1, mesh);
-
-        }
-        else {
-
-            // Join type is a fan of triangles
-
-            bool isRightTurn = (normNext.x * normPrev.y - normNext.y * normPrev.x) > 0; // z component of cross(normNext, normPrev)
-
-            if (isRightTurn) {
-
-                addPolyLineVertex(coordCurr, miterVec, {1.0f, v}, mesh, _width); // right (inner) corner
-                addPolyLineVertex(coordCurr, -normPrev, {0.0f, v}, mesh, _width); // left (outer) corner
-                indexPairs(1, mesh);
-
-                addFan(coordCurr, -normPrev, -normNext, miterVec, {0.f, v}, {0.f, v}, {1.f, v}, trianglesOnJoin, mesh, _width);
-
-                addPolyLineVertex(coordCurr, miterVec, {1.0f, v}, mesh, _width); // right (inner) corner
-                addPolyLineVertex(coordCurr, -normNext, {0.0f, v}, mesh, _width); // left (outer) corner
-
-            } else {
-
-                addPolyLineVertex(coordCurr, normPrev, {1.0f, v}, mesh, _width); // right (outer) corner
-                addPolyLineVertex(coordCurr, -miterVec, {0.0f, v}, mesh, _width); // left (inner) corner
-                indexPairs(1, mesh);
-
-                addFan(coordCurr, normPrev, normNext, -miterVec, {1.f, v}, {1.f, v}, {0.0f, v}, trianglesOnJoin, mesh, _width);
-
-                addPolyLineVertex(coordCurr, normNext, {1.0f, v}, mesh, _width); // right (outer) corner
-                addPolyLineVertex(coordCurr, -miterVec, {0.0f, v}, mesh, _width); // left (inner) corner
-            }
-        }
+void flip(Image& _image) {
+    const size_t stride = _image.width * _image.channels;
+    float *row = (float*)malloc(stride * sizeof(float));
+    float *low = &_image.data[0];
+    float *high = &_image.data[(_image.height - 1) * stride];
+    for (; low < high; low += stride, high -= stride) {
+        std::memcpy(row, low, stride * sizeof(float));
+        std::memcpy(low, high, stride * sizeof(float));
+        std::memcpy(high, row, stride * sizeof(float));
     }
-
-    distance += glm::distance(coordCurr, coordNext);
-
-    // Process last point in line with a cap
-    addPolyLineVertex(coordNext, normNext, {1.f, distance}, mesh, _width); // right corner
-    addPolyLineVertex(coordNext, -normNext, {0.f, distance}, mesh, _width); // left corner
-    indexPairs(1, mesh);
-    if (endCap)
-        addCap(coordNext, normNext, cornersOnCap, false, mesh, _width);
-
-    return mesh;
+    free(row);
 }
 
-template Mesh Convert::toSpline<glm::vec2>(const std::vector<glm::vec2>&, float, JoinType, CapType, float);
-template Mesh Convert::toSpline<glm::vec3>(const std::vector<glm::vec3>&, float, JoinType, CapType, float);
+glm::vec2 getRange(const Image& _image) {
+    float min =  10000.0f;
+    float max = -10000.0f;
 
-Mesh toTube(const Polyline& _polyline, const float* _array1D, int _n, int _resolution, bool _caps) {
-    Mesh mesh;
-    size_t offset = 0;
-
-
-    if ( !_polyline.isClosed() && _caps) {
-        mesh.addVertex(_polyline.getVertices()[0]);
-        mesh.addNormal( glm::normalize( _polyline.getVertices()[1] - _polyline.getVertices()[2] ) );
-        mesh.addTexCoord( glm::vec2(0.5, 0.0));
-        offset = 1;
+    int total = _image.width * _image.height * _image.channels;
+    for (int i = 0; i < total; i++) {
+        float val = _image.data[i];
+        if (min > val) min = val;
+        if (max < val) max = val;
     }
-    
-    for (size_t i = 0; i < _polyline.size(); i++) {
-        const glm::vec3& p0 = _polyline[i];
-        const glm::vec3& n0 = _polyline.getNormalAtIndex(i);
-        const glm::vec3& t0 = _polyline.getTangentAtIndex(i);
-        float r0 = _array1D[i%_n];
 
-        glm::vec3 v0;
-        for(int j = 0; j < _resolution; j++) {
-            float p = j / (float)_resolution;
-            float a = p * TAU;
-            v0 = glm::rotate(n0, a, t0);
+    return glm::vec2(min, max);
+} 
+
+void remap(Image& _image, float _in_min, float _int_max, float _out_min, float _out_max, bool _clamp) {
+    int total = _image.width * _image.height * _image.channels;
+    for (int i = 0; i < total; i++)
+        _image.data[i] = remap(_image.data[i], _in_min, _int_max, _out_min, _out_max, _clamp);
+} 
+
+void threshold(Image& _image, float _threshold) {
+    int total = _image.width * _image.height * _image.channels;
+    for (int i = 0; i < total; i++)
+        _image.data[i] = (_image.data[i] >= _threshold)? 1.0f : 0.0f;
+}
+
+/*
+Copyright (C) 2006 Pedro Felzenszwalb ( https://cs.brown.edu/people/pfelzens/dt/ )
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307 USA
+*/
+
+/* dt of 1d function using squared distance */
+static float *dt(float *f, int n) {
+    float *d = new float[n];
+    int *v = new int[n];
+    float *z = new float[n+1];
+    int k = 0;
+    v[0] = 0;
+    z[0] = -INF;
+    z[1] = +INF;
+    for (int q = 1; q <= n-1; q++) {
+        float s  = ((f[q]+square(q))-(f[v[k]]+square(v[k])))/(2*q-2*v[k]);
+        while (s <= z[k]) {
+            k--;
+            s  = ((f[q]+square(q))-(f[v[k]]+square(v[k])))/(2*q-2*v[k]);
+        }
+        k++;
+        v[k] = q;
+        z[k] = s;
+        z[k+1] = +INF;
+    }
+
+    k = 0;
+    for (int q = 0; q <= n-1; q++) {
+        while (z[k+1] < q)
+        k++;
+        d[q] = square(q-v[k]) + f[v[k]];
+    }
+
+    delete [] v;
+    delete [] z;
+    return d;
+}
+
+/* dt of 2d function using squared distance */
+void sdf(Image& _image) {
+    if (_image.channels > 1) {
+        std::cout << "We need a one channel image to compute an SDF" << std::endl;
+        return;
+    }
+
+    int width = _image.width;
+    int height = _image.height;
+    float *f = new float[std::max(width, height)];
+
+    // transform along columns
+    for (int x = 0; x < width; x++) {
+        for (int y = 0; y < height; y++)
+            f[y] = _image.data[y * width + x];
+        
+        float *d = dt(f, height);
+        for (int y = 0; y < height; y++) 
+            _image.data[y * width + x] = d[y];
+
+        delete [] d;
+    }
+
+    // transform along rows
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++)
+            f[x] = _image.data[y * width + x];
+        
+        float *d = dt(f, width);
+        for (int x = 0; x < width; x++)
+            _image.data[y * width + x] = d[x];
             
-            mesh.addTexCoord( glm::vec2(p, i/(_polyline.size()-1.0)) );
-            mesh.addNormal(v0);
-            
-            v0 *= r0;
-            v0 += p0;
-            
-            mesh.addVertex(v0);
+        delete [] d;
+    }
+
+    sqrt(_image);
+    autolevel(_image);
+
+    delete f;
+}
+
+
+/* dt of binary image using squared distance */
+Image toSdf(const Image& _image, float _on) {
+    int width = _image.getWidth();
+    int height = _image.getHeight();
+    Image out = Image(width, height, 1);
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            if ( _image.getValue( _image.getIndex(x, y) ) == _on)
+	            out.setValue( out.getIndex(x, y), 0.0f);
+            else
+                out.setValue( out.getIndex(x, y), INF);
         }
     }
 
-    //--------------------------------------------------------------------------
-    if ( !_polyline.isClosed() && _caps) {
-        for (size_t i = 0; i < _resolution-1; i++)
-            mesh.addTriangleIndices( 0, i + 2, i + 1);
-        mesh.addTriangleIndices( 0, 1, _resolution);
-    }
-    
-    size_t numOfTubeSections = _polyline.size();
-    for (size_t y = 0; y < numOfTubeSections - 1; y++) {
+    sdf(out);
+    return out;
+}
 
-        // 2 - 3
-        // | \ |
-        // 0 - 1
-
-        for(int x = 0; x < _resolution-1; x++) {
-            mesh.addTriangleIndices(y * _resolution + x + offset,
-                                    y * _resolution + x+1 + offset,
-                                    (y+1) * _resolution + x + offset);
-            mesh.addTriangleIndices(y*_resolution + x+1 + offset,
-                                    (y+1) * _resolution + x+1 + offset,
-                                    (y+1)*_resolution + x + offset);
+Image toNormalMap(const Image& _heightmap, float _zScale) {
+    const int w = _heightmap.getWidth() - 1;
+    const int h = _heightmap.getHeight() - 1;
+    std::vector<glm::vec3> result(w * h);
+    int i = 0;
+    for (int y0 = 0; y0 < h; y0++) {
+        const int y1 = y0 + 1;
+        const float yc = y0 + 0.5f;
+        for (int x0 = 0; x0 < w; x0++) {
+            const int x1 = x0 + 1;
+            const float xc = x0 + 0.5f;
+            const float z00 = _heightmap.getValue( _heightmap.getIndex(x0, y0) ) * -_zScale;
+            const float z01 = _heightmap.getValue( _heightmap.getIndex(x0, y1) ) * -_zScale;
+            const float z10 = _heightmap.getValue( _heightmap.getIndex(x1, y0) ) * -_zScale;
+            const float z11 = _heightmap.getValue( _heightmap.getIndex(x1, y1) ) * -_zScale;
+            const float zc = (z00 + z01 + z10 + z11) / 4.f;
+            const glm::vec3 p00(x0, y0, z00);
+            const glm::vec3 p01(x0, y1, z01);
+            const glm::vec3 p10(x1, y0, z10);
+            const glm::vec3 p11(x1, y1, z11);
+            const glm::vec3 pc(xc, yc, zc);
+            const glm::vec3 n0 = glm::triangleNormal(pc, p00, p10);
+            const glm::vec3 n1 = glm::triangleNormal(pc, p10, p11);
+            const glm::vec3 n2 = glm::triangleNormal(pc, p11, p01);
+            const glm::vec3 n3 = glm::triangleNormal(pc, p01, p00);
+            result[i] = glm::normalize(n0 + n1 + n2 + n3) * 0.5f + 0.5f;
+            i++;
         }
-
-        mesh.addTriangleIndices(y * _resolution + (_resolution-1) + offset,
-                                y * _resolution + offset,
-                                (y+1) * _resolution + (_resolution-1) + offset);
-        mesh.addTriangleIndices(y * _resolution + offset,
-                                (y+1) * _resolution + offset,
-                                (y+1)*_resolution + (_resolution-1) + offset);
     }
 
-    if ( !_polyline.isClosed() && _caps) {
-        size_t vertsN = mesh.getVerticesTotal();
-        mesh.addVertex(_polyline.getVertices()[_polyline.size()-1]);
-        mesh.addTexCoord( glm::vec2(.5, 1.0) );
-        mesh.addNormal( glm::normalize( _polyline.getVertices()[_polyline.size()-2] - _polyline.getVertices()[_polyline.size()-1] ) );
-
-        for (size_t i = 0; i < _resolution; i++)
-            mesh.addTriangleIndices( vertsN, vertsN - i - 2, vertsN - i - 1);
-
-        mesh.addTriangleIndices( vertsN, vertsN - 1 , vertsN - _resolution);
-    }
-
-    return mesh;
+    Image out = Image(w, h, 3);
+    out.setColors(&result[0].r, result.size(), 3);
+    return out;
 }
 
-std::vector<Line>   toLines(const BoundingBox& _bbox) {
-    std::vector<Line> lines;
+Image toLuma(const Image& _image) {
+    int width = _image.getWidth();
+    int height = _image.getHeight();
 
-    //    D ---- A
-    // C ---- B  |
-    // |  |   |  |
-    // |  I --|- F
-    // H .... G
-
-    glm::vec3 A = _bbox.max;
-    glm::vec3 H = _bbox.min;
-
-    glm::vec3 B = glm::vec3(A.x, A.y, H.z);
-    glm::vec3 C = glm::vec3(H.x, A.y, H.z);
-    glm::vec3 D = glm::vec3(H.x, A.y, A.z);
-
-    glm::vec3 F = glm::vec3(A.x, H.y, A.z);
-    glm::vec3 G = glm::vec3(A.x, H.y, H.z);
-    glm::vec3 I = glm::vec3(H.x, H.y, A.z);
-
-    lines.push_back( Line(A, F) );
-    lines.push_back( Line(A, B) );
-    lines.push_back( Line(A, D) );
-
-    lines.push_back( Line(B, G) );
-    lines.push_back( Line(B, C) );
-
-    lines.push_back( Line(C, H) );
-    lines.push_back( Line(C, D) );
-    
-    lines.push_back( Line(D, I) );
-
-    lines.push_back( Line(F, I) );
-    lines.push_back( Line(F, G) );
-
-    lines.push_back( Line(G, H) );
-    lines.push_back( Line(H, I) );
-
-    return lines;
-}
-
-std::vector<Line>   toLines(const std::vector<Triangle>& _triangles) {
-    std::vector<Line> lines;
-    
-    for (size_t i = 0; i < _triangles.size(); i++) {
-        Line l1 = Line(_triangles[i][0], _triangles[i][1]);
-        Line l2 = Line(_triangles[i][1], _triangles[i][2]);
-        Line l3 = Line(_triangles[i][2], _triangles[i][0]);
-
-        if (_triangles[i].haveColors()) {
-            l1.setColor(0, _triangles[i].getColor(0));
-            l1.setColor(1, _triangles[i].getColor(1));
-            l2.setColor(0, _triangles[i].getColor(1));
-            l2.setColor(1, _triangles[i].getColor(2));
-            l3.setColor(0, _triangles[i].getColor(2));
-            l3.setColor(1, _triangles[i].getColor(0));
+    Image out = Image(width, height, 1);
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            glm::vec4 c = _image.getColor( _image.getIndex(x, y) );
+            float value = glm::dot(glm::vec3(c.x, c.y, c.z), glm::vec3(0.2126f, 0.7152f, 0.0722f));
+            out.setValue( out.getIndex(x, y), value);
         }
-        lines.push_back(l1);
-        lines.push_back(l2);
-        lines.push_back(l3);
     }
 
-    // TODO:
-    //      - REMOVE DUPLICATES
-    //
-    return lines;
+    return out;
 }
 
-Mesh toMeshEdges(const BoundingBox& _bbox) {
-    std::vector<Line> lines = toLines(_bbox);
+Image   denoise(const Image& _color, const Image& _normal, const Image& _albedo, bool _hdr) {
+#ifndef OPENIMAGEDENOISE_SUPPORT
+    std::cout << "Hilma was compiled without support for OpenImageDenoise. Please install it on your system and recompile hilma" << std::endl;
+    return _color;
 
-    Mesh mesh;
-    mesh.setEdgeType( LINES );
-    mesh.addEdges(&lines[0], lines.size());
-    return mesh;
+#else
+    if (_color.getChannels() != 3) {
+        std::cout << "input image need to have 3 channels (RGB)" << std::endl;
+        return _color;
+    }
+
+    Image out = Image(_color);
+
+    // Create an Intel Open Image Denoise device
+    oidn::DeviceRef device = oidn::newDevice();
+    device.commit();
+
+    // Create a denoising filter
+    oidn::FilterRef filter = device.newFilter("RT"); // generic ray tracing filter
+    filter.setImage("color", (void*)&_color.data[0],  oidn::Format::Float3, _color.getWidth(), _color.getHeight());
+    filter.setImage("albedo", (void*)&_albedo.data[0], oidn::Format::Float3, _albedo.getWidth(), _albedo.getHeight()); // optional
+    filter.setImage("normal", (void*)&_normal.data[0], oidn::Format::Float3, _normal.getWidth(), _normal.getHeight()); // optional
+    filter.setImage("output", (void*)&out.data[0], oidn::Format::Float3, out.getWidth(), out.getHeight());
+    filter.set("hdr", _hdr); // image is HDR
+    filter.commit();
+
+    // Filter the image
+    filter.execute();
+
+    // Check for errors
+    const char* errorMessage;
+    if (device.getError(errorMessage) != oidn::Error::None)
+    std::cout << "Error: " << errorMessage << std::endl;
+
+    return out;
+#endif
+}
+
+glm::vec3 hue2rgb(float _hue) {
+    float r = saturate( abs( fmod( _hue * 6.f, 6.f) - 3.f) - 1.f );
+    float g = saturate( abs( fmod( _hue * 6.f + 4.f, 6.f) - 3.f) - 1.f );
+    float b = saturate( abs( fmod( _hue * 6.f + 2.f, 6.f) - 3.f) - 1.f );
+
+    #ifdef HSV2RGB_SMOOTH
+    r = r*r*(3. - 2. * r);
+    g = g*g*(3. - 2. * g);
+    b = b*b*(3. - 2. * b);
+    #endif
+
+    return glm::vec3(r, g, b);
+}
+
+Image toHueRainbow(const Image& _in) {
+    if (_in.getChannels() > 1) {
+        std::cout << "The input image have more than one channel" << std::endl;
+        return _in;
+    }
+
+    int width = _in.getWidth();
+    int height = _in.getHeight();
+    Image out = Image(width, height, 3);
+    for (int y = 0; y < height; y++)
+        for(int x = 0; x < width; x++)
+            out.setColor( out.getIndex(x,y), hue2rgb( _in.getValue(_in.getIndex(x,y)) ) );
+
+    return out;
 }
 
 
@@ -1156,6 +953,5 @@ Mesh toTerrain( const Image& _image,
 
     return mesh;
 }
-
 
 }

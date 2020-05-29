@@ -6,7 +6,7 @@
 // #include <iterator>
 
 #define TINYPLY_IMPLEMENTATION
-#include "hilma/io/tinyply.h"
+#include "../deps/tinyply.h"
 
 #include "hilma/io/ply.h"
 #include "hilma/text.h"

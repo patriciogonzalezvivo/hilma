@@ -6,11 +6,9 @@
 #include <functional>
 
 #include "hilma/types/Ray.h"
+#include "hilma/types/Mesh.h"
 #include "hilma/types/Image.h"
 #include "hilma/types/Camera.h"
-#include "hilma/types/Triangle.h"
-
-#include "hilma/ops/convert.h"
 
 namespace hilma {
 
@@ -36,7 +34,7 @@ class Hittable : public BoundingBox {
 public:
     // Hittable( const Mesh& _mesh, int _branches);
     Hittable( const std::vector<Line>& _lines, int _branches);
-    Hittable( const std::vector<Triangle>& _triangles, int _branches, bool _debug = false);
+    Hittable( const std::vector<Triangle>& _triangles, int _branches);
 
     virtual bool hit(const Ray& _ray, float _minDistance, float _maxDistance, HitRecord& _rec) const;
     virtual int  getTotalTriangles();

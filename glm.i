@@ -1,14 +1,14 @@
-// // minimal SWIG (http://www.swig.org) interface wrapper for the glm library
-// // defines only the types used in openFrameworks: vec2, vec3, mat3, mat4, quat
-// // 2018 Dan Wilcox <danomatika@gmail.com>
-// // some parts adapted from https://github.com/IndiumGames/swig-wrapper-glm
+// minimal SWIG (http://www.swig.org) interface wrapper for the glm library
+// defines only the types used in openFrameworks: vec2, vec3, mat3, mat4, quat
+// 2018 Dan Wilcox <danomatika@gmail.com>
+// some parts adapted from https://github.com/IndiumGames/swig-wrapper-glm
 
-// // main MODULE
-// %module glm
-// %{
+// main MODULE
+%module glm
+%{
 // #include <stdexcept>
-// #include <string>
-// #include <sstream>
+#include <string>
+#include <sstream>
 
 // // these included in math/ofVectorMath.h
 // // we declare some things manually, so some includes are commented out
@@ -45,12 +45,12 @@
 // #include <glm/ext/matrix_projection.hpp>
 // #include <glm/gtx/compatibility.hpp>
 // #include <glm/gtx/fast_square_root.hpp>
-// %}
+%}
 
 // // ----- C++ -----
 
 // %include <std_except.i>
-// %include <std_string.i>
+%include <std_string.i>
 
 // expanded primitives
 %typedef unsigned int std::size_t;

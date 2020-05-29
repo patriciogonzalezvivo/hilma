@@ -2,7 +2,6 @@
 
 #include "hilma/types/Mesh.h"
 #include "hilma/types/Polyline.h"
-#include "hilma/types/Image.h"
 
 namespace hilma {
 
@@ -66,15 +65,6 @@ inline Mesh toTube(const Polyline& _polyline, const float _width, int _resolutio
 }
 
 std::vector<Line>   toLines(const std::vector<Triangle>& _triangles);
-
 std::vector<Line>   toLines(const BoundingBox& _bbox);
-Mesh                toMeshEdges(const BoundingBox& _bbox);
-
-Mesh                toTerrain(  const Image& _image,
-                                const float _zScale,
-                                const float _maxError = 0.001f, 
-                                const float _baseHeight = 0.0f,
-                                const int _maxTriangles = 0, 
-                                const int _maxPoints = 0 );
 
 }

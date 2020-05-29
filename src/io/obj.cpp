@@ -9,7 +9,7 @@
 #include <cassert>
 
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "hilma/io/tiny_obj_loader.h"
+#include "../deps/tiny_obj_loader.h"
 
 #ifndef HILMA_LINE_MAX
 #define HILMA_LINE_MAX 2048

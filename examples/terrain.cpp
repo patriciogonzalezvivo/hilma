@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "hilma/types/Image.h"
-#include "hilma/ops/convert.h"
+#include "hilma/ops/convert_image.h"
 #include "hilma/ops/transform.h"
 #include "hilma/io/png.h"
 #include "hilma/io/ply.h"

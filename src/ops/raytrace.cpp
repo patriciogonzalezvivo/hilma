@@ -84,7 +84,7 @@ Hittable::Hittable( const std::vector<Line>& _lines, int _branches) {
     }
 }
 
-Hittable::Hittable( const std::vector<Triangle>& _triangles, int _branches, bool _debug) {
+Hittable::Hittable( const std::vector<Triangle>& _triangles, int _branches) {
     for (size_t i = 0; i < _triangles.size(); i++) {
         expand(_triangles[i][0]);
         expand(_triangles[i][1]);
@@ -111,15 +111,12 @@ Hittable::Hittable( const std::vector<Triangle>& _triangles, int _branches, bool
         std::sort(tris.begin(), tris.end(), comparator);
 
         std::size_t const half_size = tris.size() / 2;
-        left = std::make_shared<Hittable>(std::vector<Triangle>(tris.begin(), tris.begin() + half_size), _branches-1, _debug);
-        right = std::make_shared<Hittable>(std::vector<Triangle>(tris.begin() + half_size, tris.end()), _branches-1, _debug);
+        left = std::make_shared<Hittable>(std::vector<Triangle>(tris.begin(), tris.begin() + half_size), _branches-1);
+        right = std::make_shared<Hittable>(std::vector<Triangle>(tris.begin() + half_size, tris.end()), _branches-1);
     }
     else {
         leaf = true;
         triangles = _triangles;
-
-        if (_debug)
-            lines = toLines(*this);
     }
 }
 
