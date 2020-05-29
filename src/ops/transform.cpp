@@ -129,5 +129,4 @@ void rotate(Mesh& _mesh, float _rad, float _x, float _y, float _z ) {
     if (_mesh.haveNormals()) rotate(_mesh.normals, _rad, _x, _y, _z);
 }
 
-
 }

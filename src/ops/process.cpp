@@ -200,19 +200,19 @@ void sdf(Image& _image) {
 Image toSdf(const Image& _image, float _on) {
     int width = _image.getWidth();
     int height = _image.getHeight();
-    Image rta = Image(width, height, 1);
+    Image out = Image(width, height, 1);
 
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             if ( _image.getValue( _image.getIndex(x, y) ) == _on)
-	            rta.setValue( rta.getIndex(x, y), 0.0f);
+	            out.setValue( out.getIndex(x, y), 0.0f);
             else
-                rta.setValue( rta.getIndex(x, y), INF);
+                out.setValue( out.getIndex(x, y), INF);
         }
     }
 
-    sdf(rta);
-    return rta;
+    sdf(out);
+    return out;
 }
 
 Image toNormalMap(const Image& _heightmap, float _zScale) {
@@ -245,28 +245,28 @@ Image toNormalMap(const Image& _heightmap, float _zScale) {
         }
     }
 
-    Image rta = Image(w, h, 3);
-    rta.setColors(&result[0].r, result.size(), 3);
-    return rta;
+    Image out = Image(w, h, 3);
+    out.setColors(&result[0].r, result.size(), 3);
+    return out;
 }
 
 Image toLuma(const Image& _image) {
     int width = _image.getWidth();
     int height = _image.getHeight();
 
-    Image rta = Image(width, height, 1);
+    Image out = Image(width, height, 1);
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++) {
             glm::vec4 c = _image.getColor( _image.getIndex(x, y) );
             float value = glm::dot(glm::vec3(c.x, c.y, c.z), glm::vec3(0.2126f, 0.7152f, 0.0722f));
-            rta.setValue( rta.getIndex(x, y), value);
+            out.setValue( out.getIndex(x, y), value);
         }
     }
 
-    return rta;
+    return out;
 }
 
-Image   denoise(const Image& _color, Image& _normal, const Image& _albedo, bool _hdr) {
+Image   denoise(const Image& _color, const Image& _normal, const Image& _albedo, bool _hdr) {
 #ifndef OPENIMAGEDENOISE_SUPPORT
     std::cout << "Hilma was compiled without support for OpenImageDenoise. Please install it on your system and recompile hilma" << std::endl;
     return _color;
@@ -302,6 +302,36 @@ Image   denoise(const Image& _color, Image& _normal, const Image& _albedo, bool 
 
     return out;
 #endif
+}
+
+glm::vec3 hue2rgb(float _hue) {
+    float r = saturate( abs( fmod( _hue * 6.f, 6.f) - 3.f) - 1.f );
+    float g = saturate( abs( fmod( _hue * 6.f + 4.f, 6.f) - 3.f) - 1.f );
+    float b = saturate( abs( fmod( _hue * 6.f + 2.f, 6.f) - 3.f) - 1.f );
+
+    #ifdef HSV2RGB_SMOOTH
+    r = r*r*(3. - 2. * r);
+    g = g*g*(3. - 2. * g);
+    b = b*b*(3. - 2. * b);
+    #endif
+
+    return glm::vec3(r, g, b);
+}
+
+Image toHueRainbow(const Image& _in) {
+    if (_in.getChannels() > 1) {
+        std::cout << "The input image have more than one channel" << std::endl;
+        return _in;
+    }
+
+    int width = _in.getWidth();
+    int height = _in.getHeight();
+    Image out = Image(width, height, 3);
+    for (int y = 0; y < height; y++)
+        for(int x = 0; x < width; x++)
+            out.setColor( out.getIndex(x,y), hue2rgb( _in.getValue(_in.getIndex(x,y)) ) );
+
+    return out;
 }
 
 }

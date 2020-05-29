@@ -36,26 +36,29 @@ struct IntersectionData {
 
 
 // Ray
+float               distance(const glm::vec3& _point, const Plane& _plane);
 IntersectionData    intersection(const Ray& _ray, const Plane& _plane);
 
 IntersectionData    intersection(const Ray& _ray, const BoundingBox& _bbox);
 bool                intersection(const Ray& _ray, const BoundingBox& _bbox, float& _tmin, float& _tmax);
 
+float               distance(const glm::vec3& _point, const Triangle& _tri, glm::vec3& _closesPoint);
 IntersectionData    intersection(const Ray& _ray, const Triangle& _triangle);
 bool                intersection(const Ray& _ray, const Triangle& _triangle, float& _t, float& _u, float& _v);
 
 // Line
+float               distance(const glm::vec3& _point, const Line& _line, glm::vec3& _closes_point);
+IntersectionData    intersection(const glm::vec3& _point, const Line& _line);
+
 IntersectionData    intersection(const Line& _line, const Plane& _plane);
 
 IntersectionData    intersection(const Line& _line1, const Line& _line2);
 bool                intersection(const Line& _line1, const Line& _line2, glm::vec3& _p );
 bool                intersection(const Line& _line1, const Line& _line2, glm::vec3& _p, float _threshold );
 
-IntersectionData    intersection(const glm::vec3& _point, const Line& _line);
-
 // Plane
-IntersectionData intersection(const Plane& _plane1, const Plane& _plane2);
-IntersectionData intersection(const Plane& _plane, const Triangle& _triangle);
+IntersectionData    intersection(const Plane& _plane1, const Plane& _plane2);
+IntersectionData    intersection(const Plane& _plane, const Triangle& _triangle);
 
 #ifdef DEBUG_INTERSECTIONS
 uint64_t            getTotalRayBoundingBoxTests();

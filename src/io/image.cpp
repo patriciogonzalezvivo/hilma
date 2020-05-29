@@ -106,7 +106,7 @@ bool savePng(const std::string& _filename, Image& _image) {
     int total = _image.width * _image.height * _image.channels;
     unsigned char* pixels = new unsigned char[total];
     for (int i = 0; i < total; i++)
-        pixels[i] = static_cast<char>(256 * clamp(_image.data[i], 0.0, 0.999));
+        pixels[i] = static_cast<char>(256 * clamp(_image.data[i], 0.0f, 0.999f));
     savePng(_filename, pixels, _image.width, _image.height, _image.channels);
     delete [] pixels;
 

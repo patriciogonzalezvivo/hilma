@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
     // IMAGE
     const float aspect_ratio = 16.0f / 9.0f;
     const int image_width = 1024;
-    const int samples = 100;
+    const int samples = 50;
     const int maxDepth = 1;
     Image image = Image(image_width, static_cast<int>(image_width / aspect_ratio), 3);
 

@@ -14,6 +14,7 @@ public:
     void set(const glm::vec3& _p0, const glm::vec3& _p1);
     
     float               getMagintude() const { return glm::length(direction); }
+    float               getMagintude2() const { return glm::dot(direction, direction); }
     glm::vec3           getCentroid() const { return (points[0] + points[1]) * 0.5f; }
     const glm::vec3&    getDireciton() const { return direction; }
 

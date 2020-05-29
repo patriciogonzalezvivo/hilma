@@ -133,19 +133,9 @@ inline float clamp(float value, float min, float max) {
 	return value < min ? min : value > max ? max : value;
 }
 
-inline glm::vec3 getScaled(const glm::vec3 &_vec, float _length) {
-    float l = (float) std::sqrt(_vec.x*_vec.x + _vec.y*_vec.y + _vec.z*_vec.z);
-    if( l > 0 )
-        return glm::vec3( (_vec.x/l)*_length, (_vec.y/l)*_length, (_vec.z/l)*_length );
-    else
-        return glm::vec3();
+inline float saturate(float value) { 
+    return std::fmax (0.0f, std::fmin (1.0f, value)); 
 }
-
-// inline int signValue(float _n) {
-//     if( _n > 0 ) return 1;
-//     else if(_n < 0) return -1;
-//     else return 0;
-// }
 
 template <class T>
 inline int sign(const T &x) { return (x >= 0 ? 1 : -1); };

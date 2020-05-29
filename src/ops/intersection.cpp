@@ -216,9 +216,7 @@ IntersectionData intersection(const Ray& _ray, const Triangle& _triangle) {
 
 }
 
-
-
-float PointPlaneDistance(const glm::vec3& _point, const Plane& _plane) {
+float distance(const glm::vec3& _point, const Plane& _plane) {
     return glm::dot(_plane.getNormal(), _point - _plane.getOrigin());
 }
 
@@ -227,8 +225,8 @@ float PointPlaneDistance(const glm::vec3& _point, const Plane& _plane) {
 IntersectionData intersection(const Line& _line, const Plane& _plane) {
     IntersectionData idata;
     
-    float dist1 = PointPlaneDistance(_line[0], _plane);
-    float dist2 = PointPlaneDistance(_line[1], _plane);
+    float dist1 = distance(_line[0], _plane);
+    float dist2 = distance(_line[1], _plane);
     int pos1 = sign(dist1);
     int pos2 = sign(dist2);
     
@@ -400,7 +398,22 @@ IntersectionData intersection(const Line& _line1, const Line& _line2) {
     return idata;
 }
 
+float distance(const glm::vec3& _point, const Line& _line, glm::vec3& _closes_point) {
+   glm::vec3 dx = _line.getDireciton();
+   float m2 = _line.getMagintude2();
 
+   // find parameter value of closest point on segment
+   float s12 = glm::dot(_line[1]-_point, dx) / m2;
+
+   if (s12 < 0)
+      s12 = 0;
+   else if(s12 > 1)
+      s12 = 1;
+   
+   // and find the distance
+   _closes_point = s12 * _line[0] + (1.0f - s12) * _line[1];
+   return glm::distance(_point, s12 * _line[0] + (1.0f - s12) * _line[1]);
+}
 
 IntersectionData intersection(const glm::vec3& _point, const Line& _line) {
     float u;
@@ -446,10 +459,10 @@ IntersectionData intersection(const Plane& _plane1, const Plane& _plane2) {
         
         // Thank you Toxi!
         float offDiagonal = glm::dot(n1,n2);
-        double det = 1.0 / (1 - offDiagonal * offDiagonal);
-        double a = (d1 - d2 * offDiagonal) * det;
-        double b = (d2 - d1 * offDiagonal) * det;
-        glm::vec3 anchor = getScaled(n1,(float)a) + getScaled(n2,(float)b);
+        float det = 1.0 / (1 - offDiagonal * offDiagonal);
+        float a = (d1 - d2 * offDiagonal) * det;
+        float b = (d2 - d1 * offDiagonal) * det;
+        glm::vec3 anchor = glm::normalize(n1) * a + glm::normalize(n2) * b;
         
         idata.position = anchor;
         idata.direction = dir;
@@ -480,9 +493,9 @@ IntersectionData intersection(const Plane& _plane, const Triangle& _triangle) {
     glm::vec3 tp1 = _triangle[1];
     glm::vec3 tp2 = _triangle[2];
     
-    float dist1 = PointPlaneDistance(tp0, _plane);
-    float dist2 = PointPlaneDistance(tp1, _plane);
-    float dist3 = PointPlaneDistance(tp2, _plane);
+    float dist1 = distance(tp0, _plane);
+    float dist2 = distance(tp1, _plane);
+    float dist3 = distance(tp2, _plane);
     
     int pos1 = sign(dist1);
     int pos2 = sign(dist2);
@@ -526,6 +539,82 @@ IntersectionData intersection(const Plane& _plane, const Triangle& _triangle) {
     }
     
     return idata;
+}
+
+float distance(const glm::vec3& _point, const Triangle& _tri, glm::vec3& _closesPoint) {
+
+    // first find barycentric coordinates of closest point on infinite plane
+    glm::vec3 A(_tri[0] - _tri[2]);
+    glm::vec3 B(_tri[1] - _tri[2]);
+    glm::vec3 C(_point - _tri[2]);
+
+    float m13 = glm::dot(A, A);
+    float m23 = glm::dot(B, B);
+    float d = glm::dot(A, B);
+    float invdet = 1.f/std::fmax(m13 * m23 - d*d, 1e-30f);
+    float a = glm::dot(A, C);
+    float b = glm::dot(B, C);
+    // the barycentric coordinates themselves
+    float w23 = invdet * (m23 * a - d * b);
+    float w31 = invdet * (m13 * b - d * a);
+    float w12 = 1.0f - w23 - w31;
+
+    if ( w23 >= 0.0f && w31 >= 0.0f && w12 >= 0.0f){ // if we're inside the triangle
+        _closesPoint = w23 * _tri[0] + w31 * _tri[1] + w12 * _tri[2];
+        return glm::distance(_point, w23 * _tri[0] + w31 * _tri[1] + w12 * _tri[2]);
+    } 
+    else { // we have to clamp to one of the edges
+
+        Line L0 = Line(_tri[0], _tri[1]);
+        Line L1 = Line(_tri[0], _tri[2]);
+        Line L2 = Line(_tri[1], _tri[2]);
+
+        glm::vec3 r1(0);
+        glm::vec3 r2(0);
+
+        if (w23 > 0.0f) { // this rules out edge 2-3 for us
+            //return min(distance(_point,_tri[0],_tri[1]), distance(_point,_tri[0], _tri[2],r));
+            float d1 = distance(_point, L0, r1);
+            float d2 = distance(_point, L1, r2);
+
+            if (d1 < d2) {
+                _closesPoint = r1;
+                return d1;
+            }
+            else {
+                _closesPoint = r2;
+                return d2;
+            }
+        } 
+        else if(w31 > 0.0f) { // this rules out edge 1-3
+            //return min(distance(_point,_tri[0],_tri[1]), distance(_point,_tri[1], _tri[2]));
+            float d1 = distance(_point, L0, r1);
+            float d2 = distance(_point, L2, r2);
+
+            if (d1 < d2) {
+                _closesPoint = r1;
+                return d1;
+            }
+            else{
+                _closesPoint = r2;
+                return d2;
+            }
+        }
+        else { // w12 must be >0, ruling out edge 1-2
+            //return min(distance(_point,_tri[0], _tri[2]), distance(_point,_tri[1], _tri[2]));
+            float d1 = distance(_point, L1, r1);
+            float d2 = distance(_point, L2, r2);
+
+            if (d1 < d2) {
+                _closesPoint = r1;
+                return d1;
+            }
+            else{
+                _closesPoint = r2;
+                return d2;
+            }
+        }
+    }
 }
 
 }

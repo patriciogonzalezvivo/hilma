@@ -63,7 +63,7 @@ private:
     friend void threshold(Image&, float);
     friend glm::vec2 getRange(const Image&);
     friend void remap(Image&, float, float, float, float, bool);
-    friend Image denoise(const Image&, Image&, const Image&, bool);
+    friend Image denoise(const Image&, const Image&, const Image&, bool);
 };
 
 typedef std::shared_ptr<Image> ImagePtr;

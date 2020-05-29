@@ -23,7 +23,7 @@ add_library(hilma ${ROOT_SOURCE} ${IO_SOURCE} ${OPS_SOURCE} ${TYPES_SOURCE})
 
 if( OpenImageDenoise_FOUND )
   message(STATUS "Compiling with OpenImageDenoise support")
-  add_definitions(-DOPENIMAGEDENOISE_SUPPORT)
+  target_compile_definitions(hilma PUBLIC DOPENIMAGEDENOISE_SUPPORT)
   target_link_libraries(hilma OpenImageDenoise)
 endif()
 
