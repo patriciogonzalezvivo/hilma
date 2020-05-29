@@ -1,7 +1,5 @@
 #include "hilma/ops/compute.h"
 
-#include "hilma/text.h"
-
 #include <algorithm>
 #include <map>
 
@@ -261,86 +259,19 @@ BoundingBox getBoundingBox(const std::vector<glm::vec3>& _points ) {
     return bbox;
 }
 
-Mesh getSmoothNormals(const Mesh& _mesh, float _angle) {
-    Mesh rta;
+glm::vec2 getRange(const Image& _image) {
+    float min =  10000.0f;
+    float max = -10000.0f;
 
-    std::vector<Triangle> triangles = _mesh.getTriangles();
-    std::vector<glm::vec3> verts;
-    for (size_t i = 0; i < triangles.size(); i++)
-        for (size_t j = 0; j < 3; j++) 
-            verts.push_back( triangles[i][j] );
-
-    std::map<int, int> removeIds;
-    float epsilon = .01f;
-    for (size_t i = 0; i < verts.size()-1; i++) {
-        for (size_t j = i+1; j < verts.size(); j++) {
-            if (i != j) {
-                const glm::vec3& v1 = verts[i];
-                const glm::vec3& v2 = verts[j];
-                if ( glm::distance(v1, v2) <= epsilon ) {
-                    // average the location //
-                    verts[i] = (v1+v2)/2.f;
-                    verts[j] = verts[i];
-                    removeIds[j] = 1;
-                }
-            }
-        }
+    int total = _image.width * _image.height * _image.channels;
+    for (int i = 0; i < total; i++) {
+        float val = _image.data[i];
+        if (min > val) min = val;
+        if (max < val) max = val;
     }
 
-    std::map<std::string, std::vector<int> > vertHash;
-    std::string xStr, yStr, zStr;
-
-    for (size_t i = 0; i < verts.size(); i++ ) {
-        xStr = "x" + toString(verts[i].x == -0 ? 0: verts[i].x);
-        yStr = "y" + toString(verts[i].y == -0 ? 0: verts[i].y);
-        zStr = "z" + toString(verts[i].z == -0 ? 0: verts[i].z);
-        std::string vstring = xStr+yStr+zStr;
-
-        if (vertHash.find(vstring) == vertHash.end())
-            for (size_t j = 0; j < triangles.size(); j++) 
-                for (size_t k = 0; k < 3; k++) 
-                    if (verts[i].x == triangles[j][k].x)
-                        if (verts[i].y == triangles[j][k].y) 
-                            if (verts[i].z == triangles[j][k].z)
-                                vertHash[vstring].push_back( j );
-    }
-
-    glm::vec3 vert;
-    glm::vec3 normal;
-    float angleCos = cos(glm::radians(_angle));
-    float numNormals = 0.0f;
-
-    for (size_t j = 0; j < triangles.size(); j++) {
-        for (size_t k = 0; k < 3; k++) {
-            vert = triangles[j][k];
-            xStr = "x" + toString(vert.x==-0?0:vert.x);
-            yStr = "y" + toString(vert.y==-0?0:vert.y);
-            zStr = "z" + toString(vert.z==-0?0:vert.z);
-
-            std::string vstring = xStr+yStr+zStr;
-            numNormals=0;
-            normal = {0.f,0.f,0.f};
-            if (vertHash.find(vstring) != vertHash.end()) {
-                for (size_t i = 0; i < vertHash[vstring].size(); i++) {
-                    glm::vec3 f1 = triangles[j].getNormal();
-                    glm::vec3 f2 = triangles[vertHash[vstring][i]].getNormal();
-                    if (glm::dot(f1, f2) >= angleCos ) {
-                        normal += f2;
-                        numNormals+=1.f;
-                    }
-                }
-                //normal /= (float)vertHash[vstring].size();
-                normal /= numNormals;
-
-                triangles[j].setNormal(k, normal);
-            }
-        }
-    }
-
-    rta.addTriangles( triangles.data(), triangles.size() );
-
-    return rta;
-}
+    return glm::vec2(min, max);
+} 
 
 }
 

@@ -83,20 +83,6 @@ void flip(Image& _image) {
     free(row);
 }
 
-glm::vec2 getRange(const Image& _image) {
-    float min =  10000.0f;
-    float max = -10000.0f;
-
-    int total = _image.width * _image.height * _image.channels;
-    for (int i = 0; i < total; i++) {
-        float val = _image.data[i];
-        if (min > val) min = val;
-        if (max < val) max = val;
-    }
-
-    return glm::vec2(min, max);
-} 
-
 void remap(Image& _image, float _in_min, float _int_max, float _out_min, float _out_max, bool _clamp) {
     int total = _image.width * _image.height * _image.channels;
     for (int i = 0; i < total; i++)

@@ -5,6 +5,7 @@
 
 namespace hilma {
 
+// 2D
 void                    simplify(std::vector<glm::vec2>& _points, float _tolerance=0.3f);
 std::vector<glm::vec2>  getSimplify(const std::vector<glm::vec2>& _points, float _tolerance=0.3f);
 std::vector<glm::vec2>  getConvexHull(const std::vector<glm::vec2>& _points);
@@ -18,7 +19,7 @@ BoundingBox             getBoundingBox(const std::vector<glm::vec3>& _points);
 glm::vec2               getCentroid(const std::vector<glm::vec2>& _points);
 glm::vec3               getCentroid(const std::vector<glm::vec3>& _points);
 
-// 3D
-Mesh                    getSmoothNormals(const Mesh& _mesh, float _angle);
+// Image
+glm::vec2               getRange(const Image& _image);
 
 }

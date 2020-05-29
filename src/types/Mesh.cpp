@@ -2,6 +2,7 @@
 #include <map>
 
 #include "hilma/types/Mesh.h"
+#include "hilma/text.h"
 
 using namespace hilma;
 
@@ -35,7 +36,6 @@ void Mesh::clear() {
 
     // Edges data
     if (!edgeIndices.empty()) edgeIndices.clear();
-    // if (!edge_colors.empty()) edge_colors.clear();
 }
 
 void Mesh::append(const Mesh& _mesh) {
@@ -296,6 +296,85 @@ void Mesh::flatNormals() {
             if (indexCurr < colors.size()) addColor(colors[indexCurr]);
         }
     }
+}
+
+void Mesh::smoothNormals(float _angle) {
+
+    std::vector<Triangle> triangles = getTriangles();
+    std::vector<glm::vec3> verts;
+    for (size_t i = 0; i < triangles.size(); i++)
+        for (size_t j = 0; j < 3; j++) 
+            verts.push_back( triangles[i][j] );
+
+    std::map<int, int> removeIds;
+    float epsilon = .01f;
+    for (size_t i = 0; i < verts.size()-1; i++) {
+        for (size_t j = i+1; j < verts.size(); j++) {
+            if (i != j) {
+                const glm::vec3& v1 = verts[i];
+                const glm::vec3& v2 = verts[j];
+                if ( glm::distance(v1, v2) <= epsilon ) {
+                    // average the location //
+                    verts[i] = (v1+v2)/2.f;
+                    verts[j] = verts[i];
+                    removeIds[j] = 1;
+                }
+            }
+        }
+    }
+
+    std::map<std::string, std::vector<int> > vertHash;
+    std::string xStr, yStr, zStr;
+
+    for (size_t i = 0; i < verts.size(); i++ ) {
+        xStr = "x" + toString(verts[i].x == -0 ? 0: verts[i].x);
+        yStr = "y" + toString(verts[i].y == -0 ? 0: verts[i].y);
+        zStr = "z" + toString(verts[i].z == -0 ? 0: verts[i].z);
+        std::string vstring = xStr+yStr+zStr;
+
+        if (vertHash.find(vstring) == vertHash.end())
+            for (size_t j = 0; j < triangles.size(); j++) 
+                for (size_t k = 0; k < 3; k++) 
+                    if (verts[i].x == triangles[j][k].x)
+                        if (verts[i].y == triangles[j][k].y) 
+                            if (verts[i].z == triangles[j][k].z)
+                                vertHash[vstring].push_back( j );
+    }
+
+    glm::vec3 vert;
+    glm::vec3 normal;
+    float angleCos = cos(glm::radians(_angle));
+    float numNormals = 0.0f;
+
+    for (size_t j = 0; j < triangles.size(); j++) {
+        for (size_t k = 0; k < 3; k++) {
+            vert = triangles[j][k];
+            xStr = "x" + toString(vert.x==-0?0:vert.x);
+            yStr = "y" + toString(vert.y==-0?0:vert.y);
+            zStr = "z" + toString(vert.z==-0?0:vert.z);
+
+            std::string vstring = xStr+yStr+zStr;
+            numNormals=0;
+            normal = {0.f,0.f,0.f};
+            if (vertHash.find(vstring) != vertHash.end()) {
+                for (size_t i = 0; i < vertHash[vstring].size(); i++) {
+                    glm::vec3 f1 = triangles[j].getNormal();
+                    glm::vec3 f2 = triangles[vertHash[vstring][i]].getNormal();
+                    if (glm::dot(f1, f2) >= angleCos ) {
+                        normal += f2;
+                        numNormals+=1.f;
+                    }
+                }
+                //normal /= (float)vertHash[vstring].size();
+                normal /= numNormals;
+
+                triangles[j].setNormal(k, normal);
+            }
+        }
+    }
+
+    clear();
+    addTriangles( triangles.data(), triangles.size() );
 }
 
 // http://www.terathon.com/code/tangent.html

@@ -99,6 +99,7 @@ public:
     const std::vector<glm::vec3>& getNormals() const { return normals; }
     void        clearNormals() { normals.clear(); }
     bool        computeNormals();
+    void        smoothNormals(float _angle);
     void        invertNormals();
     void        flatNormals();
 
