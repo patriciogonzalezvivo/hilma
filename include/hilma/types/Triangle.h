@@ -56,6 +56,15 @@ public :
     glm::vec4           getTangent(const glm::vec3& _barycenterCoord ) const;
     
     MaterialConstPtr    material = nullptr;
+
+    static bool         compare(const Triangle& a, const Triangle& b, int axis) {
+        return a.getCentroid()[axis] < b.getCentroid()[axis];
+    }
+
+    static bool         compareX (const Triangle& a, const Triangle& b) { return compare(a, b, 0); }
+    static bool         compareY (const Triangle& a, const Triangle& b) { return compare(a, b, 1); }
+    static bool         compareZ (const Triangle& a, const Triangle& b) { return compare(a, b, 2); }
+    
 private:
     glm::vec3               vertices[3];
     glm::vec3               normal;

@@ -2,6 +2,9 @@
 
 #include "glm/glm.hpp"
 
+#include "hilma/types/Line.h"
+#include "hilma/types/Triangle.h"
+
 namespace hilma {
 
 class BoundingBox {
@@ -17,6 +20,7 @@ public:
     float   getDepth() const { return fabs(max.z - min.z); }
     
     glm::vec3 getCenter() const { return (min + max) * 0.5f; }
+    glm::vec3 getDiagonal() const { return max - min; }
     
     bool    containsX(float _x) const { return _x >= min.x && _x <= max.x; }
     bool    containsY(float _y) const { return _y >= min.y && _y <= max.y; }
@@ -32,11 +36,6 @@ public:
         min -= _value;
         max += _value;
     }
-
-    void    expand(const glm::vec2& _v) { expand(_v.x, _v.y); }
-    void    expand(const glm::vec3& _v) { expand(_v.x, _v.y, _v.z); }
-    void    expand(const BoundingBox& _b) { expand(_b.min); expand(_b.max); }
-
     void    expand(float _x, float _y) {
         min.x = std::min(min.x, _x);
         max.x = std::max(max.x, _x);
@@ -50,6 +49,12 @@ public:
         min.z = std::min(min.z, _z);
         max.z = std::max(max.z, _z);
     }
+
+    void    expand(const glm::vec2& _v) { expand(_v.x, _v.y); }
+    void    expand(const glm::vec3& _v) { expand(_v.x, _v.y, _v.z); }
+    void    expand(const Line& _l) { expand(_l[0]); expand(_l[1]); }
+    void    expand(const Triangle& _t) { expand(_t[0]); expand(_t[1]); expand(_t[2]); }
+    void    expand(const BoundingBox& _b) { expand(_b.min); expand(_b.max); }
 
 };
 

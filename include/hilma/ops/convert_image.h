@@ -37,7 +37,6 @@ Mesh                toTerrain(  const Image& _image,
                                 const int _maxTriangles = 0, 
                                 const int _maxPoints = 0 );
 
-
 std::vector<Image>  toSdf(const Mesh& _mesh, float _scale, bool _absolute = false);
 
 }

@@ -4,6 +4,8 @@
 #include "hilma/ops/transform.h"
 #include "hilma/ops/intersection.h"
 
+#include "hilma/accel/BVH.h"
+
 #include "hilma/math.h"
 #include "hilma/text.h"
 
@@ -17,8 +19,6 @@
 #include <algorithm>
 
 #define GLM_ENABLE_EXPERIMENTAL
-// #include "glm/gtx/rotate_vector.hpp"
-// #include "glm/gtx/norm.hpp"
 #include <glm/gtx/normal.hpp>
 #include <glm/gtx/hash.hpp>
 
@@ -1048,8 +1048,8 @@ Mesh toTerrain( const Image& _image,
 std::vector<Image>  toSdf(const Mesh& _mesh, float _scale, bool _absolute) {
     Mesh tmp = _mesh;
     center(tmp);
-    BoundingBox bbox = getBoundingBox( tmp );
-    std::vector<Triangle> triangles = tmp.getTriangles();
+    std::vector<Triangle> elements = tmp.getTriangles();
+    BoundingBox bbox = getBoundingBox( elements );
 
     int width = bbox.getWidth() * _scale;
     int height = bbox.getHeight() * _scale;
@@ -1067,27 +1067,29 @@ std::vector<Image>  toSdf(const Mesh& _mesh, float _scale, bool _absolute) {
 
                 glm::vec3 center = bbox.min + glm::vec3(x + 0.5f, y + 0.5f, z + 0.5f)/_scale;
 
-                glm::vec3 closest_point;
-                // count number of intersections.
-                int num_intersect = 0;
-                for (size_t i = 0; i < triangles.size(); i++) {
-                    distance(center, triangles[i], closest_point);
-                    float distance = glm::distance(center, closest_point);
-                    if (distance < layer.getValue(index))
-                        layer.setValue(index, distance);
+                {
+                    int num_intersect = 0;
+                    glm::vec3 closest_point;
+                    for (size_t i = 0; i < elements.size(); i++) {
+                        distance(center, elements[i], closest_point);
+                        float distance = glm::distance(center, closest_point);
+                        if (distance < layer.getValue(index))
+                            layer.setValue(index, distance);
 
-                    if (!_absolute) {
-                        float t, u, v;
-                        Ray ray = Ray(center, glm::normalize(glm::vec3(0.0f)-center));
-                        bool intersect = intersection(ray, triangles[i], t, u, v);
+                        if (!_absolute) {
+                            float t, u, v;
+                            Ray ray = Ray(center, glm::normalize(glm::vec3(0.0f)-center));
+                            bool intersect = intersection(ray, elements[i], t, u, v);
 
-                        if (intersect && t >= 0)
-                            num_intersect++;
+                            if (intersect && t >= 0)
+                                num_intersect++;
+                        }
                     }
-                }
 
-                if (!_absolute && num_intersect%2 == 1)
-                    layer.setValue(index, layer.getValue(index) * -1.0f);
+                    if (!_absolute && num_intersect%2 == 1)
+                        layer.setValue(index, layer.getValue(index) * -1.0f);
+                } 
+
 
             }
         }

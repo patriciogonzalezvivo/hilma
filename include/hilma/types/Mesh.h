@@ -9,7 +9,7 @@
 #include "hilma/types/Line.h"
 #include "hilma/types/Triangle.h"
 #include "hilma/types/Material.h"
-#include "hilma/types/BoundingBox.h"
+#include "hilma/accel/BoundingBox.h"
 
 namespace hilma {
 

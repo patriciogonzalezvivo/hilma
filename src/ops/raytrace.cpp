@@ -17,38 +17,6 @@
 
 namespace hilma {
 
-bool triangle_compare(const Triangle& a, const Triangle& b, int axis) {
-    return a.getCentroid()[axis] < b.getCentroid()[axis];
-}
-
-bool triangle_x_compare (const Triangle& a, const Triangle& b) {
-    return triangle_compare(a, b, 0);
-}
-
-bool triangle_y_compare (const Triangle& a, const Triangle& b) {
-    return triangle_compare(a, b, 1);
-}
-
-bool triangle_z_compare (const Triangle& a, const Triangle& b) {
-    return triangle_compare(a, b, 2);
-}
-
-bool line_compare(const Line& a, const Line& b, int axis) {
-    return a.getCentroid()[axis] < b.getCentroid()[axis];
-}
-
-bool line_x_compare (const Line& a, const Line& b) {
-    return line_compare(a, b, 0);
-}
-
-bool line_y_compare (const Line& a, const Line& b) {
-    return line_compare(a, b, 1);
-}
-
-bool line_z_compare (const Line& a, const Line& b) {
-    return line_compare(a, b, 2);
-}
-
 Hittable::Hittable( const std::vector<Line>& _lines, int _branches) {
     for (size_t i = 0; i < _lines.size(); i++) {
         expand(_lines[i][0]);
@@ -60,16 +28,16 @@ Hittable::Hittable( const std::vector<Line>& _lines, int _branches) {
         leaf = false;
 
         // int axis = rand() % 3;
-        // auto comparator = (axis == 0) ? line_x_compare
-        //                 : (axis == 1) ? line_y_compare
-        //                 : line_z_compare;
+        // auto comparator = (axis == 0) ? Line::compareX
+        //                 : (axis == 1) ? Line::compareY
+        //                 : Line::compareZ;
 
         float width = getWidth();
         float height = getHeight();
         float depth = getDepth();
-        auto comparator = (width > std::max(height, depth) ) ? line_x_compare
-                        : (height > std::max(width, depth) ) ? line_y_compare
-                        : line_z_compare;
+        auto comparator = (width > std::max(height, depth) ) ? Line::compareX
+                        : (height > std::max(width, depth) ) ? Line::compareY
+                        : Line::compareZ;
 
         std::vector<Line> lns = _lines;
         std::sort(lns.begin(), lns.end(), comparator);
@@ -96,16 +64,16 @@ Hittable::Hittable( const std::vector<Triangle>& _triangles, int _branches) {
         leaf = false;
 
         // int axis = rand() % 3;
-        // auto comparator = (axis == 0) ? triangle_x_compare
-        //                 : (axis == 1) ? triangle_y_compare
-        //                 : triangle_z_compare;
+        // auto comparator = (axis == 0) ? Triangle::compareX
+        //                 : (axis == 1) ? Triengle::compareY
+        //                 : Triangle::compareZ;
 
         float width = getWidth();
         float height = getHeight();
         float depth = getDepth();
-        auto comparator = (width > std::max(height, depth) ) ? triangle_x_compare
-                        : (height > std::max(width, depth) ) ? triangle_y_compare
-                        : triangle_z_compare;
+        auto comparator = (width > std::max(height, depth) ) ? Triangle::compareX
+                        : (height > std::max(width, depth) ) ? Triangle::compareY
+                        : Triangle::compareZ;
 
         std::vector<Triangle> tris = _triangles;
         std::sort(tris.begin(), tris.end(), comparator);

@@ -37,8 +37,8 @@ public:
     Hittable( const std::vector<Triangle>& _triangles, int _branches);
 
     virtual bool hit(const Ray& _ray, float _minDistance, float _maxDistance, HitRecord& _rec) const;
+    // virtual glm::vec3 closest(const glm::vec3& _point);
 
-    
     virtual int  getTotalTriangles();
     virtual int  getTotalLines();
     virtual Mesh getMesh();

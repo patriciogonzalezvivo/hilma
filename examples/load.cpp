@@ -4,15 +4,19 @@
 #include <iostream>
 
 #include "hilma/types/Mesh.h"
+
 #include "hilma/ops/compute.h"
 #include "hilma/ops/convert_path.h"
 #include "hilma/ops/convert_image.h"
+#include "hilma/ops/generate.h"
+
 #include "hilma/io/ply.h"
 #include "hilma/io/stl.h"
 #include "hilma/io/obj.h"
 #include "hilma/io/png.h"
+
+#include "hilma/timer.h"
 #include "hilma/text.h"
-#include "hilma/ops/generate.h"
 
 int main(int argc, char **argv) {
 
@@ -20,7 +24,7 @@ int main(int argc, char **argv) {
 
     hilma::loadPly("head.ply", mesh);
     // hilma::loadObj("CornellBox.obj", mesh);
-    // mesh = hilma::icosphere(1,2);
+    // mesh = hilma::icosphere(1, 2);
 
     std::cout << "vertices: " << mesh.getVerticesTotal() << std::endl;
     std::cout << "normals: " << mesh.getNormalsTotal() << std::endl;
@@ -39,10 +43,16 @@ int main(int argc, char **argv) {
     // hilma::saveStl("out.stl", mesh, false);
     // hilma::saveStl("out_bin.stl", mesh, true);
 
-    std::vector<hilma::Image> sdf = hilma::toSdf(mesh, 10.0f, true);
-    for (size_t i = 0; i < sdf.size(); i++) {
+    hilma::Timer timer;
+    timer.start();
+    std::vector<hilma::Image> sdf = hilma::toSdf(mesh, 2.0f, true);
+    timer.stop();
+
+    const float seconds = timer.get() / 1000.f;
+    std::cout << " Processing time : " << seconds << " secs" << std::endl;
+
+    for (size_t i = 0; i < sdf.size(); i++)
         hilma::savePng("sdf_" + hilma::toString(i, 4, '0') + ".png", sdf[i]);
-    }
 
     return 1;
 }

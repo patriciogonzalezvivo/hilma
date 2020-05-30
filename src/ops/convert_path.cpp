@@ -2,7 +2,7 @@
 #include "hilma/ops/earcut.h"
 
 #include "hilma/math.h"
-#include "hilma/types/BoundingBox.h"
+#include "hilma/accel/BoundingBox.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/rotate_vector.hpp>

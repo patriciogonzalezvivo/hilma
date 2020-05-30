@@ -10,6 +10,9 @@ file(GLOB OPS_SOURCE "${PROJECT_SOURCE_DIR}/src/ops/*.cpp")
 file(GLOB TYPES_HEADER "${PROJECT_SOURCE_DIR}/include/hilma/types/*.h")
 file(GLOB TYPES_SOURCE "${PROJECT_SOURCE_DIR}/src/types/*.cpp")
 
+file(GLOB ACCEL_HEADER "${PROJECT_SOURCE_DIR}/include/hilma/accel/*.h")
+file(GLOB ACCEL_SOURCE "${PROJECT_SOURCE_DIR}/src/accel/*.cpp")
+
 set(INCLUDE_FOLDER "${PROJECT_SOURCE_DIR}/include")
 set(INCLUDE_SWIG_FILE "${PROJECT_SOURCE_DIR}/${PROJECT_NAME}.i")
 
@@ -19,7 +22,7 @@ find_package(OpenImageDenoise)
 
 # C++ LIBRAY
 #
-add_library(hilma ${ROOT_SOURCE} ${IO_SOURCE} ${OPS_SOURCE} ${TYPES_SOURCE})
+add_library(hilma ${ROOT_SOURCE} ${IO_SOURCE} ${OPS_SOURCE} ${TYPES_SOURCE} ${ACCEL_SOURCE})
 
 if( OpenImageDenoise_FOUND )
   message(STATUS "Compiling with OpenImageDenoise support")
@@ -42,6 +45,7 @@ install(FILES ${ROOT_HEADER} DESTINATION include/hilma)
 install(FILES ${IO_HEADER} DESTINATION include/hilma/io)
 install(FILES ${OPS_HEADER} DESTINATION include/hilma/ops)
 install(FILES ${TYPES_HEADER} DESTINATION include/hilma/types)
+install(FILES ${ACCEL_HEADER} DESTINATION include/hilma/accel)
 
 
 
@@ -81,11 +85,11 @@ set_property(SOURCE ${INCLUDE_SWIG_FILE} PROPERTY CPLUSPLUS ON)
 if (CMAKE_VERSION VERSION_LESS "3.8")
     swig_add_module(${PROJECT_NAME} 
                     python 
-                    ${INCLUDE_SWIG_FILE} ${ROOT_SOURCE} ${IO_SOURCE} ${OPS_SOURCE} ${TYPES_SOURCE})
+                    ${INCLUDE_SWIG_FILE} ${ROOT_SOURCE} ${IO_SOURCE} ${OPS_SOURCE} ${TYPES_SOURCE} ${ACCEL_SOURCE})
 else()
     swig_add_library(${PROJECT_NAME} 
                     LANGUAGE python
-                    SOURCES ${INCLUDE_SWIG_FILE} ${ROOT_SOURCE} ${IO_SOURCE} ${OPS_SOURCE} ${TYPES_SOURCE})
+                    SOURCES ${INCLUDE_SWIG_FILE} ${ROOT_SOURCE} ${IO_SOURCE} ${OPS_SOURCE} ${TYPES_SOURCE} ${ACCEL_SOURCE})
 endif()
 swig_link_libraries(${PROJECT_NAME} ${PYTHON_LIBRARIES})
 

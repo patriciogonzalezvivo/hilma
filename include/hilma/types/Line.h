@@ -29,7 +29,14 @@ public:
     const glm::vec4&    getColor(size_t _index) const { return colors[_index]; }
     glm::vec4           getColorAt(float _t) const;
     
+    static bool         compare(const Line& a, const Line& b, int axis) {
+        return a.getCentroid()[axis] < b.getCentroid()[axis];
+    }
 
+    static bool         compareX (const Line& a, const Line& b) { return compare(a, b, 0); }
+    static bool         compareY (const Line& a, const Line& b) { return compare(a, b, 1); }
+    static bool         compareZ (const Line& a, const Line& b) { return compare(a, b, 2); }
+    
 private:
     std::vector<glm::vec4>  colors;
     glm::vec3               points[2];
