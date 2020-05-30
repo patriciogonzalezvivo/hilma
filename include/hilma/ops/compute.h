@@ -15,6 +15,8 @@ float                   getArea(const std::vector<glm::vec2>& _points);
 BoundingBox             getBoundingBox(const Mesh& _mesh);
 BoundingBox             getBoundingBox(const std::vector<glm::vec2>& _points);
 BoundingBox             getBoundingBox(const std::vector<glm::vec3>& _points);
+BoundingBox             getBoundingBox(const std::vector<Line>& _lines);
+BoundingBox             getBoundingBox(const std::vector<Triangle>& _triangles);
 
 glm::vec2               getCentroid(const std::vector<glm::vec2>& _points);
 glm::vec3               getCentroid(const std::vector<glm::vec3>& _points);

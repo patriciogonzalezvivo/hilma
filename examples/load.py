@@ -31,3 +31,4 @@ for e in mesh.getLinesIndices():
 # print(edges)
 
 savePly("out.ply", mesh, False)
+

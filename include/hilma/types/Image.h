@@ -40,6 +40,16 @@ public:
 
     float       getValue(size_t _index) const;
     glm::vec4   getColor(size_t _index) const;
+    
+    Image       operator+ (float _value) const;
+    Image       operator- (float _value) const;
+    Image       operator* (float _value) const;
+    Image       operator/ (float _value) const;
+    
+    Image&       operator+= (float _value);
+    Image&       operator-= (float _value);
+    Image&       operator*= (float _value);
+    Image&       operator/= (float _value);
 
 private:
     std::vector<float>  data;

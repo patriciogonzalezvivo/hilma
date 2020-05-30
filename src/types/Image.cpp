@@ -108,4 +108,56 @@ glm::vec4 Image::getColor(size_t _index) const {
     return rta;
 }
 
+Image Image::operator+ (float _value) const {
+    Image out = Image(*this);
+    for (size_t i = 0; i < out.data.size(); i++)
+        out.data[i] = data[i] + _value;
+    return out;
+}
+
+Image Image::operator- (float _value) const {
+    Image out = Image(*this);
+    for (size_t i = 0; i < out.data.size(); i++)
+        out.data[i] = data[i] - _value;
+    return out;
+}
+
+Image Image::operator* (float _value) const {
+    Image out = Image(*this);
+    for (size_t i = 0; i < out.data.size(); i++)
+        out.data[i] = data[i] * _value;
+    return out;
+}
+
+Image Image::operator/ (float _value) const {
+    Image out = Image(*this);
+    for (size_t i = 0; i < out.data.size(); i++)
+        out.data[i] = data[i] / _value;
+    return out;
+}
+
+Image& Image::operator+= (float _value) {
+    for (size_t i = 0; i < data.size(); i++)
+        data[i] = data[i] + _value;
+    return *this;
+}
+
+Image& Image::operator-= (float _value) {
+    for (size_t i = 0; i < data.size(); i++)
+        data[i] = data[i] - _value;
+    return *this;
+}
+
+Image& Image::operator*= (float _value) {
+    for (size_t i = 0; i < data.size(); i++)
+        data[i] = data[i] * _value;
+    return *this;
+}
+
+Image& Image::operator/= (float _value) {
+    for (size_t i = 0; i < data.size(); i++)
+        data[i] = data[i] / _value;
+    return *this;
+}
+
 }

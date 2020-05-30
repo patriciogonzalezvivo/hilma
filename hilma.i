@@ -118,6 +118,7 @@ namespace std {
     %template(VectorEdges)      vector<glm::ivec2>;
     %template(VectorLines)      vector<Line>;
     %template(VectorMesh)       vector<Mesh>;
+    %template(VectorImages)     vector<Image>;
 
     %template(VectorString)     vector<string>;
 };

@@ -1,5 +1,11 @@
 #include "hilma/ops/convert_image.h"
+
+#include "hilma/ops/compute.h"
+#include "hilma/ops/transform.h"
+#include "hilma/ops/intersection.h"
+
 #include "hilma/math.h"
+#include "hilma/text.h"
 
 #include <stdio.h>
 #include <cstring>
@@ -93,6 +99,105 @@ void threshold(Image& _image, float _threshold) {
     int total = _image.width * _image.height * _image.channels;
     for (int i = 0; i < total; i++)
         _image.data[i] = (_image.data[i] >= _threshold)? 1.0f : 0.0f;
+}
+
+Image mergeChannels(const Image& _red, const Image& _green, const Image& _blue) {
+    if (_red.getChannels() > 1 ||
+        _green.getChannels() > 1 ||
+        _blue.getChannels() > 1 ) {
+        std::cout << "ERROR: mergeChannel() arguments must be all grayscale images" << std::endl;
+        return _red;
+    }
+
+    if (_red.getWidth() != _green.getWidth() || _red.getWidth() != _blue.getWidth() ||
+        _red.getHeight() != _green.getHeight() || _red.getHeight() != _blue.getHeight()) {
+        std::cout << "ERROR: mergeChannel() all images must be the same size" << std::endl;
+        return _green;
+    }
+    int width = _red.getWidth();
+    int height = _red.getHeight();
+    Image out = Image(width, height, 3);
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            int index = _red.getIndex(x, y);
+            out.setColor(   out.getIndex(x,y), 
+                            glm::vec3(_red.getValue(index), _green.getValue(index), _blue.getValue(index)));
+        }
+    }
+    return out;
+}
+
+Image mergeChannels(const Image& _red, const Image& _green, const Image& _blue, const Image& _alpha) {
+    if (_red.getChannels() > 1 ||
+        _green.getChannels() > 1 ||
+        _blue.getChannels() > 1 ||
+        _alpha.getChannels() > 1 ) {
+        std::cout << "ERROR: mergeChannel() arguments must be all grayscale images" << std::endl;
+        return _red;
+    }
+
+    if (_red.getWidth() != _green.getWidth() || _red.getWidth() != _blue.getWidth() || _red.getWidth() != _alpha.getWidth() ||
+        _red.getHeight() != _green.getHeight() || _red.getHeight() != _blue.getHeight() || _red.getHeight() != _alpha.getHeight()) {
+        std::cout << "ERROR: mergeChannel() all images must be the same size" << std::endl;
+        return _green;
+    }
+    int width = _red.getWidth();
+    int height = _red.getHeight();
+    Image out = Image(width, height, 4);
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            int index = _red.getIndex(x, y);
+            out.setColor(   out.getIndex(x,y), 
+                            glm::vec4(_red.getValue(index), _green.getValue(index), _blue.getValue(index), _alpha.getValue(index) ));
+        }
+    }
+    return out;
+}
+
+Image addAlpha(const Image& _rgb, const Image& _alpha) {
+    if (_rgb.getChannels() != 3 || _alpha.getChannels() > 1) {
+        std::cout << "ERROR: addAlpha() first arguments must have 3 channels and the second argument must be a grayscale images" << std::endl;
+        return _rgb;
+    }
+
+    if (_rgb.getWidth() != _alpha.getWidth() ||
+        _rgb.getHeight() != _alpha.getHeight()) {
+        std::cout << "ERROR: addAlpha() all images must be the same size" << std::endl;
+        return _rgb;
+    }
+
+    int width = _rgb.getWidth();
+    int height = _rgb.getHeight();
+    Image out = Image(width, height, 4);
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            int index = _rgb.getIndex(x, y);
+            out.setColor(   out.getIndex(x,y), 
+                            _rgb.getColor(index) * glm::vec4(1.0f, 1.0f, 1.0f, _alpha.getValue(index) ));
+        }
+    }
+    return out;
+}
+
+std::vector<Image> splitChannels(const Image& _image) {
+    std::vector<Image> out;
+
+    int width = _image.getWidth();
+    int height = _image.getHeight();
+    int channels = _image.getChannels();
+
+    for (int i = 0; i < channels; i++) {
+        Image channel = Image(width, height, 1);
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int index = _image.getIndex(x, y);
+                glm::vec4 color = _image.getColor(_image.getIndex(x, y));
+                channel.setValue(channel.getIndex(x,y), color[i]);
+            }
+        }
+        out.push_back(channel);
+    }
+    return out;
 }
 
 /*
@@ -938,6 +1043,61 @@ Mesh toTerrain( const Image& _image,
         mesh.addTriangleIndices( tri[0], tri[1], tri[2] );
 
     return mesh;
+}
+
+std::vector<Image>  toSdf(const Mesh& _mesh, float _scale, bool _absolute) {
+    Mesh tmp = _mesh;
+    center(tmp);
+    BoundingBox bbox = getBoundingBox( tmp );
+    std::vector<Triangle> triangles = tmp.getTriangles();
+
+    int width = bbox.getWidth() * _scale;
+    int height = bbox.getHeight() * _scale;
+    int depth = bbox.getDepth() * _scale;
+    std::cout << width << "," << height << "," << depth << std::endl;
+
+    std::vector<Image> out;
+    for (int z = 0; z < depth + 1; z++) {
+        Image layer = Image(width, height, 1);
+
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
+                int index = layer.getIndex(x, y);
+                layer.setValue(index, FLT_MAX);
+
+                glm::vec3 center = bbox.min + glm::vec3(x + 0.5f, y + 0.5f, z + 0.5f)/_scale;
+
+                glm::vec3 closest_point;
+                // count number of intersections.
+                int num_intersect = 0;
+                for (size_t i = 0; i < triangles.size(); i++) {
+                    distance(center, triangles[i], closest_point);
+                    float distance = glm::distance(center, closest_point);
+                    if (distance < layer.getValue(index))
+                        layer.setValue(index, distance);
+
+                    if (!_absolute) {
+                        float t, u, v;
+                        Ray ray = Ray(center, glm::normalize(glm::vec3(0.0f)-center));
+                        bool intersect = intersection(ray, triangles[i], t, u, v);
+
+                        if (intersect && t >= 0)
+                            num_intersect++;
+                    }
+                }
+
+                if (!_absolute && num_intersect%2 == 1)
+                    layer.setValue(index, layer.getValue(index) * -1.0f);
+
+            }
+        }
+
+        out.push_back(layer);
+
+        printProgressBar("toSdf", z/float(depth), 100 );
+    }
+
+    return out;
 }
 
 }

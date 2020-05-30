@@ -243,19 +243,34 @@ BoundingBox getBoundingBox(const Mesh& _mesh) {
 
 BoundingBox getBoundingBox(const std::vector<glm::vec2>& _points ) {
     BoundingBox bbox;
-
     for (std::vector<glm::vec2>::const_iterator it = _points.begin(); it != _points.end(); ++it)
         bbox.expand(*it);
-    
     return bbox;
 }
 
 BoundingBox getBoundingBox(const std::vector<glm::vec3>& _points ) {
     BoundingBox bbox;
-
     for (std::vector<glm::vec3>::const_iterator it = _points.begin(); it != _points.end(); ++it)
         bbox.expand(*it);
-    
+    return bbox;
+}
+
+BoundingBox getBoundingBox(const std::vector<Line>& _lines) {
+    BoundingBox bbox;
+    for (std::vector<Line>::const_iterator it = _lines.begin(); it != _lines.end(); ++it) {
+        bbox.expand(it->getPoint(0));
+        bbox.expand(it->getPoint(1));
+    }
+    return bbox;
+}
+
+BoundingBox getBoundingBox(const std::vector<Triangle>& _triangles) {
+    BoundingBox bbox;
+    for (std::vector<Triangle>::const_iterator it = _triangles.begin(); it != _triangles.end(); ++it) {
+        bbox.expand(it->getVertex(0));
+        bbox.expand(it->getVertex(1));
+        bbox.expand(it->getVertex(2));
+    }
     return bbox;
 }
 

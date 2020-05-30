@@ -37,6 +37,8 @@ public:
     Hittable( const std::vector<Triangle>& _triangles, int _branches);
 
     virtual bool hit(const Ray& _ray, float _minDistance, float _maxDistance, HitRecord& _rec) const;
+
+    
     virtual int  getTotalTriangles();
     virtual int  getTotalLines();
     virtual Mesh getMesh();
