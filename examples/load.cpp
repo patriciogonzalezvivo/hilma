@@ -22,9 +22,9 @@ int main(int argc, char **argv) {
 
     hilma::Mesh mesh;
 
-    hilma::loadPly("head.ply", mesh);
+    // hilma::loadPly("head.ply", mesh);
     // hilma::loadObj("CornellBox.obj", mesh);
-    // hilma::loadObj("dragon.obj", mesh);
+    hilma::loadObj("dragon.obj", mesh);
     // mesh = hilma::icosphere(1, 2);
 
 
@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
 
     hilma::Timer timer;
     timer.start();
-    std::vector<hilma::Image> sdf = hilma::toSdf(mesh, 2.0f, true);
+    std::vector<hilma::Image> sdf = hilma::toSdf(mesh, 5.0f, true);
     timer.stop();
 
     const float seconds = timer.get() / 1000.f;
