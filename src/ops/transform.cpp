@@ -61,6 +61,30 @@ void translateY(std::vector<glm::vec3>& _points, float _y){
         it->y += _y;
 }
 
+void translateY(std::vector<glm::vec3>& _points, const Image& _grayscale) {
+    if (_grayscale.getChannels() > 1)
+        return;
+
+    int width = _grayscale.getWidth();
+    int height = _grayscale.getHeight();
+    for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it) {
+        int index = _grayscale.getIndex(int(it->x) % width, int(it->z) % height);
+        it->y += _grayscale.getValue(index);
+    }
+}
+
+void translateZ(std::vector<glm::vec3>& _points, const Image& _grayscale) {
+    if (_grayscale.getChannels() > 1)
+        return;
+
+    int width = _grayscale.getWidth();
+    int height = _grayscale.getHeight();
+    for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it) {
+        int index = _grayscale.getIndex(int(it->x) % width, int(it->y) % height);
+        it->z += _grayscale.getValue(index);
+    }
+}
+
 void translateZ(std::vector<glm::vec3>& _points, float _z){
     for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it)
         it->z += _z;
@@ -128,5 +152,27 @@ void rotate(Mesh& _mesh, float _rad, float _x, float _y, float _z ) {
     rotate(_mesh.vertices, _rad, _x, _y, _z);
     if (_mesh.haveNormals()) rotate(_mesh.normals, _rad, _x, _y, _z);
 }
+
+void rotateX(Polyline& _polyline, float _rad) {
+    rotateX(_polyline.points, _rad);
+}
+
+void rotateY(Polyline& _polyline, float _rad) {
+    rotateY(_polyline.points, _rad);
+}
+
+void rotateZ(Polyline& _polyline, float _rad) {
+    rotateZ(_polyline.points, _rad);
+}
+
+void rotate(Polyline& _polyline, float _rad, const glm::vec3& _axis ) {
+    rotate(_polyline.points, _rad, _axis);
+}
+
+void rotate(Polyline& _polyline, float _rad, float _x, float _y, float _z ) {
+    rotate(_polyline.points, _rad, _x, _y, _z);
+}
+
+
 
 }

@@ -14,6 +14,15 @@ Polyline::Polyline() {
 }
 
 //----------------------------------------------------------
+Polyline::Polyline(const std::vector<glm::vec2>& verts){
+    setRightVector();
+    clear();
+    for (size_t i = 0; i < verts.size(); i++) {
+        addVertex(verts[i].x, verts[i].y);
+    }
+}
+
+//----------------------------------------------------------
 Polyline::Polyline(const std::vector<glm::vec3>& verts){
     setRightVector();
     clear();

@@ -30,6 +30,9 @@ public:
     Polyline();
 
     /// \brief Creates an Polyline from a vector of T objects.
+    Polyline(const std::vector<glm::vec2>& verts);
+
+    /// \brief Creates an Polyline from a vector of T objects.
     Polyline(const std::vector<glm::vec3>& verts);
 
     /// \brief Creates an Polyline from a 2D array of floats (NumPy compatibility).
@@ -502,6 +505,29 @@ private:
     void getInterpolationParams(float findex, int &i1, int &i2, float &t) const;
 
     void calcData(int index, glm::vec3&tangent, float &angle, glm::vec3&rotation, glm::vec3&normal) const;
+
+    friend void scale(Polyline&, float );
+    friend void scaleX(Polyline&, float );
+    friend void scaleY(Polyline&, float );
+    friend void scaleZ(Polyline&, float );
+    friend void scale(Polyline&, const glm::vec3& );
+    friend void scale(Polyline&, float , float , float );
+
+    friend void translateX(Polyline&, float );
+    friend void translateY(Polyline&, float );
+    friend void translateZ(Polyline&, float );
+    friend void translate(Polyline&, const glm::vec3& );
+    friend void translate(Polyline&, float , float , float );
+    friend void translateY(Polyline&, const Image&);
+    friend void translateZ(Polyline&, const Image&);
+
+    friend void rotateX(Polyline&, float );
+    friend void rotateY(Polyline&, float );
+    friend void rotateZ(Polyline&, float );
+    friend void rotate(Polyline&, float, const glm::vec3& );
+    friend void rotate(Polyline&, float , float, float, float );
+
+    friend void center(Polyline&);
 };
 
 // using Polyline = Polyline;

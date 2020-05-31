@@ -207,6 +207,9 @@ private:
     friend void translate(Mesh&, const glm::vec3& );
     friend void translate(Mesh&, float , float , float );
 
+    friend void translateY(Mesh&, const Image&);
+    friend void translateZ(Mesh&, const Image&);
+
     friend void rotateX(Mesh&, float );
     friend void rotateY(Mesh&, float );
     friend void rotateZ(Mesh&, float );

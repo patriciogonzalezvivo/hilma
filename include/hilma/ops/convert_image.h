@@ -21,6 +21,7 @@ void                threshold(Image& _image, float _threshold = 0.5f);
 Image               toNormalMap(const Image& _heightmap, float _zScale = 10.0f);
 Image               toLuma(const Image& _image);
 
+Image               toHeightmap(const Image& _terrariumImage);
 Image               toSdf(const Image& _image, float _on = 1.0f);
 Image               denoise(const Image& _color, const Image& _normal, const Image& _albedo, bool _hdr = true);
 

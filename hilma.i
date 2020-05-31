@@ -31,6 +31,7 @@
     #include "hilma/types/Plane.h"
     #include "hilma/types/Mesh.h"
     #include "hilma/types/Polyline.h"
+    #include "hilma/types/Polygon.h"
     #include "hilma/types/Camera.h"
     #include "hilma/accel/BoundingBox.h"
     #include "hilma/accel/BoundingSphere.h"
@@ -93,6 +94,7 @@
 %include "include/hilma/types/Plane.h"
 %include "include/hilma/types/Mesh.h"
 %include "include/hilma/types/Polyline.h"
+%include "include/hilma/types/Polygon.h"
 %include "include/hilma/types/Camera.h"
 %include "include/hilma/accel/BoundingBox.h"
 %include "include/hilma/accel/BoundingSphere.h"
@@ -120,6 +122,7 @@ namespace std {
     %template(Vector2DVectors)  vector<glm::vec2>;
 
     %template(VectorFaces)      vector<glm::ivec3>;
+    %template(VectorPolylines)  vector<Polyline>;
     %template(VectorTriangles)  vector<Triangle>;
     %template(VectorEdges)      vector<glm::ivec2>;
     %template(VectorLines)      vector<Line>;

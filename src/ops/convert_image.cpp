@@ -915,7 +915,7 @@ Mesh toTerrain( const Image& _image,
     
     if ( _baseHeight > 0.0f ) {
 
-        const float z = -_baseHeight * _zScale;
+        const float z = -_baseHeight;// * _zScale;
         
         std::map<int, float> x0s;
         std::map<int, float> x1s;
@@ -1097,6 +1097,22 @@ std::vector<Image>  toSdf(const Mesh& _mesh, float _scale, bool _absolute) {
         out.push_back(layer);
 
         printProgressBar("toSdf", z/float(depth), 100 );
+    }
+
+    return out;
+}
+
+Image toHeightmap(const Image& _in) {
+    int width = _in.getWidth();
+    int height = _in.getHeight();
+    int channels = _in.getChannels();
+    Image out = Image(width, height, 1);
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            glm::vec4 c = _in.getColor( _in.getIndex(x, y) );
+            out.setValue( out.getIndex(x, y), (c.r * 65536.0f + c.g * 256.0f + c.b) / 65536.0f );
+        }
     }
 
     return out;

@@ -24,7 +24,7 @@ int main(int argc, char **argv) {
     hilma::Mesh top = bottom;
     bottom.invertWindingOrder();
     hilma::translateZ(top, 10.0f);
-    hilma::Mesh walls = hilma::toWall(polygon, 10.0f);
+    hilma::Mesh walls = hilma::toWall( hilma::Polygon(polygon), 10.0f);
 
 
     hilma::Mesh mesh;

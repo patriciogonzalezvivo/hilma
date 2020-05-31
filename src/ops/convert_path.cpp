@@ -17,15 +17,6 @@
 namespace mapbox { namespace util {
 
 template <>
-struct nth<0, glm::vec2> {
-    inline static float get(const glm::vec2 &t) { return t.x; };
-};
-template <>
-struct nth<1, glm::vec2> {
-    inline static float get(const glm::vec2 &t) { return t.y; };
-};
-
-template <>
 struct nth<0, glm::vec3> {
     inline static float get(const glm::vec3 &t) { return t.x; };
 };
@@ -39,8 +30,7 @@ struct nth<1, glm::vec3> {
 
 namespace hilma {
 
-template <typename T>
-Mesh Convert::toSurface(const std::vector<std::vector<T>>& _polygon) {
+Mesh toSurface(const std::vector<std::vector<glm::vec3>>& _polygon) {
     Mesh mesh;
 
     BoundingBox bb;
@@ -66,11 +56,7 @@ Mesh Convert::toSurface(const std::vector<std::vector<T>>& _polygon) {
     return mesh;
 }
 
-template Mesh Convert::toSurface<glm::vec2>(const std::vector<std::vector<glm::vec2>>&); 
-template Mesh Convert::toSurface<glm::vec3>(const std::vector<std::vector<glm::vec3>>&); 
-
-template <typename T>
-Mesh Convert::toWall(const std::vector<std::vector<T>>& _polygon, float _maxHeight, float _minHeight) {
+Mesh toWall(const std::vector<glm::vec3>& _polyline, float _maxHeight, float _minHeight) {
     Mesh mesh;
     
     static const glm::vec3 upVector(0.0f, 0.0f, 1.0f);
@@ -78,89 +64,80 @@ Mesh Convert::toWall(const std::vector<std::vector<T>>& _polygon, float _maxHeig
 
     int lineN  = 0;
     INDEX_TYPE vertexN = 0;
-    for (auto& line : _polygon) {
-        size_t lineSize = line.size();
+    for (size_t i = 0; i < _polyline.size() - 1; i++) {
 
-        for (size_t i = 0; i < lineSize - 1; i++) {
+        glm::vec3 a(_polyline[i].x, _polyline[i].y, 0.f);
+        glm::vec3 b(_polyline[i+1].x, _polyline[i+1].y, 0.f);
 
-            glm::vec3 a(line[i].x, line[i].y, 0.f);
-            glm::vec3 b(line[i+1].x, line[i+1].y, 0.f);
+        
+        normalVector = glm::cross(upVector, b - a);
+        normalVector = glm::normalize(normalVector);
 
-            
-            normalVector = glm::cross(upVector, b - a);
-            normalVector = glm::normalize(normalVector);
-
-            if (std::isnan(normalVector.x)
-             || std::isnan(normalVector.y)
-             || std::isnan(normalVector.z)) {
-                continue;
-            }
-
-            // 1st vertex top
-            a.z = _maxHeight;
-            mesh.addVertex(a);
-            mesh.addNormal(normalVector);
-            mesh.addTexCoord(1.,1.);
-
-            // 2nd vertex top
-            b.z = _maxHeight;
-            mesh.addVertex(b);
-            mesh.addNormal(normalVector);
-            mesh.addTexCoord(0.,1.);
-
-            // 1st vertex bottom
-            a.z = _minHeight;
-            mesh.addVertex(a);
-            mesh.addNormal(normalVector);
-            mesh.addTexCoord(1.,0.);
-
-            // 2nd vertex bottom
-            b.z = _minHeight;
-            mesh.addVertex(b);
-            mesh.addNormal(normalVector);
-            mesh.addTexCoord(0.,0.);
-
-            // Start the index from the previous state of the vertex Data
-            if (lineN == 0) {
-                mesh.addTriangleIndices(vertexN, vertexN + 2, vertexN + 1);
-                mesh.addTriangleIndices(vertexN + 1, vertexN + 2, vertexN + 3);
-            }
-            else {
-                mesh.addTriangleIndices(vertexN, vertexN + 1, vertexN + 2);
-                mesh.addTriangleIndices(vertexN + 1, vertexN + 3, vertexN + 2);
-            }
-
-            vertexN += 4;
+        if (std::isnan(normalVector.x)
+            || std::isnan(normalVector.y)
+            || std::isnan(normalVector.z)) {
+            continue;
         }
 
-        lineN++;
+        // 1st vertex top
+        a.z = _maxHeight;
+        mesh.addVertex(a);
+        mesh.addNormal(normalVector);
+        mesh.addTexCoord(1.,1.);
+
+        // 2nd vertex top
+        b.z = _maxHeight;
+        mesh.addVertex(b);
+        mesh.addNormal(normalVector);
+        mesh.addTexCoord(0.,1.);
+
+        // 1st vertex bottom
+        a.z = _minHeight;
+        mesh.addVertex(a);
+        mesh.addNormal(normalVector);
+        mesh.addTexCoord(1.,0.);
+
+        // 2nd vertex bottom
+        b.z = _minHeight;
+        mesh.addVertex(b);
+        mesh.addNormal(normalVector);
+        mesh.addTexCoord(0.,0.);
+
+        // Start the index from the previous state of the vertex Data
+        if (lineN == 0) {
+            mesh.addTriangleIndices(vertexN, vertexN + 2, vertexN + 1);
+            mesh.addTriangleIndices(vertexN + 1, vertexN + 2, vertexN + 3);
+        }
+        else {
+            mesh.addTriangleIndices(vertexN, vertexN + 1, vertexN + 2);
+            mesh.addTriangleIndices(vertexN + 1, vertexN + 3, vertexN + 2);
+        }
+
+        vertexN += 4;
     }
 
     return mesh;
 }
-
-template Mesh Convert::toWall<glm::vec2>(const std::vector<std::vector<glm::vec2>>&, float, float); 
-template Mesh Convert::toWall<glm::vec3>(const std::vector<std::vector<glm::vec3>>&, float, float); 
 
 // From Tangram
 // https://github.com/tangrams/tangram-es/blob/e4a323afeb310520456aec49e338614120a7ffa2/core/src/util/Modifys.cpp
 
 // Get 2D perpendicular of two points
 
-inline glm::vec2 perp2d(const glm::vec2& _v1, const glm::vec2& _v2 ) {
+inline glm::vec2 perp2d(const glm::vec3& _v1, const glm::vec3& _v2 ) {
     return glm::vec2(_v2.y - _v1.y, _v1.x - _v2.x);
 }
 
 // Helper function for polyline tesselation
-inline void addPolyLineVertex(const glm::vec2& _coord, const glm::vec2& _normal, const glm::vec2& _uv, Mesh& _mesh, float _width) {
+inline void addPolyLineVertex(const glm::vec3& _coord, const glm::vec2& _normal, const glm::vec2& _uv, Mesh& _mesh, float _width) {
     if (_width > 0.0f) {
-        glm::vec2 p = _coord +_normal * _width;
-        _mesh.addVertex(p.x, p.y);
+        glm::vec3 p = _coord + glm::vec3(_normal, 0.0f) * _width;
+        _mesh.addVertex(p);
         _mesh.addNormal(0.0f, 0.0f, 1.0f);
     }
     else {
         // Collapsed spline 
-        _mesh.addVertex(_coord.x, _coord.y);
+        _mesh.addVertex(_coord);
         _mesh.addNormal(_normal.x, _normal.y, 0.0f);
     }
     _mesh.addTexCoord(_uv);
@@ -186,7 +163,7 @@ void indexPairs(size_t _nPairs, Mesh& _mesh) {
 //  and interpolating their UVs               \ p /
 //                                             \./
 //                                              C
-void addFan(const glm::vec2& _pC,
+void addFan(const glm::vec3& _pC,
             const glm::vec2& _nA, const glm::vec2& _nB, const glm::vec2& _nC,
             const glm::vec2& _uA, const glm::vec2& _uB, const glm::vec2& _uC,
             size_t _numTriangles, Mesh& _mesh, float _width) {
@@ -216,15 +193,15 @@ void addFan(const glm::vec2& _pC,
         addPolyLineVertex(_pC, radial, uv, _mesh, _width);
 
         // Add indices
-        _mesh.addTriangleIndices(  startIndex, // center vertex
-                            startIndex + i + (angle > 0 ? 1 : 2),
-                            startIndex + i + (angle > 0 ? 2 : 1) );
+        _mesh.addTriangleIndices(   startIndex, // center vertex
+                                    startIndex + i + (angle > 0 ? 1 : 2),
+                                    startIndex + i + (angle > 0 ? 2 : 1) );
     }
 
 }
 
 // Function to add the vertices for line caps
-void addCap(const glm::vec2& _coord, const glm::vec2& _normal, int _numCorners, bool _isBeginning, Mesh& _mesh, float _width) {
+void addCap(const glm::vec3& _coord, const glm::vec2& _normal, int _numCorners, bool _isBeginning, Mesh& _mesh, float _width) {
 
     float v = _isBeginning ? 0.f : 1.f; // length-wise tex coord
 
@@ -254,14 +231,12 @@ void addCap(const glm::vec2& _coord, const glm::vec2& _normal, int _numCorners, 
     addFan(_coord, nA, nB, nC, uA, uB, uC, _numCorners, _mesh, _width);
 }
 
-template <typename T>
-Mesh Convert::toSpline(const std::vector<T>& _polyline, float _width, JoinType _join, CapType _cap, float _miterLimit) { //}, bool _close) {;
+Mesh toSpline(const std::vector<glm::vec3>& _polyline, float _width, JoinType _join, CapType _cap, float _miterLimit) { //}, bool _close) {;
 
     Mesh mesh;
     size_t startIndex = 0;
     size_t endIndex = _polyline.size();
     bool endCap = true;
-
 
     float distance = 0; // Cumulative distance along the polyline.
 
@@ -273,11 +248,9 @@ Mesh Convert::toSpline(const std::vector<T>& _polyline, float _width, JoinType _
                    (origLineSize - startIndex + endIndex));
     if (lineSize < 2) { return mesh; }
 
-    glm::vec2 coordCurr(_polyline[startIndex].x, 
-                        _polyline[startIndex].y);
+    glm::vec3 coordCurr(_polyline[startIndex]);
     // get the Point using wrapped index in the original line geometry
-    glm::vec2 coordNext(_polyline[(startIndex + 1) % origLineSize].x, 
-                        _polyline[(startIndex + 1) % origLineSize].y);
+    glm::vec3 coordNext(_polyline[(startIndex + 1) % origLineSize]);
     glm::vec2 normPrev, normNext, miterVec;
 
     int cornersOnCap = (int)_cap;
@@ -382,9 +355,6 @@ Mesh Convert::toSpline(const std::vector<T>& _polyline, float _width, JoinType _
 
     return mesh;
 }
-
-template Mesh Convert::toSpline<glm::vec2>(const std::vector<glm::vec2>&, float, JoinType, CapType, float);
-template Mesh Convert::toSpline<glm::vec3>(const std::vector<glm::vec3>&, float, JoinType, CapType, float);
 
 Mesh toTube(const Polyline& _polyline, const float* _array1D, int _n, int _resolution, bool _caps) {
     Mesh mesh;
