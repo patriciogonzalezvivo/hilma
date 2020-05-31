@@ -24,7 +24,9 @@ int main(int argc, char **argv) {
 
     hilma::loadPly("head.ply", mesh);
     // hilma::loadObj("CornellBox.obj", mesh);
+    // hilma::loadObj("dragon.obj", mesh);
     // mesh = hilma::icosphere(1, 2);
+
 
     std::cout << "vertices: " << mesh.getVerticesTotal() << std::endl;
     std::cout << "normals: " << mesh.getNormalsTotal() << std::endl;

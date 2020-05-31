@@ -1072,7 +1072,7 @@ std::vector<Image>  toSdf(const Mesh& _mesh, float _scale, bool _absolute) {
                     glm::vec3 closest_point;
                     for (size_t i = 0; i < elements.size(); i++) {
                         distance(center, elements[i], closest_point);
-                        float distance = glm::distance(center, closest_point);
+                        float distance = glm::distance(center, closest_point) / _scale;
                         if (distance < layer.getValue(index))
                             layer.setValue(index, distance);
 
