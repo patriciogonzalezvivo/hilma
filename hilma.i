@@ -59,7 +59,7 @@
     import_array();
 %}
 
-%typemap(in) (size_t _index){
+%typemap(in) size_t {
     $1 = PyInt_AsLong($input);
 }
 
@@ -83,8 +83,27 @@
 %apply (float* IN_ARRAY1, int DIM1 ) {(const float* _array1D, int _n )};
 %apply (float* IN_ARRAY2, int DIM1, int DIM2 ) {(const float* _array2D, int _m, int _n )};
 
-%apply ( uint8_t* IN_ARRAY3, int DIM1, int DIM2, int DIM3) { (const uint8_t* _array3D, int _height, int _width, int _channels) }
-%apply ( uint8_t** ARGOUTVIEWM_ARRAY3, int* DIM1, int* DIM2, int* DIM3) { (uint8_t **_array3D, int *_height, int *_width, int *_channels) }
+%apply (uint8_t* IN_ARRAY3, int DIM1, int DIM2, int DIM3) { (const uint8_t* _array3D, int _height, int _width, int _channels) }
+%apply (uint8_t** ARGOUTVIEWM_ARRAY3, int* DIM1, int* DIM2, int* DIM3) { (uint8_t **_array3D, int *_height, int *_width, int *_channels) }
+
+namespace std {
+    %template(Vector4DVector)   vector<glm::vec4>;
+    %template(Vector3DVector)   vector<glm::vec3>;
+    %template(Vector2DVector)   vector<glm::vec2>;
+
+    %template(PolylinesVector)  vector<hilma::Polyline>;
+
+    %template(FacesVector)      vector<glm::ivec3>;
+    %template(EdgesVector)      vector<glm::ivec2>;
+    %template(TrianglesVector)  vector<hilma::Triangle>;
+    %template(LinesVector)      vector<hilma::Line>;
+    %template(MeshesVector)     vector<hilma::Mesh>;
+
+    %template(ImagesVector)     vector<hilma::Image>;
+
+    %template(StringVector)     vector<string>;
+    %template(FloatVector)      vector<float>;
+};
 
 %include "include/hilma/types/Ray.h"
 %include "include/hilma/types/Line.h"
@@ -114,21 +133,6 @@
 %include "include/hilma/io/png.h"
 %include "include/hilma/io/hdr.h"
 
-using namespace hilma;
+// using namespace hilma;
 
-namespace std {
-    %template(Vector4DVectors)  vector<glm::vec4>;
-    %template(Vector3DVectors)  vector<glm::vec3>;
-    %template(Vector2DVectors)  vector<glm::vec2>;
-
-    %template(VectorFaces)      vector<glm::ivec3>;
-    %template(VectorPolylines)  vector<Polyline>;
-    %template(VectorTriangles)  vector<Triangle>;
-    %template(VectorEdges)      vector<glm::ivec2>;
-    %template(VectorLines)      vector<Line>;
-    %template(VectorMesh)       vector<Mesh>;
-    %template(VectorImages)     vector<Image>;
-
-    %template(VectorString)     vector<string>;
-};
 

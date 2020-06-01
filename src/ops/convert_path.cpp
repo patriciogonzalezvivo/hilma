@@ -30,10 +30,36 @@ struct nth<1, glm::vec3> {
 
 namespace hilma {
 
-Mesh toSurface(const std::vector<std::vector<glm::vec3>>& _polygon) {
+Mesh toSurface(const std::vector<std::vector<glm::vec3>>& _polygon, BoundingBox& _bbox) {
     Mesh mesh;
 
     BoundingBox bb;
+    static const glm::vec3 upVector(0.0f, 0.0f, 1.0f);
+    for (size_t i = 0; i < _polygon.size(); i++) {
+        for (size_t j = 0; j < _polygon[i].size(); j++ ) {
+            mesh.addVertex( _polygon[i][j].x, _polygon[i][j].y, 0.0f );
+            mesh.addNormal( upVector );
+            bb.expand( _polygon[i][j].x, _polygon[i][j].y );
+        }
+    }
+
+    for (size_t i = 0; i < mesh.getVerticesTotal(); i++) {
+        glm::vec3 p = mesh.getVertices()[i];
+        mesh.addTexCoord(   remap(p.x, bb.min.x, bb.max.x, 0.0f, 1.0f, true),
+                            remap(p.y, bb.min.y, bb.max.y, 0.0f, 1.0f, true) );
+    }
+
+    std::vector<uint32_t> indices = mapbox::earcut<uint32_t>(_polygon);
+    for (size_t i = 0; i < indices.size(); i++)
+        mesh.addFaceIndex(indices[i]);
+
+    return mesh;
+}
+
+Mesh toSurface(const std::vector<std::vector<glm::vec3>>& _polygon, const BoundingBox& _bbox) {
+    Mesh mesh;
+
+    BoundingBox bb = _bbox;
     static const glm::vec3 upVector(0.0f, 0.0f, 1.0f);
     for (size_t i = 0; i < _polygon.size(); i++) {
         for (size_t j = 0; j < _polygon[i].size(); j++ ) {

@@ -23,6 +23,10 @@ public:
     int         getHeight() const { return height;};
     int         getChannels() const { return channels;};
 
+    const float& operator[] (int _index) const { return data[_index]; }
+    float&      operator[] (int _index) { return data[_index]; }
+    size_t      size() const { return data.size(); }
+
     size_t      getIndex(size_t _x, size_t _y) const { return (_y * width + _x) * channels; };
     size_t      getIndexUV(float _u, float _v) const { return getIndex(_u * width, _v * height); }
 
@@ -63,17 +67,6 @@ private:
     friend bool loadPng( const std::string&, Image&, int );
     friend bool saveHdr( const std::string&, Image& );
     friend bool loadHdr( const std::string&, Image&, int );
-
-    friend void sdf(Image&);
-    friend void flip(Image&);
-    friend void sqrt(Image&);
-    friend void invert(Image&);
-    friend void autolevel(Image&);
-    friend void gamma(Image&, float);
-    friend void threshold(Image&, float);
-    friend glm::vec2 getRange(const Image&);
-    friend void remap(Image&, float, float, float, float, bool);
-    friend Image denoise(const Image&, const Image&, const Image&, bool);
 };
 
 typedef std::shared_ptr<Image> ImagePtr;

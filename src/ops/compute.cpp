@@ -278,9 +278,9 @@ glm::vec2 getRange(const Image& _image) {
     float min =  10000.0f;
     float max = -10000.0f;
 
-    int total = _image.width * _image.height * _image.channels;
+    int total = _image.getWidth() * _image.getHeight() * _image.getChannels();
     for (int i = 0; i < total; i++) {
-        float val = _image.data[i];
+        float val = _image[i];
         if (min > val) min = val;
         if (max < val) max = val;
     }

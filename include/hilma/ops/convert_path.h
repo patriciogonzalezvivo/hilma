@@ -5,22 +5,38 @@
 
 namespace hilma {
 
-Mesh toSurface(const std::vector<std::vector<glm::vec3>>& _polygon);
+Mesh toSurface(const std::vector<std::vector<glm::vec3>>& _polygon, const BoundingBox& _bbox);
+
+inline Mesh toSurface(const std::vector<std::vector<glm::vec3>>& _polygon) {
+    return toSurface(_polygon, BoundingBox());
+};
+
+inline Mesh toSurface(const Polyline& _polyline, const BoundingBox& _bbox) {
+    return toSurface(_polyline.getVertices(), _bbox);
+}
 
 inline Mesh toSurface(const Polyline& _polyline) {
     return toSurface(_polyline.getVertices());
 }
 
-inline Mesh toSurface(const Polygon& _polygon) {
+inline Mesh toSurface(const Polygon& _polygon, const BoundingBox& _bbox) {
     std::vector< std::vector<glm::vec3> > polygon;
     for (size_t i = 0; i < _polygon.size(); i++)
         polygon.push_back( _polygon[i].getVertices() );
     
-    return toSurface(polygon);
+    return toSurface(polygon, _bbox);
+}
+
+inline Mesh toSurface(const Polygon& _polygon) {
+    return toSurface(_polygon, BoundingBox());
+}
+
+inline Mesh toSurface(const std::vector<Polyline>& _polygon, const BoundingBox& _bbox) {
+    return toSurface( Polygon(_polygon), _bbox );
 }
 
 inline Mesh toSurface(const std::vector<Polyline>& _polygon) {
-    return toSurface( Polygon(_polygon) );
+    return toSurface( Polygon(_polygon), BoundingBox() );
 }
 
 Mesh toWall(const std::vector<glm::vec3>& _polyline, float _maxHeight, float _minHeight = 0.0f);

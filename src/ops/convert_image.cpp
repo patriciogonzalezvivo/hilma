@@ -34,36 +34,36 @@
 namespace hilma {
 
 void sqrt(Image& _image) {
-    int total = _image.width * _image.height * _image.channels;
+    int total = _image.getWidth() * _image.getHeight() * _image.getChannels();
     for (int i = 0; i < total; i++)
-        _image.data[i] = std::sqrt(_image.data[i]);
+        _image[i] = std::sqrt(_image[i]);
 }
 
 void invert(Image& _image) {
-    int total = _image.width * _image.height * _image.channels;
+    int total = _image.getWidth() * _image.getHeight() * _image.getChannels();
     for (int i = 0; i < total; i++)
-        _image.data[i] = 1.0f -_image.data[i];
+        _image[i] = 1.0f -_image[i];
 }
 
 void gamma(Image& _image, float _gamma) {
-    int total = _image.width * _image.height * _image.channels;
+    int total = _image.getWidth() * _image.getHeight() * _image.getChannels();
     for (int i = 0; i < total; i++)
-        _image.data[i] = std::pow(_image.data[i], _gamma);
+        _image[i] = std::pow(_image[i], _gamma);
 }
 
 void autolevel(Image& _image){
     float lo = 1.0f;
     float hi = 0.0f;
 
-    int total = _image.width * _image.height * _image.channels;
+    int total = _image.getWidth() * _image.getHeight() * _image.getChannels();
     for (int i = 0; i < total; i++) {
-        float data = _image.data[i];
+        float data = _image[i];
         lo = std::min(lo, data);
         hi = std::max(hi, data);
     }
 
     for (int i = 0; i < total; i++) {
-        float data = _image.data[i];
+        float data = _image[i];
         lo = std::min(lo, data);
         hi = std::max(hi, data);
     }
@@ -73,14 +73,14 @@ void autolevel(Image& _image){
     }
 
     for (int i = 0; i < total; i++)
-        _image.data[i] =  (_image.data[i] - lo) / (hi - lo);
+        _image[i] =  (_image[i] - lo) / (hi - lo);
 }
 
 void flip(Image& _image) {
-    const size_t stride = _image.width * _image.channels;
+    const size_t stride = _image.getWidth() * _image.getChannels();
     float *row = (float*)malloc(stride * sizeof(float));
-    float *low = &_image.data[0];
-    float *high = &_image.data[(_image.height - 1) * stride];
+    float *low = &_image[0];
+    float *high = &_image[(_image.getHeight() - 1) * stride];
     for (; low < high; low += stride, high -= stride) {
         std::memcpy(row, low, stride * sizeof(float));
         std::memcpy(low, high, stride * sizeof(float));
@@ -90,15 +90,15 @@ void flip(Image& _image) {
 }
 
 void remap(Image& _image, float _in_min, float _int_max, float _out_min, float _out_max, bool _clamp) {
-    int total = _image.width * _image.height * _image.channels;
+    int total = _image.getWidth() * _image.getHeight() * _image.getChannels();
     for (int i = 0; i < total; i++)
-        _image.data[i] = remap(_image.data[i], _in_min, _int_max, _out_min, _out_max, _clamp);
+        _image[i] = remap(_image[i], _in_min, _int_max, _out_min, _out_max, _clamp);
 } 
 
 void threshold(Image& _image, float _threshold) {
-    int total = _image.width * _image.height * _image.channels;
+    int total = _image.getWidth() * _image.getHeight() * _image.getChannels();
     for (int i = 0; i < total; i++)
-        _image.data[i] = (_image.data[i] >= _threshold)? 1.0f : 0.0f;
+        _image[i] = (_image[i] >= _threshold)? 1.0f : 0.0f;
 }
 
 Image mergeChannels(const Image& _red, const Image& _green, const Image& _blue) {
@@ -253,23 +253,23 @@ static float *dt(float *f, int n) {
 
 /* dt of 2d function using squared distance */
 void sdf(Image& _image) {
-    if (_image.channels > 1) {
+    if (_image.getChannels() > 1) {
         std::cout << "We need a one channel image to compute an SDF" << std::endl;
         return;
     }
 
-    int width = _image.width;
-    int height = _image.height;
+    int width = _image.getWidth();
+    int height = _image.getHeight();
     float *f = new float[std::max(width, height)];
 
     // transform along columns
     for (int x = 0; x < width; x++) {
         for (int y = 0; y < height; y++)
-            f[y] = _image.data[y * width + x];
+            f[y] = _image[y * width + x];
         
         float *d = dt(f, height);
         for (int y = 0; y < height; y++) 
-            _image.data[y * width + x] = d[y];
+            _image[y * width + x] = d[y];
 
         delete [] d;
     }
@@ -277,11 +277,11 @@ void sdf(Image& _image) {
     // transform along rows
     for (int y = 0; y < height; y++) {
         for (int x = 0; x < width; x++)
-            f[x] = _image.data[y * width + x];
+            f[x] = _image[y * width + x];
         
         float *d = dt(f, width);
         for (int x = 0; x < width; x++)
-            _image.data[y * width + x] = d[x];
+            _image[y * width + x] = d[x];
             
         delete [] d;
     }
@@ -382,10 +382,10 @@ Image   denoise(const Image& _color, const Image& _normal, const Image& _albedo,
 
     // Create a denoising filter
     oidn::FilterRef filter = device.newFilter("RT"); // generic ray tracing filter
-    filter.setImage("color", (void*)&_color.data[0],  oidn::Format::Float3, _color.getWidth(), _color.getHeight());
-    filter.setImage("albedo", (void*)&_albedo.data[0], oidn::Format::Float3, _albedo.getWidth(), _albedo.getHeight()); // optional
-    filter.setImage("normal", (void*)&_normal.data[0], oidn::Format::Float3, _normal.getWidth(), _normal.getHeight()); // optional
-    filter.setImage("output", (void*)&out.data[0], oidn::Format::Float3, out.getWidth(), out.getHeight());
+    filter.setImage("color", (void*)&_color[0],  oidn::Format::Float3, _color.getWidth(), _color.getHeight());
+    filter.setImage("albedo", (void*)&_albedo[0], oidn::Format::Float3, _albedo.getWidth(), _albedo.getHeight()); // optional
+    filter.setImage("normal", (void*)&_normal[0], oidn::Format::Float3, _normal.getWidth(), _normal.getHeight()); // optional
+    filter.setImage("output", (void*)&out[0], oidn::Format::Float3, out.getWidth(), out.getHeight());
     filter.set("hdr", _hdr); // image is HDR
     filter.commit();
 
@@ -1112,6 +1112,36 @@ Image toHeightmap(const Image& _in) {
         for (int x = 0; x < width; x++) {
             glm::vec4 c = _in.getColor( _in.getIndex(x, y) );
             out.setValue( out.getIndex(x, y), (c.r * 65536.0f + c.g * 256.0f + c.b) / 65536.0f );
+        }
+    }
+
+    return out;
+}
+
+Image packInSprite( const std::vector<Image>& _images ) {
+    Image out;
+    if (_images.size() == 0)
+        return out;
+
+    // Let's asume they are all equal
+    int cellWidth = _images[0].getWidth();
+    int cellHeight = _images[0].getHeight();
+    int cellChannels = _images[0].getChannels();
+
+    int cellTotal = std::ceil( std::sqrt( float(_images.size()) ) );
+    int width = cellWidth * cellTotal;
+    int height = cellHeight * cellTotal;
+    int channels = cellChannels;
+
+    out.allocate(width, height, channels);
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            int i = (x / cellWidth) + (y / cellHeight) * cellTotal;
+            if (i < _images.size()) {
+                out.setColor(out.getIndex(x, y), 
+                            _images[i].getColor( _images[i].getIndex(x%cellWidth, y%cellHeight) ));
+            }
         }
     }
 
