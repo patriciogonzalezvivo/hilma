@@ -18,13 +18,13 @@ void scaleX(std::vector<glm::vec3>& _points, float _x);
 void scaleY(std::vector<glm::vec3>& _points, float _y);
 void scaleZ(std::vector<glm::vec3>& _points, float _z);
 void scale(std::vector<glm::vec3>& _points, const glm::vec3& _v);
-void scale(std::vector<glm::vec3>& _points, float _x, float _y, float _z);
+void scale(std::vector<glm::vec3>& _points, float _x, float _y, float _z = 1.0f);
 
 void translateX(std::vector<glm::vec3>& _points, float _x);
 void translateY(std::vector<glm::vec3>& _points, float _y);
 void translateZ(std::vector<glm::vec3>& _points, float _z);
 void translate(std::vector<glm::vec3>& _points, const glm::vec3& _v);
-void translate(std::vector<glm::vec3>& _points, float _x, float _y, float _z);
+void translate(std::vector<glm::vec3>& _points, float _x, float _y, float _z = 0.0f);
 
 void translateY(std::vector<glm::vec3>& _points, const Image& _grayscale);
 void translateZ(std::vector<glm::vec3>& _points, const Image& _grayscale);
@@ -44,13 +44,13 @@ inline void scaleX(Polyline& _polyline, float _x) { scaleX(_polyline.points, _x)
 inline void scaleY(Polyline& _polyline, float _y) { scaleY(_polyline.points, _y); };
 inline void scaleZ(Polyline& _polyline, float _z) { scaleZ(_polyline.points, _z); };
 inline void scale(Polyline& _polyline, const glm::vec3& _v) { scale(_polyline.points, _v); };
-inline void scale(Polyline& _polyline, float _x, float _y, float _z) { scale(_polyline.points, _x, _y, _z); };
+inline void scale(Polyline& _polyline, float _x, float _y, float _z = 1.0f) { scale(_polyline.points, _x, _y, _z); };
 
 inline void translateX(Polyline& _polyline, float _x) { translateX(_polyline.points, _x); };
 inline void translateY(Polyline& _polyline, float _y) { translateY(_polyline.points, _y); };
 inline void translateZ(Polyline& _polyline, float _z) { translateZ(_polyline.points, _z); };
 inline void translate(Polyline& _polyline, const glm::vec3& _v) { translate(_polyline.points, _v); };
-inline void translate(Polyline& _polyline, float _x, float _y, float _z) { translate(_polyline.points, _x, _y, _z);};
+inline void translate(Polyline& _polyline, float _x, float _y, float _z = 0.0f) { translate(_polyline.points, _x, _y, _z);};
 
 inline void translateY(Polyline& _polyline, const Image& _grayscale) { translateY(_polyline.points, _grayscale); };
 inline void translateZ(Polyline& _polyline, const Image& _grayscale) { translateZ(_polyline.points, _grayscale); };
@@ -70,13 +70,13 @@ inline void scaleX(Mesh& _mesh, float _x) { scaleX(_mesh.vertices, _x); };
 inline void scaleY(Mesh& _mesh, float _y) { scaleY(_mesh.vertices, _y); };
 inline void scaleZ(Mesh& _mesh, float _z) { scaleZ(_mesh.vertices, _z); };
 inline void scale(Mesh& _mesh, const glm::vec3& _v) { scale(_mesh.vertices, _v); };
-inline void scale(Mesh& _mesh, float _x, float _y, float _z) { scale(_mesh.vertices, _x, _y, _z); };
+inline void scale(Mesh& _mesh, float _x, float _y, float _z = 1.0f) { scale(_mesh.vertices, _x, _y, _z); };
 
 inline void translateX(Mesh& _mesh, float _x) { translateX(_mesh.vertices, _x); };
 inline void translateY(Mesh& _mesh, float _y) { translateY(_mesh.vertices, _y); };
 inline void translateZ(Mesh& _mesh, float _z) { translateZ(_mesh.vertices, _z); };
 inline void translate(Mesh& _mesh, const glm::vec3& _v) { translate(_mesh.vertices, _v); };
-inline void translate(Mesh& _mesh, float _x, float _y, float _z) { translate(_mesh.vertices, _x, _y, _z);};
+inline void translate(Mesh& _mesh, float _x, float _y, float _z = 0.0f) { translate(_mesh.vertices, _x, _y, _z);};
 
 inline void translateY(Mesh& _mesh, const Image& _grayscale) { translateY(_mesh.vertices, _grayscale); };
 inline void translateZ(Mesh& _mesh, const Image& _grayscale) { translateZ(_mesh.vertices, _grayscale); };
