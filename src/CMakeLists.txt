@@ -47,8 +47,6 @@ install(FILES ${OPS_HEADER} DESTINATION include/hilma/ops)
 install(FILES ${TYPES_HEADER} DESTINATION include/hilma/types)
 install(FILES ${ACCEL_HEADER} DESTINATION include/hilma/accel)
 
-
-
 # PYTHON BINDINGS 
 #
 if(POLICY CMP0078)
