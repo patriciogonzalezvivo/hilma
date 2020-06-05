@@ -48,37 +48,6 @@ Material InitMaterial (const tinyobj::material_t& _material) {
     else if (_material.roughness > 0.0f)
         mat.set("metallic", _material.metallic);
 
-    // if (_material.sheen_texname.size() > 0)
-    //     mat.set("sheen", _material.sheen_texname);
-    // else
-    //     mat.set("sheen", _material.sheen);
-
-    // if (_material.normal_texname.size() > 0)
-    //     mat.set("normal", _material.normal_texname);
-
-    // if (_material.bump_texname.size() > 0)
-    //     mat.set("bump", _material.bump_texname);
-
-    // if (_material.alpha_texname.size() > 0)
-    //     mat.set("alpha", _material.alpha_texname);
-
-    // if (_material.displacement_texname.size() > 0)
-    //     mat.set("displacement", _material.displacement_texname);
-    
-    // mat.shininess = _material.shininess;
-
-    // mat.anisotropy = _material.anisotropy;
-    // mat.anisotropyRotation = _material.anisotropy_rotation;
-
-    // mat.clearcoatRoughness = _material.clearcoat_roughness;
-    // mat.clearcoatThickness = _material.clearcoat_thickness;
-
-    // mat.ior = _material.ior;
-    // mat.dissolve = _material.dissolve;
-    // mat.transmittance = glm::vec3(_material.transmittance[0], _material.transmittance[1], _material.transmittance[2]);
-    // mat.reflectionMapName = _material.reflection_texname;
-    // mat.specularHighlightMapName = _material.specular_highlight_texname;
-
     mat.illuminationModel = _material.illum;
     return mat;
 }

@@ -2,6 +2,8 @@
 
 #include <memory>
 #include <vector>
+#include <string>
+
 #include "glm/glm.hpp"
 
 namespace hilma {
@@ -50,10 +52,12 @@ public:
     Image       operator* (float _value) const;
     Image       operator/ (float _value) const;
     
-    Image&       operator+= (float _value);
-    Image&       operator-= (float _value);
-    Image&       operator*= (float _value);
-    Image&       operator/= (float _value);
+    Image&      operator+= (float _value);
+    Image&      operator-= (float _value);
+    Image&      operator*= (float _value);
+    Image&      operator/= (float _value);
+
+    std::string name;
 
 private:
     std::vector<float>  data;

@@ -22,6 +22,7 @@ public:
     // Material() {}
     Material(const std::string& _name);
 
+    void set(const std::string& _property, const Image& _image);
     void set(const std::string& _property, const std::string& _filename);
     void set(const std::string& _property, const glm::vec3& _color);
     void set(const std::string& _property, const float* _array1D, int _n);

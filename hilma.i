@@ -45,12 +45,13 @@
     #include "hilma/ops/transform.h"
     #include "hilma/ops/raytrace.h"
     #include "hilma/ops/earcut.h"
-    #include "hilma/io/ply.h"
-    #include "hilma/io/stl.h"
-    #include "hilma/io/obj.h"
     #include "hilma/io/jpg.h"
     #include "hilma/io/png.h"
     #include "hilma/io/hdr.h"
+    #include "hilma/io/ply.h"
+    #include "hilma/io/stl.h"
+    #include "hilma/io/obj.h"
+    #include "hilma/io/gltf.h"
 %}
 
 %include "glm.i"
@@ -126,12 +127,13 @@ namespace std {
 %include "include/hilma/ops/generate.h"
 %include "include/hilma/ops/raytrace.h"
 %include "include/hilma/ops/transform.h"
-%include "include/hilma/io/ply.h"
-%include "include/hilma/io/stl.h"
-%include "include/hilma/io/obj.h"
 %include "include/hilma/io/jpg.h"
 %include "include/hilma/io/png.h"
 %include "include/hilma/io/hdr.h"
+%include "include/hilma/io/ply.h"
+%include "include/hilma/io/stl.h"
+%include "include/hilma/io/obj.h"
+%include "include/hilma/io/gltf.h"
 
 // using namespace hilma;
 

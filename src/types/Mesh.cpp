@@ -377,6 +377,10 @@ void Mesh::smoothNormals(float _angle) {
     addTriangles( triangles.data(), triangles.size() );
 }
 
+void  Mesh::addTangent(const glm::vec4 &_tangent) {
+    tangents.push_back(_tangent);
+}
+
 // http://www.terathon.com/code/tangent.html
 bool Mesh::computeTangents() {
     //The number of the vertices

@@ -7,10 +7,10 @@
 
 namespace hilma {
 
-Image::Image(): width(0), height(0), channels(0) {
+Image::Image(): name("undefined"), width(0), height(0), channels(0) {
 }
 
-Image::Image(const Image& _mother) {
+Image::Image(const Image& _mother): name("undefined") {
     width = _mother.width;
     height = _mother.height;
     channels = _mother.channels;
@@ -22,12 +22,12 @@ Image::Image(const Image& _mother) {
     }
 }
 
-Image::Image(int _width, int _height, int _channels) {
+Image::Image(int _width, int _height, int _channels): name("undefined") {
     allocate(_width, _height, _channels);
 }
 
 // bool Image::loadData(const uint8_t* _array3D, int _height, int _width, int _channels) {
-Image::Image(const uint8_t* _array3D, int _height, int _width, int _channels) {
+Image::Image(const uint8_t* _array3D, int _height, int _width, int _channels): name("undefined") {
     set(_array3D, _height, _width, _channels);
 }
 

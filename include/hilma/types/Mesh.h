@@ -22,8 +22,9 @@ enum FaceType {
 };
 
 enum EdgeType {
-    LINE_STRIP  = 0,
-    LINES       = 1
+    UNDEFINED_EDGE = 0,
+    LINES       = 1,
+    LINE_STRIP  = 2
 };
 
 #if defined(PLATFORM_RPI)
@@ -116,6 +117,7 @@ public:
     void        clearTexCoords() { texcoords.clear(); }
 
     // Tangents
+    void        addTangent(const glm::vec4 &_tangent);
     const bool  haveTangents() const { return !tangents.empty(); }
     const glm::vec4&   getTangent(size_t _index) const { return tangents[_index]; }
     const std::vector<glm::vec4>& getTangents() const { return tangents; }

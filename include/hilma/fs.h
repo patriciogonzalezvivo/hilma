@@ -38,4 +38,17 @@ inline std::string getBaseDir(const std::string& _filepath) {
     return base_dir;
 }
 
+inline std::string getFilename(const std::string& _filepath) {
+    size_t sep = _filepath.find_last_of("\\/");
+    std::string out;
+    if (sep != std::string::npos)
+        out = _filepath.substr(sep + 1, _filepath.size() - sep - 1);
+
+    size_t dot = out.find_last_of(".");
+    if (dot != std::string::npos)
+        return out.substr(0, dot);
+    else
+        return out;
+}
+
 }

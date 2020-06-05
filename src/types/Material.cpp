@@ -10,6 +10,13 @@ namespace hilma {
 Material::Material(const std::string& _name): illuminationModel(0), name(_name) {
 }
 
+void Material::set(const std::string& _property, const Image& _image) {
+    texturesPaths[_property] = _image.name + ".png";
+    ImagePtr image = std::make_shared<Image>( _image );
+    textures[_property] = image;
+    properties[_property] = TEXTURE;
+}
+
 void Material::set(const std::string& _property, const std::string& _filename) {
     texturesPaths[_property] = _filename;
 
