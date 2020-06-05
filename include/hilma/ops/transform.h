@@ -3,16 +3,18 @@
 #include "hilma/types/Mesh.h"
 #include "hilma/types/Image.h"
 #include "hilma/types/Polyline.h"
+#include "hilma/types/Polygon.h"
 
 #include <glm/gtc/quaternion.hpp>
 
 namespace hilma {
 
-// points
 void transform(std::vector<glm::vec3>& _points, const glm::quat& _mat);
 void transform(std::vector<glm::vec3>& _points, const glm::mat3& _mat);
 void transform(std::vector<glm::vec3>& _points, const glm::mat4& _mat);
 
+// points
+//
 void scale(std::vector<glm::vec3>& _points, float _v);
 void scaleX(std::vector<glm::vec3>& _points, float _x);
 void scaleY(std::vector<glm::vec3>& _points, float _y);
@@ -62,6 +64,32 @@ void rotate(Polyline& _polyline, float _rad, const glm::vec3& _axis );
 void rotate(Polyline& _polyline, float _rad, float _x, float _y, float _z );
 
 inline void center(Polyline& _polyline) { center(_polyline.points); };
+
+// Polygon
+//
+void scale(Polygon& _polygon, float _v);
+void scaleX(Polygon& _polygon, float _x);
+void scaleY(Polygon& _polygon, float _y);
+void scaleZ(Polygon& _polygon, float _z);
+void scale(Polygon& _polygon, const glm::vec3& _v);
+void scale(Polygon& _polygon, float _x, float _y, float _z = 1.0f);
+
+void translateX(Polygon& _polygon, float _x);
+void translateY(Polygon& _polygon, float _y);
+void translateZ(Polygon& _polygon, float _z);
+void translate(Polygon& _polygon, const glm::vec3& _v);
+void translate(Polygon& _polygon, float _x, float _y, float _z = 0.0f);
+
+void translateY(Polygon& _polygon, const Image& _grayscale);
+void translateZ(Polygon& _polygon, const Image& _grayscale);
+
+void rotateX(Polygon& _polygon, float _rad);
+void rotateY(Polygon& _polygon, float _rad);
+void rotateZ(Polygon& _polygon, float _rad);
+void rotate(Polygon& _polygon, float _rad, const glm::vec3& _axis );
+void rotate(Polygon& _polygon, float _rad, float _x, float _y, float _z );
+
+void center(Polygon& _polygon);
 
 // Mesh
 //

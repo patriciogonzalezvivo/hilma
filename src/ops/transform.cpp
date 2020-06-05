@@ -173,6 +173,101 @@ void rotate(Polyline& _polyline, float _rad, float _x, float _y, float _z ) {
     rotate(_polyline.points, _rad, _x, _y, _z);
 }
 
+void scale(Polygon& _polygon, float _v) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+        scale(_polygon[i], _v);
+}
+
+void scaleX(Polygon& _polygon, float _x) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+        scale(_polygon[i], _x);
+}
+
+void scaleY(Polygon& _polygon, float _y) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+        scale(_polygon[i], _y);
+}
+
+void scaleZ(Polygon& _polygon, float _z) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+        scale(_polygon[i], _z);
+}
+
+void scale(Polygon& _polygon, const glm::vec3& _v) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+        scale(_polygon[i], _v);
+}
+
+void scale(Polygon& _polygon, float _x, float _y, float _z) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+        scale(_polygon[i], _x, _y, _z);
+}
+
+void translateX(Polygon& _polygon, float _x) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+        translateX(_polygon[i], _x);
+}
+
+void translateY(Polygon& _polygon, float _y) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+        translateY(_polygon[i], _y);
+}
+
+void translateZ(Polygon& _polygon, float _z) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+        translateZ(_polygon[i], _z);
+}
+
+void translate(Polygon& _polygon, const glm::vec3& _v) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+        translate(_polygon[i], _v);
+
+}
+void translate(Polygon& _polygon, float _x, float _y, float _z) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+        translate(_polygon[i], _x, _y, _z);
+}
+
+void translateY(Polygon& _polygon, const Image& _grayscale) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+        translateY(_polygon[i], _grayscale);
+}
+void translateZ(Polygon& _polygon, const Image& _grayscale) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+    translateZ(_polygon[i], _grayscale);
+}
+
+void rotateX(Polygon& _polygon, float _rad) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+        rotateX(_polygon[i], _rad);
+}
+void rotateY(Polygon& _polygon, float _rad) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+        rotateY(_polygon[i], _rad);
+}
+void rotateZ(Polygon& _polygon, float _rad) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+        rotateZ(_polygon[i], _rad);
+}
+void rotate(Polygon& _polygon, float _rad, const glm::vec3& _axis ) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+        rotate(_polygon[i], _rad, _axis);
+}
+void rotate(Polygon& _polygon, float _rad, float _x, float _y, float _z ) {
+    for (size_t i = 0; i < _polygon.size(); i++)
+        rotate(_polygon[i], _rad, _x, _y, _z);
+}
+
+void center(Polygon& _polygon) {
+    BoundingBox bbox;
+
+    for (size_t i = 0; i < _polygon.size(); i++)
+        for(size_t j = 0; j < _polygon[i].size(); j++)
+            bbox.expand(_polygon[i][j] );
+
+    glm::vec3 center = bbox.getCenter();
+    translate(_polygon, -center);
+}
 
 
 }
