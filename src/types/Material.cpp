@@ -29,11 +29,20 @@ void Material::set(const std::string& _property, const std::string& _filename) {
 }
 
 void Material::set(const std::string& _property, const float* _array1D, int _n) {
-    colors[_property] = glm::vec3(_array1D[0], _array1D[1], _array1D[2]);
+    glm::vec4 color = glm::vec4(0.0f, 0.0f, 0.0f, 1.0f);
+    for (int i = 0; i < _n; i++)
+        color[i] = _array1D[i];
+    
+    colors[_property] = color;
     properties[_property] = COLOR;
 }
 
 void Material::set(const std::string& _property, const glm::vec3& _color) {
+    colors[_property] = glm::vec4(_color, 1.0f);
+    properties[_property] = COLOR;
+}
+
+void Material::set(const std::string& _property, const glm::vec4& _color){
     colors[_property] = _color;
     properties[_property] = COLOR;
 }
@@ -68,7 +77,7 @@ Image Material::getImage(const std::string& _property) const {
     return none;
 }
 
-glm::vec3 Material::getColor(const std::string& _property, const glm::vec2& _uv) const {
+glm::vec4 Material::getColor(const std::string& _property, const glm::vec2& _uv) const {
     if (haveProperty(_property)) {
         MaterialPropertyType type = properties.find(_property)->second;
         if (type == TEXTURE) {
@@ -78,22 +87,22 @@ glm::vec3 Material::getColor(const std::string& _property, const glm::vec2& _uv)
         else if (type == COLOR)
             return colors.find(_property)->second;
         else if (type == VALUE)
-            return glm::vec3(values.find(_property)->second);
+            return glm::vec4(values.find(_property)->second);
     }
 
-    return glm::vec3(-1.0);
+    return glm::vec4(-1.0);
 }
 
-glm::vec3 Material::getColor(const std::string& _property) const {
+glm::vec4 Material::getColor(const std::string& _property) const {
     if (haveProperty(_property)) {
         MaterialPropertyType type = properties.find(_property)->second;
         if (type == COLOR)
             return colors.find(_property)->second;
         else if (type == VALUE)
-            return glm::vec3(values.find(_property)->second);
+            return glm::vec4(values.find(_property)->second);
     }
 
-    return glm::vec3(-1.0);
+    return glm::vec4(-1.0);
 }
 
 float Material::getValue(const std::string& _property, const glm::vec2& _uv) const {

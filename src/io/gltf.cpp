@@ -327,9 +327,7 @@ void extractVertexData(uint32_t v_pos, const uint8_t *base, int accesor_componen
 
 Material extractMaterial(const tinygltf::Model& _model, const tinygltf::Material& _material, bool _verbose) {
     Material mat = Material( toLower( toUnderscore( purifyString( _material.name ) ) ) );
-
-    std::vector<double> c = _material.pbrMetallicRoughness.baseColorFactor;
-    mat.set("diffuse", glm::vec4(float(c[0]), float(c[1]), float(c[2]), float(c[3])));
+    
     if (_material.pbrMetallicRoughness.baseColorTexture.index >= 0) {
         const tinygltf::Texture &tex = _model.textures[_material.pbrMetallicRoughness.baseColorTexture.index];
         const tinygltf::Image &image = _model.images[tex.source];
@@ -349,9 +347,11 @@ Material extractMaterial(const tinygltf::Model& _model, const tinygltf::Material
         if (_verbose)
             std::cout << "Loading " << name << " as diffuse image" << std::endl;
     }
+    else {
+        std::vector<double> c = _material.pbrMetallicRoughness.baseColorFactor;
+        mat.set("diffuse", glm::vec4(float(c[0]), float(c[1]), float(c[2]), float(c[3])));
+    }
 
-    c = _material.emissiveFactor;
-    mat.set("emissive", glm::vec3(float(c[0]), float(c[1]), float(c[2])));
     if (_material.emissiveTexture.index >= 0) {
         const tinygltf::Image &image = _model.images[_model.textures[_material.emissiveTexture.index].source];
         std::string name = image.name + "_" + image.uri;
@@ -367,10 +367,12 @@ Material extractMaterial(const tinygltf::Model& _model, const tinygltf::Material
         if (_verbose)
             std::cout << "Loading " << name << " as emissive image" << std::endl;
     }
+    else {
+        std::vector<double> c = _material.emissiveFactor;
+        mat.set("emissive", glm::vec3(float(c[0]), float(c[1]), float(c[2])));
+    }
 
     bool isOcclusionRoughnessMetallic = false;
-    mat.set("roughness", (float)_material.pbrMetallicRoughness.roughnessFactor);
-    mat.set("metallic", (float)_material.pbrMetallicRoughness.metallicFactor);
     if (_material.pbrMetallicRoughness.metallicRoughnessTexture.index >= 0) {
         tinygltf::Texture tex = _model.textures[_material.pbrMetallicRoughness.metallicRoughnessTexture.index];
         const tinygltf::Image &image = _model.images[tex.source];
@@ -403,6 +405,10 @@ Material extractMaterial(const tinygltf::Model& _model, const tinygltf::Material
         if (_verbose)
             std::cout << "Loading " << name << " as roughness/metallic image" << std::endl;
     }
+    else {
+        mat.set("roughness", (float)_material.pbrMetallicRoughness.roughnessFactor);
+        mat.set("metallic", (float)_material.pbrMetallicRoughness.metallicFactor);
+    }
 
      // OCCLUSION
     if (!isOcclusionRoughnessMetallic && _material.occlusionTexture.index >= 0) {
@@ -426,7 +432,7 @@ Material extractMaterial(const tinygltf::Model& _model, const tinygltf::Material
         std::string name = image.name + "_" + image.uri;
         if (name == "_")
             name = _material.name;
-        name += "_normalmap";;
+        name += "_normalmap";
 
         Image img = Image(&image.image[0], image.width, image.height, image.component);
         img.name = name;
@@ -594,7 +600,7 @@ bool    loadGltf( const std::string& _filename, Mesh& _mesh ) {
 
     const tinygltf::Scene &scene = model.scenes[model.defaultScene];
     for (size_t i = 0; i < scene.nodes.size(); ++i)
-        extractNodes(model, model.nodes[scene.nodes[i]], glm::mat4(1.0), _mesh, true);
+        extractNodes(model, model.nodes[scene.nodes[i]], glm::mat4(1.0), _mesh, false);
 
     return true;
 }

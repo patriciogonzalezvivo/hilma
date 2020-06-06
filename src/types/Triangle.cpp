@@ -147,18 +147,47 @@ glm::vec3 Triangle::getVertex(const glm::vec3& _barycenter) const {
 }
 
 glm::vec4 Triangle::getColor(const glm::vec3& _barycenter) const {
-    return  getColor(0) * _barycenter.x +
-            getColor(1) * _barycenter.y +
-            getColor(2) * _barycenter.z;
+
+    if (material != nullptr) {
+        if ( material->haveProperty("diffuse") ) {
+            if (haveTexCoords()) {
+                glm::vec2 uv = getTexCoord(_barycenter);
+                return material->getColor("diffuse", uv);
+            }
+            else
+                return material->getColor("diffuse");
+        }
+    }
+
+    if (haveColors())
+        return  getColor(0) * _barycenter.x +
+                getColor(1) * _barycenter.y +
+                getColor(2) * _barycenter.z;
+    else
+        return glm::vec4(1.0f);
 }
 
 glm::vec3 Triangle::getNormal(const glm::vec3& _barycenter) const {
+    glm::vec3 n;
     if (haveNormals())
-        return  getNormal(0) * _barycenter.x +
-                getNormal(1) * _barycenter.y +
-                getNormal(2) * _barycenter.z;
+        n = getNormal(0) * _barycenter.x +
+            getNormal(1) * _barycenter.y +
+            getNormal(2) * _barycenter.z;
     else
-        return getNormal();
+        n = getNormal();
+
+    if (material != nullptr && haveTexCoords() && haveTangents()) {
+        if ( material->haveProperty("normalmap") ) {
+            glm::vec2 uv = getTexCoord(_barycenter);
+            glm::vec4 t = getTangent(_barycenter);
+            glm::vec3 b = glm::cross( n, glm::vec3(t.x, t.y, t.z) ) * t.w;
+            glm::mat3 tbn = glm::mat3( t, b, n );
+
+            return tbn * ( material->getColor("normalmap", uv) * 2.0f - 1.0f);
+        }
+    }
+
+    return n;
 }
 
 glm::vec2 Triangle::getTexCoord(const glm::vec3& _barycenter) const {

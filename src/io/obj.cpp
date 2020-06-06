@@ -89,7 +89,6 @@ bool saveMaterials(const std::string& _filename, const Mesh& _mesh) {
                         Image img = mat->getImage(mat_value_name[j]);
                         save(filename, img);
                     }
-                    std::cout << mat->getImagePath(mat_value_name[j]) << std::endl;
                 }
                 else
                     fprintf(mtl_file, "%s %.3f\n", mat_value_obj[j].c_str(), mat->getValue(mat_value_name[j]) );
@@ -116,7 +115,7 @@ bool saveMaterials(const std::string& _filename, const Mesh& _mesh) {
             if (filename.size() > 0) {
                 fprintf(mtl_file, "map_%s %s\n", mat_tex_obj[j].c_str(),filename.c_str() );
                 if (!urlExists(filename)) {
-                    Image img = mat->getImage(mat_color_name[j]);
+                    Image img = mat->getImage(mat_tex_name[j]);
                     save(filename, img);
                 }
             }

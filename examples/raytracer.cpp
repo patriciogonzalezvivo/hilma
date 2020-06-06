@@ -38,7 +38,7 @@ glm::vec3 ray_color(const Ray& _ray, const std::vector<Hittable>& _hittables, in
         if (rec.line != nullptr)
             return glm::vec3(2.0f);
 
-        glm::vec3 attenuation = glm::vec3(1.0f);
+        glm::vec3 diffuse = glm::vec3(1.0f);
         glm::vec3 emissive = glm::vec3(0.0f);
         glm::vec3 normal = rec.normal;
         float opacity = 1.0f;
@@ -47,17 +47,18 @@ glm::vec3 ray_color(const Ray& _ray, const std::vector<Hittable>& _hittables, in
 
         if (rec.triangle != nullptr) {
             normal = rec.triangle->getNormal(rec.barycentric);
+            diffuse = rec.triangle->getColor(rec.barycentric);
 
             if (rec.triangle->material != nullptr) {
                 bool haveUV = rec.triangle->haveTexCoords();
                 glm::vec2 uv;
 
                 if (haveUV) uv = rec.triangle->getTexCoord(rec.barycentric);
-                uv.x = 1.0f - uv.x;
+                // uv.x = 1.0f - uv.x;
 
-                if ( rec.triangle->material->haveProperty("diffuse") )
-                    if ( haveUV ) attenuation = rec.triangle->material->getColor("diffuse", uv);
-                    else attenuation = rec.triangle->material->getColor("diffuse");
+                // if ( rec.triangle->material->haveProperty("diffuse") )
+                //     if ( haveUV ) diffuse = rec.triangle->material->getColor("diffuse", uv);
+                //     else diffuse = rec.triangle->material->getColor("diffuse");
                 
                 if ( rec.triangle->material->haveProperty("emissive") )
                     if ( haveUV ) emissive = rec.triangle->material->getColor("emissive", uv);
@@ -80,7 +81,7 @@ glm::vec3 ray_color(const Ray& _ray, const std::vector<Hittable>& _hittables, in
         target += random_unit_vector() * roughtness;
 
         Ray scattered(rec.position, target);
-        return emissive + attenuation * ray_color( scattered, _hittables, _depth-1 );
+        return emissive + diffuse * ray_color( scattered, _hittables, _depth-1 );
     }
 
     return glm::vec3(0.0f);
@@ -166,12 +167,30 @@ int main(int argc, char **argv) {
     // scene.push_back( Hittable(head.getTriangles(), branches) );
     // scene_mesh.append(head);
 
-    Mesh helmet = Mesh("helmet");
-    loadGltf("helmet.glb", helmet);
-    center(helmet);
-    translateY(helmet, 0.4f);
-    scene.push_back( Hittable(helmet.getTriangles(), branches) );
-    scene_mesh.append(helmet);
+    // Mesh helmet = Mesh("helmet");
+    // loadGltf("helmet.glb", helmet);
+    // center(helmet);
+    // translateY(helmet, 0.4f);
+    // scene.push_back( Hittable(helmet.getTriangles(), branches) );
+    // scene_mesh.append(helmet);
+
+    // Mesh Duck = Mesh("Duck");
+    // loadGltf("Duck.glb", Duck);
+    // center(Duck);
+    // scale(Duck, 1.2f);
+    // translateY(Duck, 0.2f);
+    // scene.push_back( Hittable(Duck.getTriangles(), branches) );
+    // scene_mesh.append(Duck);
+
+    Mesh BoomBox = Mesh("BoomBox");
+    loadGltf("BoomBox.glb", BoomBox);
+    if (!BoomBox.haveTangents())
+        BoomBox.computeTangents();
+    center(BoomBox);
+    scale(BoomBox, 100.0f);
+    translateY(BoomBox, 0.4f);
+    scene.push_back( Hittable(BoomBox.getTriangles(), branches) );
+    scene_mesh.append(BoomBox);
 
     // Mesh icosphere = hilma::icosphere(0.5f, 2);
     // icosphere.setMaterial(metal);
@@ -197,70 +216,62 @@ int main(int argc, char **argv) {
     // scene_mesh.append(cylinder);
 
     saveObj("raytracer.obj", scene_mesh);
-    // savePly("raytracer.ply", scene_mesh, false);
+    savePly("raytracer.ply", scene_mesh, false);
 
-    // // RAYTRACE
-    // //
-    // Timer timer;
-    // timer.start();
-    // raytrace_multithread(image, cam, scene, samples, maxDepth, ray_color);
-    // timer.stop();
+    // RAYTRACE
+    //
+    Timer timer;
+    timer.start();
+    raytrace_multithread(image, cam, scene, samples, maxDepth, ray_color);
+    timer.stop();
 
-    // const float time_raycasting = timer.get() / 1000.f;
-    // std::cout << "                            Rendertime time : " << time_raycasting << " secs" << std::endl;
+    const float time_raycasting = timer.get() / 1000.f;
+    std::cout << "                            Rendertime time : " << time_raycasting << " secs" << std::endl;
 
-    // int totalTriangles = 0;
-    // for (size_t i = 0; i < scene.size(); i++)
-    //     totalTriangles += scene[i].getTotalTriangles();   
+    int totalTriangles = 0;
+    for (size_t i = 0; i < scene.size(); i++)
+        totalTriangles += scene[i].getTotalTriangles();   
 
-    // std::cout << "                  Total number of triangles : " << totalTriangles << std::endl;
-    // std::cout << "              Total number of ray-box tests : " << getTotalRayBoundingBoxTests() << std::endl;
-    // std::cout << "        Total number of ray-triangles tests : " << getTotalRayTriangleTests() << std::endl; 
-    // std::cout << "Total number of ray-triangles intersections : " << getTotalRayTrianglesIntersections() << std::endl;
-    // std::cout << "            Total number of ray-lines tests : " << getTotalLineLineTests() << std::endl; 
-    // std::cout << "    Total number of ray-lines intersections : " << getTotalLineLineIntersections() << std::endl;
+    std::cout << "                  Total number of triangles : " << totalTriangles << std::endl;
+    std::cout << "              Total number of ray-box tests : " << getTotalRayBoundingBoxTests() << std::endl;
+    std::cout << "        Total number of ray-triangles tests : " << getTotalRayTriangleTests() << std::endl; 
+    std::cout << "Total number of ray-triangles intersections : " << getTotalRayTrianglesIntersections() << std::endl;
+    std::cout << "            Total number of ray-lines tests : " << getTotalLineLineTests() << std::endl; 
+    std::cout << "    Total number of ray-lines intersections : " << getTotalLineLineIntersections() << std::endl;
 
-    // savePng("raytracer.png", image);
+    savePng("raytracer.png", image);
 
-    // // // PRINT NORMAL and ALBEDO FOR DENOISER
-    // // cam = Camera(lookfrom, lookat, vup, dov, aspect_ratio, 0.0f, dist_to_focus);
+    // PRINT NORMAL and ALBEDO FOR DENOISER
+    cam = Camera(lookfrom, lookat, vup, dov, aspect_ratio, 0.0f, dist_to_focus);
 
-    // // hilma::Image normal= Image(image);
-    // // raytrace_multithread(normal, cam, scene, 10, 1, [](const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
-    // //     HitRecord rec;
-    // //     if ( hit(_ray, 0.001, 1000.0, _hittables, rec) )
-    // //         if (rec.triangle != nullptr)
-    // //             return rec.triangle->getNormal(rec.barycentric);
+    hilma::Image normal= Image(image);
+    raytrace_multithread(normal, cam, scene, 10, 1, [](const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
+        HitRecord rec;
+        if ( hit(_ray, 0.001, 1000.0, _hittables, rec) )
+            if (rec.triangle != nullptr)
+                return rec.triangle->getNormal(rec.barycentric);
         
-    // //     return glm::vec3(0.0f);
-    // // } );
-    // // savePng("raytracer_normal.png", normal);
+        return glm::vec3(0.0f);
+    } );
+    savePng("raytracer_normal.png", normal);
 
-    // // hilma::Image albedo = Image(image);
-    // // raytrace_multithread(albedo, cam, scene, 10, 1, [](const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
-    // //     HitRecord rec;
-    // //     if ( hit(_ray, 0.001, 1000.0, _hittables, rec) ) {
-    // //         glm::vec3 attenuation = glm::vec3(1.0f);
+    hilma::Image albedo = Image(image);
+    raytrace_multithread(albedo, cam, scene, 10, 1, [](const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
+        HitRecord rec;
+        if ( hit(_ray, 0.001, 1000.0, _hittables, rec) ) {
+            glm::vec3 diffuse = glm::vec3(1.0f);
 
-    // //         if (rec.triangle != nullptr) {
-    // //             if (rec.triangle->material != nullptr) {
-    // //                 bool haveUV = rec.triangle->haveTexCoords();
-    // //                 glm::vec2 uv;
-    // //                 if (haveUV) uv = rec.triangle->getTexCoord(rec.barycentric);
-    // //                 uv.x = 1.0f - uv.x;
-    // //                 if ( rec.triangle->material->haveProperty("diffuse") )
-    // //                     if ( haveUV ) attenuation = rec.triangle->material->getColor("diffuse", uv);
-    // //                     else attenuation = rec.triangle->material->getColor("diffuse");
-    // //             }
-    // //         }
-    // //         return attenuation;
-    // //     }
-    // //     return glm::vec3(0.0f);
-    // // } );
-    // // savePng("raytracer_albedo.png", albedo);
+            if (rec.triangle != nullptr)
+                diffuse = rec.triangle->getColor(rec.barycentric);
+            
+            return diffuse;
+        }
+        return glm::vec3(0.0f);
+    } );
+    savePng("raytracer_albedo.png", albedo);
 
-    // // Image denoised = denoise(image, normal, albedo, true);
-    // // savePng("raytracer_denoised.png", denoised);
+    // Image denoised = denoise(image, normal, albedo, true);
+    // savePng("raytracer_denoised.png", denoised);
 
     return 0;
 }

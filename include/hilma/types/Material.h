@@ -25,6 +25,7 @@ public:
     void set(const std::string& _property, const Image& _image);
     void set(const std::string& _property, const std::string& _filename);
     void set(const std::string& _property, const glm::vec3& _color);
+    void set(const std::string& _property, const glm::vec4& _color);
     void set(const std::string& _property, const float* _array1D, int _n);
     void set(const std::string& _property, const float _value);
 
@@ -35,9 +36,9 @@ public:
     std::string     getImagePath(const std::string& _property) const;
     // ImagePtr        getImage(const std::string& _property);
     Image           getImage(const std::string& _property) const;
-    glm::vec3       getColor(const std::string& _property, const glm::vec2& _uv) const;
+    glm::vec4       getColor(const std::string& _property, const glm::vec2& _uv) const;
     float           getValue(const std::string& _property, const glm::vec2& _uv) const;
-    glm::vec3       getColor(const std::string& _property) const;
+    glm::vec4       getColor(const std::string& _property) const;
     float           getValue(const std::string& _property) const;
 
     int             illuminationModel;      // illum
@@ -48,7 +49,7 @@ public:
 // private:
 
     std::map<const std::string, float>        values;
-    std::map<const std::string, glm::vec3>    colors;
+    std::map<const std::string, glm::vec4>    colors;
 
     std::map<const std::string, ImagePtr>     textures;
     std::map<const std::string, std::string>  texturesPaths;
