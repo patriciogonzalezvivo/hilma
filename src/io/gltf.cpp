@@ -333,7 +333,10 @@ Material extractMaterial(const tinygltf::Model& _model, const tinygltf::Material
     if (_material.pbrMetallicRoughness.baseColorTexture.index >= 0) {
         const tinygltf::Texture &tex = _model.textures[_material.pbrMetallicRoughness.baseColorTexture.index];
         const tinygltf::Image &image = _model.images[tex.source];
-        std::string name = image.name + "_" + image.uri + "_diffuse";
+        std::string name = image.name + "_" + image.uri;
+        if (name == "_")
+            name = _material.name;
+        name += "_diffuse";
 
         // Todo:
         //      - image.bits
@@ -351,7 +354,10 @@ Material extractMaterial(const tinygltf::Model& _model, const tinygltf::Material
     mat.set("emissive", glm::vec3(float(c[0]), float(c[1]), float(c[2])));
     if (_material.emissiveTexture.index >= 0) {
         const tinygltf::Image &image = _model.images[_model.textures[_material.emissiveTexture.index].source];
-        std::string name = image.name + "_" + image.uri + "_emissive";
+        std::string name = image.name + "_" + image.uri;
+        if (name == "_")
+            name = _material.name;
+        name += "_emissive";
 
         Image img = Image(&image.image[0], image.width, image.height, image.component);
         img.name = name;
@@ -371,6 +377,8 @@ Material extractMaterial(const tinygltf::Model& _model, const tinygltf::Material
 
         Image img = Image(&image.image[0], image.width, image.height, image.component);
         std::string name = image.name + "_" + image.uri;
+        if (name == "_")
+            name = _material.name;
 
         std::vector<Image> imgs = splitChannels(img);
         
@@ -378,6 +386,7 @@ Material extractMaterial(const tinygltf::Model& _model, const tinygltf::Material
             const tinygltf::Image &occlussionImage = _model.images[_model.textures[_material.occlusionTexture.index].source];
             if (image.uri != "" && image.uri == occlussionImage.uri) {
                 imgs[0].name = name + "_occlusion";
+                
                 mat.set("occlusion", imgs[0]);
                 isOcclusionRoughnessMetallic = true;
                 if (_verbose)
@@ -398,7 +407,10 @@ Material extractMaterial(const tinygltf::Model& _model, const tinygltf::Material
      // OCCLUSION
     if (!isOcclusionRoughnessMetallic && _material.occlusionTexture.index >= 0) {
         const tinygltf::Image &image = _model.images[_model.textures[_material.occlusionTexture.index].source];
-        std::string name = image.name + "_" + image.uri + "_occlusion";
+        std::string name = image.name + "_" + image.uri;
+        if (name == "_")
+            name = _material.name;
+        name += "_occlusion";
         
         Image img = Image(&image.image[0], image.width, image.height, image.component);
         img.name = name;
@@ -411,7 +423,10 @@ Material extractMaterial(const tinygltf::Model& _model, const tinygltf::Material
     // NORMALMAP
     if (_material.normalTexture.index >= 0) {
         const tinygltf::Image &image = _model.images[_model.textures[_material.normalTexture.index].source];
-        std::string name = image.name + "_" + image.uri + "_normalmap";
+        std::string name = image.name + "_" + image.uri;
+        if (name == "_")
+            name = _material.name;
+        name += "_normalmap";;
 
         Image img = Image(&image.image[0], image.width, image.height, image.component);
         img.name = name;
