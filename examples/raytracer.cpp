@@ -56,10 +56,6 @@ glm::vec3 ray_color(const Ray& _ray, const std::vector<Hittable>& _hittables, in
                 if (haveUV) uv = rec.triangle->getTexCoord(rec.barycentric);
                 // uv.x = 1.0f - uv.x;
 
-                // if ( rec.triangle->material->haveProperty("diffuse") )
-                //     if ( haveUV ) diffuse = rec.triangle->material->getColor("diffuse", uv);
-                //     else diffuse = rec.triangle->material->getColor("diffuse");
-                
                 if ( rec.triangle->material->haveProperty("emissive") )
                     if ( haveUV ) emissive = rec.triangle->material->getColor("emissive", uv);
                     else emissive = rec.triangle->material->getColor("emissive");
@@ -94,8 +90,8 @@ int main(int argc, char **argv) {
 
     // IMAGE
     const float aspect_ratio = 16.0f / 9.0f;
-    const int image_width = 1024 * 0.5;
-    const int samples = 10;
+    const int image_width = 1024;
+    const int samples = 50;
     const int maxDepth = 50;
     Image image = Image(image_width, static_cast<int>(image_width / aspect_ratio), 3);
 
@@ -106,6 +102,7 @@ int main(int argc, char **argv) {
     float dist_to_focus = glm::length(lookfrom-lookat);
     float dov = 35.0f;
     float aperture = 0.15;
+    aperture = 0.0;
 
     Camera cam = Camera(lookfrom, lookat, vup, dov, aspect_ratio, aperture, dist_to_focus);
 

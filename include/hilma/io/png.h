@@ -12,7 +12,9 @@ inline bool loadPng(const std::string& _filename, Image& _image, int _channels =
 }
 
 inline Image loadPng(const std::string& _filename, int _channels = 0) {
-    return load(_filename, _channels);
+    Image out;
+    load(_filename, out, _channels);
+    return out;
 }
 
 inline unsigned char* loadPng(const std::string& _filename, int* _width, int* _height, int* _channels) {

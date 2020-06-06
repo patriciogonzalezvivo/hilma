@@ -11,7 +11,9 @@ inline bool     loadJpg(const std::string& _filename, Image& _image, int _channe
 }
 
 inline Image    loadJpg(const std::string& _filename, int _channels = 0) {
-    return load(_filename, _channels);
+    Image out;
+    load(_filename, out, _channels);
+    return out;
 }
 
 inline unsigned char* loadJpg(const std::string& _filename, int* _width, int* _height, int* _channels) {

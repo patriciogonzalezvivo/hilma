@@ -191,9 +191,13 @@ glm::vec3 Triangle::getNormal(const glm::vec3& _barycenter) const {
 }
 
 glm::vec2 Triangle::getTexCoord(const glm::vec3& _barycenter) const {
-    return  getTexCoord(0) * _barycenter.x +
-            getTexCoord(1) * _barycenter.y +
-            getTexCoord(2) * _barycenter.z;
+    glm::vec2 uv =  getTexCoord(0) * _barycenter.x +
+                    getTexCoord(1) * _barycenter.y +
+                    getTexCoord(2) * _barycenter.z;
+    
+    uv.x = 1.0 - uv.x;
+
+    return uv;
 }
 
 glm::vec4 Triangle::getTangent(const glm::vec3& _barycenter ) const {
