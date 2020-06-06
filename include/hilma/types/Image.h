@@ -65,12 +65,7 @@ private:
     int                 height;
     int                 channels;
 
-    friend bool saveJpg( const std::string&, Image& );
-    friend bool loadJpg( const std::string&, Image&, int );
-    friend bool savePng( const std::string&, Image& );
-    friend bool loadPng( const std::string&, Image&, int );
-    friend bool saveHdr( const std::string&, Image& );
-    friend bool loadHdr( const std::string&, Image&, int );
+    friend bool load( const std::string&, Image&, int );
 };
 
 typedef std::shared_ptr<Image> ImagePtr;

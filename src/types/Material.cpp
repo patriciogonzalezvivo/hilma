@@ -1,8 +1,6 @@
 #include "hilma/types/Material.h"
 
-#include "hilma/io/jpg.h"
-#include "hilma/io/png.h"
-#include "hilma/io/hdr.h"
+#include "hilma/io/auto.h"
 #include "hilma/fs.h"
 
 namespace hilma {
@@ -22,20 +20,8 @@ void Material::set(const std::string& _property, const std::string& _filename) {
 
     if ( urlExists(_filename) ) {
         ImagePtr image = std::make_shared<Image>( Image() );
-        std::string ext = getExt(_filename);
-        bool loaded = false;
 
-        if (ext == "jpg" || ext == "JPG" || 
-            ext == "jpeg" || ext == "JPEG" )
-            loaded = loadJpg(_filename, *image);
-        else if (ext == "png" || ext == "PNG")
-            loaded = loadPng(_filename, *image);
-        else if (ext == "hdr" || ext == "HDR")
-            loaded = loadHdr(_filename, *image);
-        // TODO:
-        //      - add more image formats
-
-        if (loaded) {
+        if (load(_filename, *image)) {
             textures[_property] = image;
             properties[_property] = TEXTURE;
         }
@@ -63,6 +49,23 @@ std::string Material::getImagePath(const std::string& _property) const {
         return it->second;
 
     return "";
+}
+
+// ImagePtr Material::getImage(const std::string& _property) {
+//     const std::map<const std::string, ImagePtr>::const_iterator it = textures.find(_property);
+//     if (it != textures.end() )
+//         return it->second;
+
+//     return nullptr;
+// }
+
+Image Material::getImage(const std::string& _property) const {
+    const std::map<const std::string, ImagePtr>::const_iterator it = textures.find(_property);
+    if (it != textures.end() )
+        return *it->second;
+
+    Image none;
+    return none;
 }
 
 glm::vec3 Material::getColor(const std::string& _property, const glm::vec2& _uv) const {

@@ -1,5 +1,7 @@
 #include "hilma/io/obj.h"
 
+#include "hilma/io/auto.h"
+
 #include <stdio.h>
 #include <iostream>
 #include <limits>
@@ -80,25 +82,45 @@ bool saveMaterials(const std::string& _filename, const Mesh& _mesh) {
 
         for (size_t j = 0; j < mat_value_obj.size(); j++)
             if (mat->haveProperty(mat_value_name[j])) {
-                if (mat->getImagePath(mat_value_name[j]).size() > 0) 
-                    fprintf(mtl_file, "map_%s %s\n", mat_value_obj[j].c_str(), mat->getImagePath(mat_value_name[j]).c_str() );
+                std::string filename = mat->getImagePath(mat_value_name[j]);
+                if (filename.size() > 0) {
+                    fprintf(mtl_file, "map_%s %s\n", mat_value_obj[j].c_str(), filename.c_str() );
+                    if (!urlExists(filename)) {
+                        Image img = mat->getImage(mat_value_name[j]);
+                        save(filename, img);
+                    }
+                    std::cout << mat->getImagePath(mat_value_name[j]) << std::endl;
+                }
                 else
                     fprintf(mtl_file, "%s %.3f\n", mat_value_obj[j].c_str(), mat->getValue(mat_value_name[j]) );
             }
 
         for (size_t j = 0; j < mat_color_obj.size(); j++)
             if (mat->haveProperty(mat_color_name[j])) {
-                if (mat->getImagePath(mat_color_name[j]).size() > 0)
-                    fprintf(mtl_file, "map_%s %s\n", mat_color_obj[j].c_str(), mat->getImagePath(mat_color_name[j]).c_str() );
+                std::string filename = mat->getImagePath(mat_color_name[j]);
+                if (filename.size() > 0) {
+                    fprintf(mtl_file, "map_%s %s\n", mat_color_obj[j].c_str(), filename.c_str() );
+                    if (!urlExists(filename)) {
+                        Image img = mat->getImage(mat_color_name[j]);
+                        save(filename, img);
+                    }
+                }
                 else {
                     glm::vec3 color = mat->getColor(mat_color_name[j]);
                     fprintf(mtl_file, "%s %.3f %.3f %.3f\n", mat_color_obj[j].c_str(), color.r, color.g, color.b );
                 }
             }
 
-        for (size_t j = 0; j < mat_tex_obj.size(); j++)
-            if (mat->getImagePath(mat_tex_name[j]).size() > 0) 
-                fprintf(mtl_file, "map_%s %s\n", mat_tex_obj[j].c_str(), mat->getImagePath(mat_tex_name[j]).c_str() );
+        for (size_t j = 0; j < mat_tex_obj.size(); j++) {
+            std::string filename = mat->getImagePath(mat_tex_name[j]);
+            if (filename.size() > 0) {
+                fprintf(mtl_file, "map_%s %s\n", mat_tex_obj[j].c_str(),filename.c_str() );
+                if (!urlExists(filename)) {
+                    Image img = mat->getImage(mat_color_name[j]);
+                    save(filename, img);
+                }
+            }
+        }
 
         fprintf(mtl_file, "illum %i\n", mat->illuminationModel);
     }

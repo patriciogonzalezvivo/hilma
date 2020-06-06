@@ -21,6 +21,7 @@
 #include "hilma/io/jpg.h"
 #include "hilma/io/obj.h"
 #include "hilma/io/ply.h"
+#include "hilma/io/gltf.h"
 
 using namespace hilma;
 
@@ -158,12 +159,19 @@ int main(int argc, char **argv) {
     scene.push_back( Hittable(plane.getTriangles(), 0) );
     scene_mesh.append(plane);
 
-    Mesh head = loadPly("head.ply");
-    center(head);
-    scale(head, 0.15f);
-    translateY(head, 0.4f);
-    scene.push_back( Hittable(head.getTriangles(), branches) );
-    scene_mesh.append(head);
+    // Mesh head = loadPly("head.ply");
+    // center(head);
+    // scale(head, 0.15f);
+    // translateY(head, 0.4f);
+    // scene.push_back( Hittable(head.getTriangles(), branches) );
+    // scene_mesh.append(head);
+
+    Mesh helmet = Mesh("helmet");
+    loadGltf("helmet.glb", helmet);
+    center(helmet);
+    translateY(helmet, 0.4f);
+    scene.push_back( Hittable(helmet.getTriangles(), branches) );
+    scene_mesh.append(helmet);
 
     // Mesh icosphere = hilma::icosphere(0.5f, 2);
     // icosphere.setMaterial(metal);
@@ -172,24 +180,24 @@ int main(int argc, char **argv) {
     // scene.push_back( Hittable(icosphere.getTriangles(), branches) );
     // scene_mesh.append(icosphere);
 
-    Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
-    // cone.setMaterial(plastic);
-    // cone.setMaterial(metal);
-    cone.setMaterial(checker);
-    rotateX(cone, PI);
-    translateX(cone, -2.0f);
-    scene.push_back( Hittable(cone.getTriangles(), branches) );
-    scene_mesh.append(cone);
+    // Mesh cone = hilma::cone(0.5f, 1.f, 36, 1, 1);
+    // // cone.setMaterial(plastic);
+    // // cone.setMaterial(metal);
+    // cone.setMaterial(checker);
+    // rotateX(cone, PI);
+    // translateX(cone, -2.0f);
+    // scene.push_back( Hittable(cone.getTriangles(), branches) );
+    // scene_mesh.append(cone);
 
-    Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
-    // cylinder.setMaterial(metal);
-    cylinder.setMaterial(checker);
-    translateX(cylinder, 2.0f);
-    scene.push_back( Hittable(cylinder.getTriangles(), branches) );
-    scene_mesh.append(cylinder);
+    // Mesh cylinder = hilma::cylinder(0.5f, 1.f, 36, 1, 1, true);
+    // // cylinder.setMaterial(metal);
+    // cylinder.setMaterial(checker);
+    // translateX(cylinder, 2.0f);
+    // scene.push_back( Hittable(cylinder.getTriangles(), branches) );
+    // scene_mesh.append(cylinder);
 
     saveObj("raytracer.obj", scene_mesh);
-    savePly("raytracer.ply", scene_mesh, false);
+    // savePly("raytracer.ply", scene_mesh, false);
 
     // // RAYTRACE
     // //
@@ -214,45 +222,45 @@ int main(int argc, char **argv) {
 
     // savePng("raytracer.png", image);
 
-    // // PRINT NORMAL and ALBEDO FOR DENOISER
-    // cam = Camera(lookfrom, lookat, vup, dov, aspect_ratio, 0.0f, dist_to_focus);
+    // // // PRINT NORMAL and ALBEDO FOR DENOISER
+    // // cam = Camera(lookfrom, lookat, vup, dov, aspect_ratio, 0.0f, dist_to_focus);
 
-    // hilma::Image normal= Image(image);
-    // raytrace_multithread(normal, cam, scene, 10, 1, [](const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
-    //     HitRecord rec;
-    //     if ( hit(_ray, 0.001, 1000.0, _hittables, rec) )
-    //         if (rec.triangle != nullptr)
-    //             return rec.triangle->getNormal(rec.barycentric);
+    // // hilma::Image normal= Image(image);
+    // // raytrace_multithread(normal, cam, scene, 10, 1, [](const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
+    // //     HitRecord rec;
+    // //     if ( hit(_ray, 0.001, 1000.0, _hittables, rec) )
+    // //         if (rec.triangle != nullptr)
+    // //             return rec.triangle->getNormal(rec.barycentric);
         
-    //     return glm::vec3(0.0f);
-    // } );
-    // savePng("raytracer_normal.png", normal);
+    // //     return glm::vec3(0.0f);
+    // // } );
+    // // savePng("raytracer_normal.png", normal);
 
-    // hilma::Image albedo = Image(image);
-    // raytrace_multithread(albedo, cam, scene, 10, 1, [](const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
-    //     HitRecord rec;
-    //     if ( hit(_ray, 0.001, 1000.0, _hittables, rec) ) {
-    //         glm::vec3 attenuation = glm::vec3(1.0f);
+    // // hilma::Image albedo = Image(image);
+    // // raytrace_multithread(albedo, cam, scene, 10, 1, [](const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
+    // //     HitRecord rec;
+    // //     if ( hit(_ray, 0.001, 1000.0, _hittables, rec) ) {
+    // //         glm::vec3 attenuation = glm::vec3(1.0f);
 
-    //         if (rec.triangle != nullptr) {
-    //             if (rec.triangle->material != nullptr) {
-    //                 bool haveUV = rec.triangle->haveTexCoords();
-    //                 glm::vec2 uv;
-    //                 if (haveUV) uv = rec.triangle->getTexCoord(rec.barycentric);
-    //                 uv.x = 1.0f - uv.x;
-    //                 if ( rec.triangle->material->haveProperty("diffuse") )
-    //                     if ( haveUV ) attenuation = rec.triangle->material->getColor("diffuse", uv);
-    //                     else attenuation = rec.triangle->material->getColor("diffuse");
-    //             }
-    //         }
-    //         return attenuation;
-    //     }
-    //     return glm::vec3(0.0f);
-    // } );
-    // savePng("raytracer_albedo.png", albedo);
+    // //         if (rec.triangle != nullptr) {
+    // //             if (rec.triangle->material != nullptr) {
+    // //                 bool haveUV = rec.triangle->haveTexCoords();
+    // //                 glm::vec2 uv;
+    // //                 if (haveUV) uv = rec.triangle->getTexCoord(rec.barycentric);
+    // //                 uv.x = 1.0f - uv.x;
+    // //                 if ( rec.triangle->material->haveProperty("diffuse") )
+    // //                     if ( haveUV ) attenuation = rec.triangle->material->getColor("diffuse", uv);
+    // //                     else attenuation = rec.triangle->material->getColor("diffuse");
+    // //             }
+    // //         }
+    // //         return attenuation;
+    // //     }
+    // //     return glm::vec3(0.0f);
+    // // } );
+    // // savePng("raytracer_albedo.png", albedo);
 
-    // Image denoised = denoise(image, normal, albedo, true);
-    // savePng("raytracer_denoised.png", denoised);
+    // // Image denoised = denoise(image, normal, albedo, true);
+    // // savePng("raytracer_denoised.png", denoised);
 
     return 0;
 }

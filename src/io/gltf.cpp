@@ -1,12 +1,12 @@
 #include "hilma/io/gltf.h"
+
+#include "hilma/io/auto.h"
 #include "hilma/io/jpg.h"
 #include "hilma/io/png.h"
 #include "hilma/io/hdr.h"
+
 #include "hilma/math.h"
 #include "hilma/fs.h"
-
-// #include <stdio.h>
-// #include <cstring>
 
 #include <iostream>
 #include <fstream>
@@ -40,71 +40,46 @@ namespace hilma {
 //
 bool load(const std::string& _filename, Image& _image, int _channels) {
     int width, height, channels;
-    uint16_t* pixels = stbi_load_16(_filename.c_str(), &width, &height, &channels, _channels);
-    
-    if (!pixels)
-        return false;
+    std::string ext = getExt(_filename);
 
-    _image.allocate(width, height, channels);
-    int total = width * height * channels;
-    const float m = 1.f / 65535.f;
-    for (int i = 0; i < total; i++)
-        _image.setValue(i, float(pixels[i]) * m);
+    if (ext == "hdr" || ext == "HDR") {
+        float *pixels = stbi_loadf(_filename.c_str(), &width, &height, &channels, _channels);
 
-    _image.name = getFilename( _filename );
-    
-    delete pixels;
-    return true;
-}
+        if (!pixels)
+            return false;
 
-bool loadPng(const std::string& _filename, Image& _image, int _channels) {
-    return load(_filename, _image, _channels);
-}
+        _image.allocate(width, height, channels);
+        int total = width * height * channels;
+        if (total != _image.data.size())
+            _image.data.resize(total);
+        std::memcpy(&_image.data[0], pixels, total * sizeof(float));
+        _image.name = getFilename( _filename );
 
-Image loadPng(const std::string& _filename, int _channels) {
-    Image out;
-    load(_filename, out, _channels);
-    return out;
-}
+        return true;
+    }
+    else {
+        uint16_t* pixels = stbi_load_16(_filename.c_str(), &width, &height, &channels, _channels);
+        
+        if (!pixels)
+            return false;
 
-unsigned char* loadPng(const std::string& _filename, int* _width, int* _height, int* _channels) {
-    return stbi_load(_filename.c_str(), _width, _height, _channels, 0);
-}
+        _image.allocate(width, height, channels);
+        int total = width * height * channels;
+        const float m = 1.f / 65535.f;
+        for (int i = 0; i < total; i++)
+            _image.setValue(i, float(pixels[i]) * m);
 
-bool loadJpg(const std::string& _filename, Image& _image, int _channels) {
-    _image.name = getFilename( _filename );
-    return load(_filename, _image, _channels);
-}
+        delete pixels;
 
-Image loadJpg(const std::string& _filename, int _channels) {
-    Image out;
-    load(_filename, out, _channels);
-    return out;
-}
+    }
 
-unsigned char* loadJpg(const std::string& _filename, int* _width, int* _height, int* _channels) {
-    return stbi_load(_filename.c_str(), _width, _height, _channels, 0);
-}
-
-bool loadHdr(const std::string& _filename, Image& _image, int _channels ) {
-    float *pixels = stbi_loadf(_filename.c_str(), &_image.width, &_image.height, &_image.channels, _channels);
-
-    if (!pixels)
-        return false;
-
-    int total = _image.width * _image.height * _image.channels;
-    if (total != _image.data.size())
-        _image.data.resize(total);
-    std::memcpy(&_image.data[0], pixels, total * sizeof(float));
     _image.name = getFilename( _filename );
 
     return true;
 }
 
-Image   loadHdr(const std::string& _filename, int _channel) {
-    Image out;
-    loadHdr(_filename, out, _channel);
-    return out;
+unsigned char*  load(const std::string& _filename, int* _width, int* _height, int* _channels) {
+    return stbi_load(_filename.c_str(), _width, _height, _channels, 0);
 }
 
 float* loadHdr(const std::string& _filename, int* _width, int* _height, int* _channels) {
@@ -114,12 +89,13 @@ float* loadHdr(const std::string& _filename, int* _width, int* _height, int* _ch
 
 // IMAGE SAVE
 //
+
 bool saveHdr(const std::string& _filename, const float* _pixels, int _width, int _height, int _channels) {
     return stbi_write_hdr(_filename.c_str(), _width, _height, _channels, _pixels);
 }
 
 bool saveHdr(const std::string& _filename, Image& _image) {
-    return stbi_write_hdr(_filename.c_str(), _image.width, _image.height, _image.channels, &_image.data[0]);
+    return stbi_write_hdr(_filename.c_str(), _image.getWidth(), _image.getHeight(), _image.getChannels(), &_image[0]);
 }
 
 bool savePng(const std::string& _filename, const unsigned char* _pixels, int _width, int _height, int _channels) {
@@ -127,11 +103,11 @@ bool savePng(const std::string& _filename, const unsigned char* _pixels, int _wi
 }
 
 bool savePng(const std::string& _filename, Image& _image) {
-    int total = _image.width * _image.height * _image.channels;
+    int total = _image.getWidth() * _image.getHeight() * _image.getChannels();
     unsigned char* pixels = new unsigned char[total];
     for (int i = 0; i < total; i++)
-        pixels[i] = static_cast<char>(256 * clamp(_image.data[i], 0.0f, 0.999f));
-    savePng(_filename, pixels, _image.width, _image.height, _image.channels);
+        pixels[i] = static_cast<char>(256 * clamp(_image[i], 0.0f, 0.999f));
+    savePng(_filename, pixels, _image.getWidth(), _image.getHeight(), _image.getChannels());
     delete [] pixels;
 
     return true;
@@ -142,16 +118,32 @@ bool saveJpg(const std::string& _filename, const unsigned char* _pixels, int _wi
 }
 
 bool saveJpg(const std::string& _filename, Image& _image) {
-    int total = _image.width * _image.height * _image.channels;
+    int total = _image.getWidth() * _image.getHeight() * _image.getChannels();
     unsigned char* pixels = new unsigned char[total];
     for (int i = 0; i < total; i++)
-        pixels[i] = static_cast<char>(256 * clamp(_image.data[i], 0.0, 0.999));
-    saveJpg(_filename, pixels, _image.width, _image.height, _image.channels);
+        pixels[i] = static_cast<char>(256 * clamp(_image[i], 0.0, 0.999));
+    saveJpg(_filename, pixels, _image.getWidth(), _image.getHeight(), _image.getChannels());
     delete [] pixels;
 
     return true;
 }
 
+bool save(const std::string& _filename, Image& _image) {
+    std::string ext = getExt(_filename);
+
+    if (ext == "hdr" || ext == "HDR") {
+        return saveHdr(_filename, _image);
+    }
+    else if (ext == "png" || ext == "PNG") {
+        return savePng(_filename, _image);
+    }
+    else if (ext == "jpg" || ext == "JPG" || 
+             ext == "jpg" || ext == "JPG" ) {
+        return saveJpg(_filename, _image);
+    }
+
+    return false;
+}
 
 
 // bool savePng16(const std::string& _filename, uint16_t* _pixels, int _width, int _height, int _channels) {
@@ -341,7 +333,7 @@ Material extractMaterial(const tinygltf::Model& _model, const tinygltf::Material
     if (_material.pbrMetallicRoughness.baseColorTexture.index >= 0) {
         const tinygltf::Texture &tex = _model.textures[_material.pbrMetallicRoughness.baseColorTexture.index];
         const tinygltf::Image &image = _model.images[tex.source];
-        std::string name = image.name + "_" + image.uri;
+        std::string name = image.name + "_" + image.uri + "_diffuse";
 
         // Todo:
         //      - image.bits
@@ -359,7 +351,7 @@ Material extractMaterial(const tinygltf::Model& _model, const tinygltf::Material
     mat.set("emissive", glm::vec3(float(c[0]), float(c[1]), float(c[2])));
     if (_material.emissiveTexture.index >= 0) {
         const tinygltf::Image &image = _model.images[_model.textures[_material.emissiveTexture.index].source];
-        std::string name = image.name + "_" + image.uri;
+        std::string name = image.name + "_" + image.uri + "_emissive";
 
         Image img = Image(&image.image[0], image.width, image.height, image.component);
         img.name = name;
@@ -406,10 +398,10 @@ Material extractMaterial(const tinygltf::Model& _model, const tinygltf::Material
      // OCCLUSION
     if (!isOcclusionRoughnessMetallic && _material.occlusionTexture.index >= 0) {
         const tinygltf::Image &image = _model.images[_model.textures[_material.occlusionTexture.index].source];
-        std::string name = image.name + "_" + image.uri;
+        std::string name = image.name + "_" + image.uri + "_occlusion";
         
         Image img = Image(&image.image[0], image.width, image.height, image.component);
-        img.name = image.name + "_" + image.uri;
+        img.name = name;
         
         mat.set("occlusion", img);
         if (_verbose)
@@ -419,10 +411,10 @@ Material extractMaterial(const tinygltf::Model& _model, const tinygltf::Material
     // NORMALMAP
     if (_material.normalTexture.index >= 0) {
         const tinygltf::Image &image = _model.images[_model.textures[_material.normalTexture.index].source];
-        std::string name = image.name + "_" + image.uri;
+        std::string name = image.name + "_" + image.uri + "_normalmap";
 
         Image img = Image(&image.image[0], image.width, image.height, image.component);
-        img.name = image.name + "_" + image.uri;
+        img.name = name;
         
         mat.set("normalmap", img);
         if (_verbose)
