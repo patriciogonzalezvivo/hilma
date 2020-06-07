@@ -52,6 +52,7 @@
     #include "hilma/io/stl.h"
     #include "hilma/io/obj.h"
     #include "hilma/io/gltf.h"
+    #include "hilma/io/auto.h"
 %}
 
 %include "glm.i"
@@ -134,6 +135,7 @@ namespace std {
 %include "include/hilma/io/stl.h"
 %include "include/hilma/io/obj.h"
 %include "include/hilma/io/gltf.h"
+%include "include/hilma/io/auto.h"
 
 // using namespace hilma;
 
