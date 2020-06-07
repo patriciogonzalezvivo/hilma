@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
     savePng("img_lumma_sdf.png", luma_sdf);
 
     Image heightmap = loadPng("gale.png", 1);
-    Image normalmap = toNormalMap(heightmap, -10.0);
+    Image normalmap = toNormalmap(heightmap, -10.0);
     savePng("normalmap.png", normalmap);
     
     return 1;

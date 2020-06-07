@@ -6,7 +6,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from hilma import Image, loadJpg, loadPng, savePng, gamma, invert, autolevel, threshold, flip, toLuma, toSdf, toNormalMap
+from hilma import Image, loadJpg, loadPng, savePng, gamma, invert, autolevel, threshold, flip, toLuma, toSdf, toNormalmap
 
 import cv2
 
@@ -49,6 +49,6 @@ luma_sdf = toSdf(luma_threshold)
 savePng("img_lumma_sdf.png", luma_sdf)
 
 heightmap = loadPng("gale.png", 1)
-normalmap = toNormalMap(heightmap, -10.0)
+normalmap = toNormalmap(heightmap, -10.0)
 savePng("normalmap.png", normalmap)
     

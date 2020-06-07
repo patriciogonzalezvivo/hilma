@@ -312,7 +312,7 @@ Image toSdf(const Image& _image, float _on) {
     return out;
 }
 
-Image toNormalMap(const Image& _heightmap, float _zScale) {
+Image toNormalmap(const Image& _heightmap, float _zScale) {
     const int w = _heightmap.getWidth() - 1;
     const int h = _heightmap.getHeight() - 1;
     std::vector<glm::vec3> result(w * h);
