@@ -5,24 +5,35 @@ from .hilma import *
 import importlib
 bpy_found = importlib.util.find_spec("bpy")
 
-def toBlenderImage(_name, _imgage):
+def toBlenderImage(_name, _image):
     if bpy_found is None:
         raise Exception('hilma.toBlenderImage() requires Blender enviroment')
 
     import bpy
+    from itertools import chain
 
     if _name in bpy.data.images:
         bimage = bpy.data.images[_name]
     else:
         bimage = bpy.data.images.new(_name, _image.getWidth(), _image.getHeight(), alpha=True)
 
-    def feedPixels(img):
+    def feedGrayscalePixels(img):
         for y in range(img.getHeight()):
             for x in range(img.getWidth()):
                 v = img.getValue( img.getIndex(x,y) )
                 yield v, v, v, 1.0
+
+    def feedColorPixels(img):
+        for y in range(img.getHeight()):
+            for x in range(img.getWidth()):
+                v = img.getColor( img.getIndex(x,y) )
+                yield v[0], v[1], v[2], v[3]
             
-    bimage.pixels = tuple(chain.from_iterable(feedPixels(_image)))
+    if _image.getChannels() == 1:
+        bimage.pixels = tuple(chain.from_iterable(feedGrayscalePixels(_image)))
+    else:
+        bimage.pixels = tuple(chain.from_iterable(feedColorPixels(_image)))
+
     bimage.update()
 
 
