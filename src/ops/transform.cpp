@@ -68,7 +68,8 @@ void translateY(std::vector<glm::vec3>& _points, const Image& _grayscale) {
     int width = _grayscale.getWidth();
     int height = _grayscale.getHeight();
     for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it) {
-        int index = _grayscale.getIndex(int(it->x) % width, int(it->z) % height);
+        int index = _grayscale.getIndex(int( clamp(it->x, 0.0f, width) ), 
+                                        int( clamp(it->z, 0.0f, height)) );
         it->y += _grayscale.getValue(index);
     }
 }
@@ -80,7 +81,8 @@ void translateZ(std::vector<glm::vec3>& _points, const Image& _grayscale) {
     int width = _grayscale.getWidth();
     int height = _grayscale.getHeight();
     for (std::vector<glm::vec3>::iterator it = _points.begin(); it != _points.end(); ++it) {
-        int index = _grayscale.getIndex(int(it->x) % width, int(it->y) % height);
+        int index = _grayscale.getIndex(int( clamp(it->x, 0.0f, width) ), 
+                                        int( clamp(it->y, 0.0f, height)) );
         it->z += _grayscale.getValue(index);
     }
 }
