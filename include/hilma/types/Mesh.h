@@ -85,6 +85,7 @@ public:
 
     const bool  haveColors() const { return !colors.empty(); }
     size_t      getColorsTotal() const { return colors.size(); }
+    const glm::vec4&    getColor(size_t _index) const { return colors[_index]; }
     const std::vector<glm::vec4>& getColors() const { return colors; }
 
     // Normals

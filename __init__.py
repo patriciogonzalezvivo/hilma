@@ -130,7 +130,7 @@ def toBlenderMesh(_name, _mesh, _collection_name="Collection"):
     if _mesh.haveColors():
         vcol_lay = bmesh.vertex_colors.new()
         for i, col in enumerate(vcol_lay.data):
-            color = _mesh.getColor( _mesh.getFaceIndex(i) )
+            color = _mesh.getColors( _mesh.getFaceIndex(i) )
             col.color[0] = color.r
             col.color[1] = color.g
             col.color[2] = color.b
