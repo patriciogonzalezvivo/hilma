@@ -56,7 +56,11 @@ bool hit(const Ray& _ray, float _minDistance, float _maxDistance, const std::vec
 bool hit(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Triangle>& _triangles, HitRecord& _rec);
 bool hit(const Ray& _ray, float _minDistance, float _maxDistance, const std::vector<Hittable>& _hittables, HitRecord& _rec);
 
-void raytrace(Image& _image, const Camera& _cam, const std::vector<Hittable>& _scene, int _samples, int _maxDepth, std::function<glm::vec3(const Ray&, const std::vector<Hittable>&, int)> _rayColor);
-void raytrace_multithread(Image& _image, const Camera& _cam, const std::vector<Hittable>& _scene, int _samples, int _maxDepth, std::function<glm::vec3(const Ray&, const std::vector<Hittable>&, int)> _rayColor);
+glm::vec3 default_rayColor(const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth);
+glm::vec3 albedo_rayColor(const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth);
+glm::vec3 normal_rayColor(const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth);
+
+void raytrace(Image& _image, const Camera& _cam, const std::vector<Hittable>& _scene, int _samples, int _maxDepth, std::function<glm::vec3(const Ray&, const std::vector<Hittable>&, int)> _rayColor = default_rayColor);
+void raytrace_multithread(Image& _image, const Camera& _cam, const std::vector<Hittable>& _scene, int _samples, int _maxDepth, std::function<glm::vec3(const Ray&, const std::vector<Hittable>&, int)> _rayColor = default_rayColor);
 
 }

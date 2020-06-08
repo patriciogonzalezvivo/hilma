@@ -192,12 +192,6 @@ bool loadStl( const std::string& _filename, Mesh& _mesh ) {
         return true;
 }
 
-Mesh loadStl( const std::string& _filename) {
-    Mesh mesh;
-    loadStl(_filename, mesh);
-    return mesh;
-}
-
 bool saveStl( const std::string& _filename, const Mesh& _mesh, bool _binnary ) {
     std::vector<Triangle> triangles = _mesh.getTriangles();
 

@@ -144,6 +144,7 @@ public:
     
     const bool  haveFaceIndices() const { return !faceIndices.empty(); }
     size_t      getFaceIndicesTotal() const { return faceIndices.size(); }
+    const std::vector<INDEX_TYPE>& getFaceIndices() const { return faceIndices; }
     void        clearFaceIndices() { faceIndices.clear(); }
     void        invertWindingOrder();
 

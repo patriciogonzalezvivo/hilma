@@ -232,8 +232,88 @@ bool Hittable::hit(const Ray& _ray, float _minDistance, float _maxDistance, HitR
     return hit_anything;
 }
 
+glm::vec3 default_rayColor(const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
+    if (_depth <= 0)
+        return glm::vec3(0.0f);
 
+    HitRecord rec;
+    if ( hit(_ray, 0.001, 1000.0, _hittables, rec) ) {
 
+        if (!rec.frontFace)
+            return glm::vec3(0.0f);
+
+        if (rec.line != nullptr)
+            return glm::vec3(2.0f);
+
+        glm::vec3 diffuse = glm::vec3(1.0f);
+        glm::vec3 emissive = glm::vec3(0.0f);
+        glm::vec3 normal = rec.normal;
+        float opacity = 1.0f;
+        float metallic = 0.0f;
+        float roughtness = 1.0f;
+
+        if (rec.triangle != nullptr) {
+            normal = rec.triangle->getNormal(rec.barycentric);
+            diffuse = rec.triangle->getColor(rec.barycentric);
+
+            if (rec.triangle->material != nullptr) {
+                bool haveUV = rec.triangle->haveTexCoords();
+                glm::vec2 uv;
+
+                if (haveUV) uv = rec.triangle->getTexCoord(rec.barycentric);
+                // uv.x = 1.0f - uv.x;
+
+                if ( rec.triangle->material->haveProperty("emissive") )
+                    if ( haveUV ) emissive = rec.triangle->material->getColor("emissive", uv);
+                    else emissive = rec.triangle->material->getColor("emissive");
+                
+                if ( rec.triangle->material->haveProperty("roughness") )
+                    roughtness = rec.triangle->material->getValue("roughness", uv);
+
+                if ( rec.triangle->material->haveProperty("metallic") )
+                    metallic = rec.triangle->material->getValue("metallic", uv);
+
+                if ( rec.triangle->material->haveProperty("opacity") )
+                    opacity = rec.triangle->material->getValue("opacity", uv);
+            }
+        }
+
+        glm::vec3 dir = glm::normalize(_ray.getDirection());
+        glm::vec3 reflected = glm::reflect(dir, normal);
+        glm::vec3 target = glm::mix(normal, reflected, metallic);
+        target += random_unit_vector() * roughtness;
+
+        Ray scattered(rec.position, target);
+        return emissive + diffuse * default_rayColor( scattered, _hittables, _depth-1 );
+    }
+
+    return glm::vec3(0.0f);
+    // glm::vec3 unit_direction = normalize(_ray.getDirection() );
+    // float t = 0.5f * (unit_direction.y + 1.0f);
+    // return glm::mix(glm::vec3(1.0f), glm::vec3(0.5f, 0.7f, 1.0f), t);
+}
+
+glm::vec3 albedo_rayColor(const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
+    HitRecord rec;
+    if ( hit(_ray, 0.001, 1000.0, _hittables, rec) ) {
+        glm::vec3 diffuse = glm::vec3(1.0f);
+
+        if (rec.triangle != nullptr)
+            diffuse = rec.triangle->getColor(rec.barycentric);
+        
+        return diffuse;
+    }
+    return glm::vec3(0.0f);
+}
+
+glm::vec3 normal_rayColor(const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
+    HitRecord rec;
+    if ( hit(_ray, 0.001, 1000.0, _hittables, rec) )
+        if (rec.triangle != nullptr)
+            return rec.triangle->getNormal(rec.barycentric);
+    
+    return glm::vec3(0.0f);
+}
 
 void raytrace(  Image& _image, const Camera& _cam, const std::vector<Hittable>& _scene, int _samplesPerPixel, int _maxDepth, 
                 std::function<glm::vec3(const Ray&, const std::vector<Hittable>&, int)> _rayColor) {

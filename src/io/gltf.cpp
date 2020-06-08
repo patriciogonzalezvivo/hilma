@@ -253,18 +253,29 @@ bool loadModel(tinygltf::Model& _model, const std::string& _filename) {
     return res;
 }
 
-FaceType extractFaceType(const tinygltf::Primitive& _primitive) {
-    if (_primitive.mode == TINYGLTF_MODE_TRIANGLES)
-      return TRIANGLES;
-    else if (_primitive.mode == TINYGLTF_MODE_TRIANGLE_STRIP)
-      return TRIANGLE_STRIP;
-    else if (_primitive.mode == TINYGLTF_MODE_TRIANGLE_FAN)
-      return TRIANGLE_FAN;
+int toPrimitiveMode(const FaceType& _type) {
+    if (_type == TRIANGLES)
+        return TINYGLTF_MODE_TRIANGLES;
+    else if (_type == TRIANGLE_STRIP)
+        return TINYGLTF_MODE_TRIANGLE_STRIP;
+    else if (_type == TRIANGLE_FAN)
+        return TINYGLTF_MODE_TRIANGLE_FAN;
     else
-      return POINTS;
+      return TINYGLTF_MODE_POINTS;
 }
 
-EdgeType extractEdgeType(const tinygltf::Primitive& _primitive) {
+FaceType toFaceType(const tinygltf::Primitive& _primitive) {
+    if (_primitive.mode == TINYGLTF_MODE_TRIANGLES)
+        return TRIANGLES;
+    else if (_primitive.mode == TINYGLTF_MODE_TRIANGLE_STRIP)
+        return TRIANGLE_STRIP;
+    else if (_primitive.mode == TINYGLTF_MODE_TRIANGLE_FAN)
+        return TRIANGLE_FAN;
+    else
+        return POINTS;
+}
+
+EdgeType toEdgeType(const tinygltf::Primitive& _primitive) {
     if (_primitive.mode == TINYGLTF_MODE_LINE)
       return LINES;
     // else if (_primitive.mode == TINYGLTF_MODE_LINE_LOOP)
@@ -273,7 +284,7 @@ EdgeType extractEdgeType(const tinygltf::Primitive& _primitive) {
       return UNDEFINED_EDGE;
 }
 
-void extractIndices(const tinygltf::Model& _model, const tinygltf::Accessor& _indexAccessor, Mesh& _mesh) {
+void extractFaceIndices(const tinygltf::Model& _model, const tinygltf::Accessor& _indexAccessor, Mesh& _mesh) {
     const tinygltf::BufferView &buffer_view = _model.bufferViews[_indexAccessor.bufferView];
     const tinygltf::Buffer &buffer = _model.buffers[buffer_view.buffer];
     const uint8_t* base = &buffer.data.at(buffer_view.byteOffset + _indexAccessor.byteOffset);
@@ -457,8 +468,8 @@ void extractMesh(const tinygltf::Model& _model, const tinygltf::Mesh& _mesh, glm
 
         Mesh mesh;
         if (primitive.indices >= 0)
-            extractIndices(_model, _model.accessors[primitive.indices], mesh);
-        mesh.setFaceType( extractFaceType(primitive) );
+            extractFaceIndices(_model, _model.accessors[primitive.indices], mesh);
+        mesh.setFaceType( toFaceType(primitive) );
 
         // Extract Vertex Data
         for (auto &attrib : primitive.attributes) {
@@ -603,6 +614,153 @@ bool    loadGltf( const std::string& _filename, Mesh& _mesh ) {
         extractNodes(model, model.nodes[scene.nodes[i]], glm::mat4(1.0), _mesh, false);
 
     return true;
+}
+
+bool convertMesh( const Mesh& _inMesh, tinygltf::Model& _outModel) {
+    tinygltf::Mesh mesh = tinygltf::Mesh();
+    mesh.name = _inMesh.getName();
+
+    int iVertices = -1;
+    int iFaces = -1;
+    int iColors = -1;
+    int iNormals = -1;
+    int iTexCoords = -1;
+
+    // Vertices
+    {
+        tinygltf::Buffer        verticesBuffer = tinygltf::Buffer();
+        tinygltf::BufferView    verticesView = tinygltf::BufferView();
+        tinygltf::Accessor      verticesAccessor = tinygltf::Accessor();
+
+        // give the buffer a unique name and address
+        verticesBuffer.name = _inMesh.getName() + "_vertices";
+        // verticesBuffer.uri = _inMesh.getName() + "_vertices.bin";
+        // Convert vector of vec3 to binnaty 
+        const unsigned char* bytes = reinterpret_cast<const unsigned char*>(&_inMesh.getVertices()[0].x);
+        verticesView.target = TINYGLTF_TARGET_ARRAY_BUFFER;
+        verticesView.byteOffset = 0;
+        // verticesView.byteStride = sizeof(float) * 3;
+        verticesView.byteLength = sizeof(float) * 3 * _inMesh.getVerticesTotal();
+        verticesBuffer.data = std::vector<unsigned char>(   bytes + verticesView.byteOffset, 
+                                                            bytes + verticesView.byteOffset + verticesView.byteLength);
+        // Assigne the position on the vector of buffers where it will store
+        verticesView.buffer = _outModel.buffers.size();
+        _outModel.buffers.push_back(verticesBuffer);
+
+        // Assign the position of the vector of bufferViews wher it will be store
+        verticesAccessor.bufferView = _outModel.bufferViews.size();
+        _outModel.bufferViews.push_back(verticesView);
+        verticesAccessor.byteOffset = 0;
+        verticesAccessor.type = TINYGLTF_TYPE_VEC3;
+        verticesAccessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
+        verticesAccessor.count = _inMesh.getVerticesTotal();
+        verticesAccessor.normalized = false;
+
+        BoundingBox bbox = getBoundingBox(_inMesh);
+        verticesAccessor.minValues = {bbox.min.x, bbox.min.y, bbox.min.z};
+        verticesAccessor.maxValues = {bbox.max.x, bbox.max.y, bbox.max.z};
+
+        iVertices = _outModel.accessors.size();
+        
+        _outModel.accessors.push_back(verticesAccessor);
+    }
+
+    // Indices
+    if ( _inMesh.haveFaceIndices() ) {
+        tinygltf::Buffer        facesBuffer = tinygltf::Buffer();
+        tinygltf::BufferView    facesView = tinygltf::BufferView();
+        tinygltf::Accessor      facesAccessor = tinygltf::Accessor();
+
+        // give the buffer a unique name and address
+        facesBuffer.name = _inMesh.getName() + "_facesBuffer";
+        // facesBuffer.uri = _inMesh.getName() + "_faces.bin";
+
+        // Convert to a binnary buffer
+        const unsigned char* bytes = reinterpret_cast<const unsigned char*>(&_inMesh.getFaceIndices()[0]);
+        // facesView.name = _inMesh.getName() + "_facesView";
+        facesView.target = TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER;
+        facesView.byteOffset = 0;
+        // facesView.byteStride = sizeof(INDEX_TYPE);
+        facesView.byteLength = sizeof(INDEX_TYPE) * _inMesh.getFaceIndicesTotal();
+        facesBuffer.data = std::vector<unsigned char>(  bytes + facesView.byteOffset, 
+                                                        bytes + facesView.byteOffset + facesView.byteLength );
+        // Reference the buffer on the viewer
+        facesView.buffer = _outModel.buffers.size();
+        _outModel.buffers.push_back(facesBuffer);
+
+        // Reference the view on the accessor
+        facesAccessor.name = _inMesh.getName() + "_facesAccessor";
+        facesAccessor.bufferView = _outModel.bufferViews.size();
+        _outModel.bufferViews.push_back(facesView);
+        facesAccessor.byteOffset = 0;
+        facesAccessor.type = TINYGLTF_TYPE_SCALAR;
+        facesAccessor.count = _inMesh.getFaceIndicesTotal();
+        facesAccessor.normalized = false;
+#if defined(PLATFORM_RPI)
+#define INDEX_TYPE uint16_t
+        facesAccessor.componentType = TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT;
+#else
+#define INDEX_TYPE uint32_t
+        facesAccessor.componentType = TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT;
+#endif
+
+        // Reference the data on the primitive
+        iFaces = _outModel.accessors.size();
+        _outModel.accessors.push_back(facesAccessor);
+    }
+    tinygltf::Primitive faces = tinygltf::Primitive();
+    faces.mode = toPrimitiveMode( _inMesh.getFaceType() );
+
+    faces.attributes["POSITION"] = iVertices;
+    
+    tinygltf::Material mat = tinygltf::Material();
+    mat.name = "default_material";
+    mat.emissiveFactor = {0.0, 0.0, 0.0};       // length 3. default [0, 0, 0]
+    mat.alphaMode   = "OPAQUE";                 // default "OPAQUE"
+    mat.alphaCutoff = 0.5;                      // default 0.5
+    mat.doubleSided = false;                    // default false;
+    mat.pbrMetallicRoughness = tinygltf::PbrMetallicRoughness();
+    int iMat = _outModel.materials.size();
+    _outModel.materials.push_back(mat);
+
+    if (iFaces >= 0) faces.indices = iFaces;
+    faces.material = iMat;
+    mesh.primitives.push_back(faces);
+
+    tinygltf::Node node = tinygltf::Node();
+    node.name = "meshNode";
+    node.mesh = _outModel.meshes.size(); 
+    _outModel.meshes.push_back(mesh);
+    int aNode = _outModel.nodes.size();
+    _outModel.nodes.push_back(node);
+
+    tinygltf::Scene scene = tinygltf::Scene();
+    scene.name = "root";
+    scene.nodes.push_back( aNode);
+    _outModel.scenes.push_back(scene);
+
+    return true;
+}
+
+bool saveGltf( const std::string& _filename, const Mesh& _mesh ) {
+    tinygltf::Model model = tinygltf::Model();
+    model.asset = tinygltf::Asset();
+    model.asset.version = "2.0";
+    model.asset.generator = "Genereted using Hilma C++/Python Library";
+    model.asset.copyright = "2020 (c) Patricio Gonzalez Vivo";
+
+    std::string ext = getExt(_filename);
+    bool bin = (ext == "glb" || ext == "GLB");
+
+    convertMesh(_mesh, model);
+
+    tinygltf::TinyGLTF gltf = tinygltf::TinyGLTF();
+    return gltf.WriteGltfSceneToFile(   &model, 
+                                        _filename,
+                                        bin,       // embedBuffer
+                                        bin,       // embedImagess
+                                        !bin,       // prettyPrint
+                                        bin );    // writeBinary
 }
 
 }

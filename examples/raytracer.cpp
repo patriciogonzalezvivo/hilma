@@ -16,6 +16,7 @@
 #include "hilma/ops/transform.h"
 #include "hilma/ops/raytrace.h"
 #include "hilma/ops/intersection.h"
+#include "hilma/ops/convert_image.h"
 
 #include "hilma/io/png.h"
 #include "hilma/io/jpg.h"
@@ -25,73 +26,12 @@
 
 using namespace hilma;
 
-glm::vec3 ray_color(const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
-    if (_depth <= 0)
-        return glm::vec3(0.0f);
-
-    HitRecord rec;
-    if ( hit(_ray, 0.001, 1000.0, _hittables, rec) ) {
-
-        if (!rec.frontFace)
-            return glm::vec3(0.0f);
-
-        if (rec.line != nullptr)
-            return glm::vec3(2.0f);
-
-        glm::vec3 diffuse = glm::vec3(1.0f);
-        glm::vec3 emissive = glm::vec3(0.0f);
-        glm::vec3 normal = rec.normal;
-        float opacity = 1.0f;
-        float metallic = 0.0f;
-        float roughtness = 1.0f;
-
-        if (rec.triangle != nullptr) {
-            normal = rec.triangle->getNormal(rec.barycentric);
-            diffuse = rec.triangle->getColor(rec.barycentric);
-
-            if (rec.triangle->material != nullptr) {
-                bool haveUV = rec.triangle->haveTexCoords();
-                glm::vec2 uv;
-
-                if (haveUV) uv = rec.triangle->getTexCoord(rec.barycentric);
-                // uv.x = 1.0f - uv.x;
-
-                if ( rec.triangle->material->haveProperty("emissive") )
-                    if ( haveUV ) emissive = rec.triangle->material->getColor("emissive", uv);
-                    else emissive = rec.triangle->material->getColor("emissive");
-                
-                if ( rec.triangle->material->haveProperty("roughness") )
-                    roughtness = rec.triangle->material->getValue("roughness", uv);
-
-                if ( rec.triangle->material->haveProperty("metallic") )
-                    metallic = rec.triangle->material->getValue("metallic", uv);
-
-                if ( rec.triangle->material->haveProperty("opacity") )
-                    opacity = rec.triangle->material->getValue("opacity", uv);
-            }
-        }
-
-        glm::vec3 dir = glm::normalize(_ray.getDirection());
-        glm::vec3 reflected = glm::reflect(dir, normal);
-        glm::vec3 target = glm::mix(normal, reflected, metallic);
-        target += random_unit_vector() * roughtness;
-
-        Ray scattered(rec.position, target);
-        return emissive + diffuse * ray_color( scattered, _hittables, _depth-1 );
-    }
-
-    return glm::vec3(0.0f);
-    // glm::vec3 unit_direction = normalize(_ray.getDirection() );
-    // float t = 0.5f * (unit_direction.y + 1.0f);
-    // return glm::mix(glm::vec3(1.0f), glm::vec3(0.5f, 0.7f, 1.0f), t);
-}
-
 int main(int argc, char **argv) {
 
     // IMAGE
     const float aspect_ratio = 16.0f / 9.0f;
     const int image_width = 1024;
-    const int samples = 50;
+    const int samples = 10;
     const int maxDepth = 50;
     Image image = Image(image_width, static_cast<int>(image_width / aspect_ratio), 3);
 
@@ -219,7 +159,7 @@ int main(int argc, char **argv) {
     //
     Timer timer;
     timer.start();
-    raytrace_multithread(image, cam, scene, samples, maxDepth, ray_color);
+    raytrace_multithread(image, cam, scene, samples, maxDepth);
     timer.stop();
 
     const float time_raycasting = timer.get() / 1000.f;
@@ -242,33 +182,15 @@ int main(int argc, char **argv) {
     cam = Camera(lookfrom, lookat, vup, dov, aspect_ratio, 0.0f, dist_to_focus);
 
     hilma::Image normal= Image(image);
-    raytrace_multithread(normal, cam, scene, 10, 1, [](const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
-        HitRecord rec;
-        if ( hit(_ray, 0.001, 1000.0, _hittables, rec) )
-            if (rec.triangle != nullptr)
-                return rec.triangle->getNormal(rec.barycentric);
-        
-        return glm::vec3(0.0f);
-    } );
+    raytrace_multithread(normal, cam, scene, 10, 1, normal_rayColor );
     savePng("raytracer_normal.png", normal);
 
     hilma::Image albedo = Image(image);
-    raytrace_multithread(albedo, cam, scene, 10, 1, [](const Ray& _ray, const std::vector<Hittable>& _hittables, int _depth) {
-        HitRecord rec;
-        if ( hit(_ray, 0.001, 1000.0, _hittables, rec) ) {
-            glm::vec3 diffuse = glm::vec3(1.0f);
-
-            if (rec.triangle != nullptr)
-                diffuse = rec.triangle->getColor(rec.barycentric);
-            
-            return diffuse;
-        }
-        return glm::vec3(0.0f);
-    } );
+    raytrace_multithread(albedo, cam, scene, 10, 1, albedo_rayColor );
     savePng("raytracer_albedo.png", albedo);
 
-    // Image denoised = denoise(image, normal, albedo, true);
-    // savePng("raytracer_denoised.png", denoised);
+    Image denoised = denoise(image, normal, albedo, true);
+    savePng("raytracer_denoised.png", denoised);
 
     return 0;
 }

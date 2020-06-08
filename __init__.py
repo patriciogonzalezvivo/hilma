@@ -130,11 +130,11 @@ def toBlenderMesh(_name, _mesh, _collection_name="Collection"):
     if _mesh.haveColors():
         vcol_lay = bmesh.vertex_colors.new()
         for i, col in enumerate(vcol_lay.data):
-            color = _mesh.getColors( _mesh.getFaceIndex(i) )
-            col.color[0] = color.r
-            col.color[1] = color.g
-            col.color[2] = color.b
-            col.color[3] = color.a
+            color = _mesh.getColor( _mesh.getFaceIndex(i) )
+            col.color[0] = color[0]
+            col.color[1] = color[1]
+            col.color[2] = color[2]
+            col.color[3] = color[3]
             
     # We're done setting up the mesh values, update mesh object and 
     # let Blender do some checks on it
