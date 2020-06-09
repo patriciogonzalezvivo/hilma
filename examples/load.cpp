@@ -30,8 +30,9 @@ int main(int argc, char **argv) {
     // mesh = hilma::icosphere(1, 2);
 
     std::cout << "vertices: " << mesh.getVerticesTotal() << std::endl;
-    std::cout << "normals: " << mesh.getNormalsTotal() << std::endl;
     std::cout << "colors: " << mesh.getColorsTotal() << std::endl;
+    std::cout << "tangents: " << mesh.getTangetsTotal() << std::endl;
+    std::cout << "normals: " << mesh.getNormalsTotal() << std::endl;
     std::cout << "texcoords: " << mesh.getTexCoordsTotal() << std::endl;
     std::cout << "indices: " << mesh.getFaceIndicesTotal() << std::endl;
 
@@ -47,6 +48,7 @@ int main(int argc, char **argv) {
     // hilma::saveStl("out_bin.stl", mesh, true);
 
     hilma::saveGltf("out.glb", mesh);
+    hilma::saveGltf("out.gltf", mesh);
 
     // hilma::Timer timer;
     // timer.start();

@@ -617,50 +617,37 @@ bool    loadGltf( const std::string& _filename, Mesh& _mesh ) {
     return true;
 }
 
-int makeView(   const std::string& _name, const int _bufferIndex, 
+// GLTF SAVE
+//
+int makeView(   const std::string& _name, const int _bufferIndex,
+                const int _byteOffset, const int _byteStride, const int _byteLength,
                 const float* _data, const int _totalElements, const int _floatsPerData, 
-                tinygltf::Model& _outModel, int& _byteOffset) {
+                tinygltf::Model& _outModel) {
 
     tinygltf::BufferView    view = tinygltf::BufferView();
     tinygltf::Accessor      accessor = tinygltf::Accessor();
-
-    // Grow the buffer
-    const unsigned char* bytes = reinterpret_cast<const unsigned char*>(_data);
-    std::vector<unsigned char> bytesVector = std::vector<unsigned char>(bytes, 
-                                                                        bytes + sizeof(float) * _floatsPerData * _totalElements);
-    _outModel.buffers[_bufferIndex].data.insert(_outModel.buffers[_bufferIndex].data.end(), 
-                                                bytesVector.begin(), bytesVector.end());
 
     // give the buffer a unique name and address
     view.name = _name;
     view.buffer = _bufferIndex;
     view.target = TINYGLTF_TARGET_ARRAY_BUFFER;
 
-    view.byteOffset = _byteOffset;
-    view.byteStride = 0;
-    view.byteLength = sizeof(float) * _floatsPerData * _totalElements;
-    std::cout << _name << " form: " << _byteOffset << " to " << _byteOffset + view.byteLength << " ( " << view.byteLength << " ) " << std::endl;
-    _byteOffset += view.byteLength;
+    view.byteOffset = 0;
+    view.byteStride = _byteStride,
+    view.byteLength = _byteLength + _byteOffset;
 
     // Assign the position of the vector of bufferViews wher it will be store
-    accessor.bufferView = _outModel.bufferViews.size();
-    _outModel.bufferViews.push_back(view);
+    accessor.byteOffset = _byteOffset;
+    accessor.count = _totalElements;
+    accessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
 
-    accessor.byteOffset = 0;
-    if (_floatsPerData == 1)
-        accessor.type = TINYGLTF_TYPE_SCALAR;
-    else if (_floatsPerData == 2)
+    accessor.type = TINYGLTF_TYPE_SCALAR;
+    if (_floatsPerData == 2)
         accessor.type = TINYGLTF_TYPE_VEC2;
     else if (_floatsPerData == 3)
         accessor.type = TINYGLTF_TYPE_VEC3;
     else if (_floatsPerData == 4)
         accessor.type = TINYGLTF_TYPE_VEC4;
-    else
-        accessor.type = TINYGLTF_TYPE_VECTOR;
-
-    accessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
-    accessor.count = _totalElements;
-    accessor.normalized = false;
 
     std::cout << _name << " min: ";
     std::vector<float> range_min = getMin(_data, _totalElements, _floatsPerData);
@@ -678,11 +665,25 @@ int makeView(   const std::string& _name, const int _bufferIndex,
     }
     std::cout << std::endl;
 
+    accessor.normalized = false;
+    accessor.bufferView = _outModel.bufferViews.size();
+    _outModel.bufferViews.push_back(view);
+
     int access_index = _outModel.accessors.size();
-    
     _outModel.accessors.push_back(accessor);
 
     return access_index;
+}
+
+std::vector<unsigned char> toBytes( const float* _array1D, int _n) {
+    const unsigned char* bytes = reinterpret_cast<const unsigned char*>(_array1D);
+    return std::vector<unsigned char>(  bytes, bytes + sizeof(float) * _n);
+}
+
+void addBytes( const float* _array1D, int _n, const int _bufferIndex, tinygltf::Model& _outModel) {
+    std::vector<unsigned char> bytes = toBytes(_array1D, _n);
+    _outModel.buffers[_bufferIndex].data.insert( _outModel.buffers[_bufferIndex].data.end(), 
+                                                bytes.begin(), bytes.end());
 }
 
 bool convertMesh( const Mesh& _inMesh, tinygltf::Model& _outModel, bool _embebedFiles) {
@@ -696,7 +697,7 @@ bool convertMesh( const Mesh& _inMesh, tinygltf::Model& _outModel, bool _embebed
     int iTexCoords = -1;
     int iTangents = -1;
 
-    // Make a Buffer to grow
+    // Make a Buffer
     tinygltf::Buffer buffer = tinygltf::Buffer();
     buffer.name = mesh.name;
     if (!_embebedFiles)
@@ -704,40 +705,71 @@ bool convertMesh( const Mesh& _inMesh, tinygltf::Model& _outModel, bool _embebed
     int iBuffer = _outModel.buffers.size();
     _outModel.buffers.push_back(buffer);
 
+    // Interleave vertex data
+    int byteStride = 0;
+    for (size_t i = 0; i < _inMesh.getVerticesTotal(); i++) {
+        // Vertex
+        addBytes(&_inMesh.getVertex(i).x, 3, iBuffer, _outModel);
+        
+        if (_inMesh.haveColors()) addBytes(&_inMesh.getColor(i).x, 4, iBuffer, _outModel);
+        if (_inMesh.haveTangents()) addBytes(&_inMesh.getTangent(i).x, 4, iBuffer, _outModel);
+        if (_inMesh.haveNormals()) addBytes(&_inMesh.getNormal(i).x, 3, iBuffer, _outModel);
+        if (_inMesh.haveTexCoords()) addBytes(&_inMesh.getTexCoord(i).x, 2, iBuffer, _outModel);
 
-    int bytesOffset = 0;
+        if (i == 0) byteStride = _outModel.buffers[iBuffer].data.size();
+    }
+
+    // Create Views and Accessors
+    int byteOffset = 0;
+    int byteLength = _outModel.buffers[iBuffer].data.size();
+    std::cout << "Buffer ByteStride: " << byteStride << std::endl;
+    std::cout << "Buffer ByteLength: " << byteLength << std::endl;
 
     // Vertices
     {
         iVertices = makeView(   mesh.name + "_vertices", iBuffer, 
+                                byteOffset, byteStride, byteLength - byteOffset,
                                 &_inMesh.getVertices()[0].x, _inMesh.getVerticesTotal(), 3, 
-                                _outModel, bytesOffset);
+                                _outModel);
+        byteOffset += sizeof(float) * 3;
     }
     
-    // // Colors
-    // if (_inMesh.haveColors())
-    //     iColors = makeView(     mesh.name + "_colors", iBuffer,
-    //                             &_inMesh.getColors()[0].x, _inMesh.getColorsTotal(), 4, 
-    //                             _outModel, bytesOffset);
+    // Colors
+    if (_inMesh.haveColors()) {
+        iColors = makeView(     mesh.name + "_colors", iBuffer,
+                                byteOffset, byteStride, byteLength - byteOffset,
+                                &_inMesh.getColors()[0].x, _inMesh.getColorsTotal(), 4, 
+                                _outModel);
+        byteOffset += sizeof(float) * 4;
+    }
 
-    // // Tangent
-    // if (_inMesh.haveTangents())
-    //     iTangents = makeView(   mesh.name + "_tangents", iBuffer,
-    //                             &_inMesh.getTangents()[0].x, _inMesh.getTangetsTotal(), 4, 
-    //                             _outModel, bytesOffset);
+    // Tangent
+    if (_inMesh.haveTangents()) {
+        iTangents = makeView(   mesh.name + "_tangents", iBuffer,
+                                byteOffset, byteStride, byteLength - byteOffset,
+                                &_inMesh.getTangents()[0].x, _inMesh.getTangetsTotal(), 4, 
+                                _outModel);
+        byteOffset += sizeof(float) * 4;
+    }
 
     // Normals
-    // if (_inMesh.haveNormals())
-    //     iNormals = makeView(    mesh.name + "_normals", iBuffer,
-    //                             &_inMesh.getNormals()[0].x, _inMesh.getNormalsTotal(), 3,
-    //                             _outModel, bytesOffset);
+    if (_inMesh.haveNormals()) {
+        iNormals = makeView(    mesh.name + "_normals", iBuffer, 
+                                byteOffset, byteStride, byteLength - byteOffset,
+                                &_inMesh.getNormals()[0].x, _inMesh.getNormalsTotal(), 3,
+                                _outModel);
+        byteOffset += sizeof(float) * 3;
+    }
 
     
-    // // TexCoords
-    // if (_inMesh.haveColors())
-    //     iColors = makeView(     mesh.name + "_texcoords", iBuffer,
-    //                             &_inMesh.getTexCoords()[0].x, _inMesh.getTexCoordsTotal(), 2, 
-    //                             _outModel, bytesOffset);
+    // TexCoords
+    if (_inMesh.haveTexCoords()) {
+        iTexCoords = makeView(  mesh.name + "_texcoords", iBuffer,
+                                byteOffset, byteStride, byteLength - byteOffset,
+                                &_inMesh.getTexCoords()[0].x, _inMesh.getTexCoordsTotal(), 2, 
+                                _outModel);
+        byteOffset += sizeof(float) * 2;
+    }
 
     // Indices
     if ( _inMesh.haveFaceIndices() ) {
@@ -787,10 +819,10 @@ bool convertMesh( const Mesh& _inMesh, tinygltf::Model& _outModel, bool _embebed
     faces.mode = toPrimitiveMode( _inMesh.getFaceType() );
 
     faces.attributes["POSITION"] = iVertices;
-    if (iNormals >= 0) faces.attributes["NORMAL"] = iNormals;
-    if (iColors >= 0) faces.attributes["COLOR_0"] = iColors;
-    if (iTexCoords >= 0) faces.attributes["TEXCOORD_0"] = iTexCoords;
     if (iTangents >= 0) faces.attributes["TANGENT"] = iTangents;
+    if (iColors >= 0) faces.attributes["COLOR_0"] = iColors;
+    if (iNormals >= 0) faces.attributes["NORMAL"] = iNormals;
+    if (iTexCoords >= 0) faces.attributes["TEXCOORD_0"] = iTexCoords;
     
     tinygltf::Material mat = tinygltf::Material();
     mat.name = "default_material";
@@ -817,6 +849,7 @@ bool convertMesh( const Mesh& _inMesh, tinygltf::Model& _outModel, bool _embebed
     tinygltf::Scene scene = tinygltf::Scene();
     scene.name = "root";
     scene.nodes.push_back(aNode);
+    _outModel.defaultScene = _outModel.scenes.size();
     _outModel.scenes.push_back(scene);
 
     return true;
