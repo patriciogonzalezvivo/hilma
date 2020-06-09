@@ -286,7 +286,34 @@ glm::vec2 getRange(const Image& _image) {
     }
 
     return glm::vec2(min, max);
-} 
+}
+
+std::vector<float> getMax(const float* _array2D, int _m, int _n) {
+    std::vector<float> out;
+    for (int i = 0; i < _n; i++)
+        out.push_back(-9999999.9);
+
+    for (int i = 0; i < _m; i++)
+        for (int j = 0; j < _n; j++)
+            if (_array2D[i * _n + j] > out[j])
+                out[j] = _array2D[i * _n + j];
+
+    return out;
+}
+
+std::vector<float> getMin(const float* _array2D, int _m, int _n) {
+    std::vector<float> out;
+    for (int i = 0; i < _n; i++)
+        out.push_back(9999999.9);
+
+    for (int i = 0; i < _m; i++)
+        for (int j = 0; j < _n; j++)
+            if (_array2D[i * _n + j] < out[j])
+                out[j] = _array2D[i * _n + j];
+
+    return out;
+
+}
 
 }
 

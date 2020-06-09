@@ -21,6 +21,9 @@ BoundingBox             getBoundingBox(const std::vector<Triangle>& _triangles);
 glm::vec2               getCentroid(const std::vector<glm::vec2>& _points);
 glm::vec3               getCentroid(const std::vector<glm::vec3>& _points);
 
+std::vector<float>      getMax(const float* _array2D, int _m, int _n);
+std::vector<float>      getMin(const float* _array2D, int _m, int _n);
+
 // Image
 glm::vec2               getRange(const Image& _image);
 
