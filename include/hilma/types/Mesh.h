@@ -175,6 +175,7 @@ public:
 
     Mesh                getMeshForIndices(size_t _start, size_t _end) const;
     std::vector<Mesh>   getMeshesByMaterials() const;
+    std::vector<INDEX_TYPE> getFaceIndicesForMaterial(const std::string& _name) const;
 
 private:
     MaterialsByName         materialsByName;

@@ -939,3 +939,24 @@ std::vector<Mesh> Mesh::getMeshesByMaterials() const {
 
     return meshes;
 }
+
+std::vector<INDEX_TYPE> Mesh::getFaceIndicesForMaterial(const std::string& _name) const {
+    std::vector<INDEX_TYPE> out;
+
+    for (size_t i = 0; i < materialsByIndices.size(); i++ ) {
+        if (materialsByIndices[i].second->name == _name) {
+            size_t first = materialsByIndices[i].first;
+            size_t last = first;
+
+            if (i+1 < materialsByIndices.size())
+                last = materialsByIndices[i+1].first;
+            else
+                last = faceIndices.size();
+            
+            for (size_t j = first; j < last; j++)
+                out.push_back(faceIndices[j]);
+        }
+    }
+
+    return out;
+}

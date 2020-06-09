@@ -24,8 +24,8 @@ int main(int argc, char **argv) {
 
     hilma::Mesh mesh;
 
-    hilma::load("head.ply", mesh);
-    // hilma::load("CornellBox.obj", mesh);
+    // hilma::load("head.ply", mesh);
+    hilma::load("CornellBox.obj", mesh);
     // hilma::load("dragon.obj", mesh);
     // mesh = hilma::icosphere(1, 2);
 

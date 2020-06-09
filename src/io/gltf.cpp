@@ -649,21 +649,14 @@ int makeView(   const std::string& _name, const int _bufferIndex,
     else if (_floatsPerData == 4)
         accessor.type = TINYGLTF_TYPE_VEC4;
 
-    std::cout << _name << " min: ";
     std::vector<float> range_min = getMin(_data, _totalElements, _floatsPerData);
-    for (size_t i = 0; i < range_min.size(); i++) {
+    for (size_t i = 0; i < range_min.size(); i++)
         accessor.minValues.push_back(range_min[i]);
-        std::cout << range_min[i] << " ";
-    }
-    std::cout << std::endl;
 
-    std::cout << _name << " max: ";
     std::vector<float> range_max = getMax(_data, _totalElements, _floatsPerData);
-    for (size_t i = 0; i < range_max.size(); i++) {
+    for (size_t i = 0; i < range_max.size(); i++)
         accessor.maxValues.push_back(range_max[i]);
-        std::cout << range_max[i] << " ";
-    }
-    std::cout << std::endl;
+
 
     accessor.normalized = false;
     accessor.bufferView = _outModel.bufferViews.size();
@@ -675,9 +668,14 @@ int makeView(   const std::string& _name, const int _bufferIndex,
     return access_index;
 }
 
-std::vector<unsigned char> toBytes( const float* _array1D, int _n) {
+std::vector<unsigned char> toBytes(const float* _array1D, int _n) {
     const unsigned char* bytes = reinterpret_cast<const unsigned char*>(_array1D);
-    return std::vector<unsigned char>(  bytes, bytes + sizeof(float) * _n);
+    return std::vector<unsigned char>(bytes, bytes + sizeof(float) * _n);
+}
+
+std::vector<unsigned char> toBytes(const INDEX_TYPE* _array1D, int _n) {
+    const unsigned char* bytes = reinterpret_cast<const unsigned char*>(_array1D);
+    return std::vector<unsigned char>(bytes, bytes + sizeof(INDEX_TYPE) * _n);
 }
 
 void addBytes( const float* _array1D, int _n, const int _bufferIndex, tinygltf::Model& _outModel) {
@@ -686,12 +684,117 @@ void addBytes( const float* _array1D, int _n, const int _bufferIndex, tinygltf::
                                                 bytes.begin(), bytes.end());
 }
 
+int makeIndexBuffer(const std::string& _name, const std::vector<INDEX_TYPE>& _indices, tinygltf::Model& _outModel, bool _embebedFiles) {
+    tinygltf::Buffer        buffer = tinygltf::Buffer();
+    tinygltf::BufferView    view = tinygltf::BufferView();
+    tinygltf::Accessor      accessor = tinygltf::Accessor();
+
+    // give the buffer a unique name and address
+    buffer.name = _name;
+    if (!_embebedFiles)
+        buffer.uri = _name + ".bin";
+    buffer.data = toBytes(&_indices[0], _indices.size());
+
+    // Convert to a binnary buffer
+    view.name = _name + "_view";
+    view.target = TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER;
+    view.byteOffset = 0;
+    view.byteStride = 0;
+    view.byteLength = sizeof(INDEX_TYPE) * _indices.size();
+
+    // Reference the buffer on the viewer
+    view.buffer = _outModel.buffers.size();
+    _outModel.buffers.push_back(buffer);
+
+    // Reference the view on the accessor
+    accessor.name = _name + "_accessor";
+    accessor.bufferView = _outModel.bufferViews.size();
+    _outModel.bufferViews.push_back(view);
+    accessor.byteOffset = 0;
+    accessor.type = TINYGLTF_TYPE_SCALAR;
+    accessor.count = _indices.size();
+    accessor.normalized = false;
+#if defined(PLATFORM_RPI)
+#define INDEX_TYPE uint16_t
+    accessor.componentType = TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT;
+#else
+#define INDEX_TYPE uint32_t
+    accessor.componentType = TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT;
+#endif
+
+    int access_index = _outModel.accessors.size();
+    _outModel.accessors.push_back(accessor);
+
+    return access_index;
+}
+
+std::vector<double> convertColor(const glm::vec4& _color, int _totalValues = 4) {
+    std::vector<double> out;
+    for (int i = 0; i < _totalValues; i++)
+        out.push_back(_color[i]);
+    return out;
+}
+
+int convertMaterial(const std::string& _name, MaterialPtr _material, tinygltf::Model& _outModel) {
+    tinygltf::Material mat = tinygltf::Material();
+    mat.name = _name;
+    mat.alphaMode   = "OPAQUE";                 // default "OPAQUE"
+    mat.alphaCutoff = 0.5;                      // default 0.5
+    mat.doubleSided = false;                    // default false;
+
+    if (_material->haveProperty("emissive")) {
+        MaterialPropertyType type = _material->properties["emissive"];
+        if (type == COLOR)
+            mat.emissiveFactor = convertColor(_material->getColor("emissive"), 3);
+        else if (type == TEXTURE) {
+            // TODO
+        }
+    }
+
+    mat.pbrMetallicRoughness = tinygltf::PbrMetallicRoughness();
+
+    if (_material->haveProperty("diffuse")) {
+        MaterialPropertyType type = _material->properties["diffuse"];
+        if (type == COLOR)
+            mat.pbrMetallicRoughness.baseColorFactor = convertColor(_material->getColor("diffuse"), 4);
+        else if (type == TEXTURE) {
+            // TODO
+        }
+    }
+
+    if (_material->haveProperty("roughness")) {
+        MaterialPropertyType type = _material->properties["roughness"];
+        if (type == VALUE)
+            mat.pbrMetallicRoughness.roughnessFactor = _material->getValue("roughness");
+        else if (type == TEXTURE) {
+            // TODO
+        }
+    }
+
+    if (_material->haveProperty("metallic")) {
+        MaterialPropertyType type = _material->properties["metallic"];
+        if (type == VALUE)
+            mat.pbrMetallicRoughness.metallicFactor = _material->getValue("metallic");
+        else if (type == TEXTURE) {
+            // TODO
+        }
+    }
+
+    if (_material->haveProperty("normalmap")) {
+        // TODO
+    }
+
+    int access_index = _outModel.materials.size();
+    _outModel.materials.push_back(mat);
+
+    return access_index;
+}
+
 bool convertMesh( const Mesh& _inMesh, tinygltf::Model& _outModel, bool _embebedFiles) {
     tinygltf::Mesh mesh = tinygltf::Mesh();
     mesh.name = _inMesh.getName();
     
     int iVertices = -1;
-    int iFaces = -1;
     int iColors = -1;
     int iNormals = -1;
     int iTexCoords = -1;
@@ -722,8 +825,6 @@ bool convertMesh( const Mesh& _inMesh, tinygltf::Model& _outModel, bool _embebed
     // Create Views and Accessors
     int byteOffset = 0;
     int byteLength = _outModel.buffers[iBuffer].data.size();
-    std::cout << "Buffer ByteStride: " << byteStride << std::endl;
-    std::cout << "Buffer ByteLength: " << byteLength << std::endl;
 
     // Vertices
     {
@@ -771,72 +872,28 @@ bool convertMesh( const Mesh& _inMesh, tinygltf::Model& _outModel, bool _embebed
         byteOffset += sizeof(float) * 2;
     }
 
-    // Indices
     if ( _inMesh.haveFaceIndices() ) {
-        tinygltf::Buffer        facesBuffer = tinygltf::Buffer();
-        tinygltf::BufferView    facesView = tinygltf::BufferView();
-        tinygltf::Accessor      facesAccessor = tinygltf::Accessor();
+        std::vector<std::string> materials_names = _inMesh.getMaterialsNames();
+        for (size_t i = 0; i < materials_names.size(); i++) {
+            std::string name = mesh.name + "_" + materials_names[i];
+            MaterialPtr material = _inMesh.getMaterial( materials_names[i] );
+            std::vector<INDEX_TYPE> indices = _inMesh.getFaceIndicesForMaterial( materials_names[i] );
 
-        // give the buffer a unique name and address
-        facesBuffer.name = mesh.name + "_facesBuffer";
-        if (!_embebedFiles)
-            facesBuffer.uri = mesh.name + "_faces.bin";
+            tinygltf::Primitive faces = tinygltf::Primitive();
+            faces.mode = toPrimitiveMode( _inMesh.getFaceType() );
+ 
+            faces.indices = makeIndexBuffer(name, indices, _outModel, _embebedFiles);
 
-        // Convert to a binnary buffer
-        const unsigned char* bytes = reinterpret_cast<const unsigned char*>(&_inMesh.getFaceIndices()[0]);
-        facesView.name = mesh.name + "_facesView";
-        facesView.target = TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER;
-        facesView.byteOffset = 0;
-        // facesView.byteStride = sizeof(INDEX_TYPE);
-        facesView.byteLength = sizeof(INDEX_TYPE) * _inMesh.getFaceIndicesTotal();
-        facesBuffer.data = std::vector<unsigned char>(  bytes + facesView.byteOffset, 
-                                                        bytes + facesView.byteOffset + facesView.byteLength );
-        // Reference the buffer on the viewer
-        facesView.buffer = _outModel.buffers.size();
-        _outModel.buffers.push_back(facesBuffer);
+            faces.attributes["POSITION"] = iVertices;
+            if (iTangents >= 0) faces.attributes["TANGENT"] = iTangents;
+            if (iColors >= 0) faces.attributes["COLOR_0"] = iColors;
+            if (iNormals >= 0) faces.attributes["NORMAL"] = iNormals;
+            if (iTexCoords >= 0) faces.attributes["TEXCOORD_0"] = iTexCoords;
 
-        // Reference the view on the accessor
-        facesAccessor.name = mesh.name + "_facesAccessor";
-        facesAccessor.bufferView = _outModel.bufferViews.size();
-        _outModel.bufferViews.push_back(facesView);
-        facesAccessor.byteOffset = 0;
-        facesAccessor.type = TINYGLTF_TYPE_SCALAR;
-        facesAccessor.count = _inMesh.getFaceIndicesTotal();
-        facesAccessor.normalized = false;
-#if defined(PLATFORM_RPI)
-#define INDEX_TYPE uint16_t
-        facesAccessor.componentType = TINYGLTF_COMPONENT_TYPE_UNSIGNED_SHORT;
-#else
-#define INDEX_TYPE uint32_t
-        facesAccessor.componentType = TINYGLTF_COMPONENT_TYPE_UNSIGNED_INT;
-#endif
-
-        // Reference the data on the primitive
-        iFaces = _outModel.accessors.size();
-        _outModel.accessors.push_back(facesAccessor);
+            faces.material = convertMaterial(name, material, _outModel);
+            mesh.primitives.push_back(faces);
+        }
     }
-    tinygltf::Primitive faces = tinygltf::Primitive();
-    faces.mode = toPrimitiveMode( _inMesh.getFaceType() );
-
-    faces.attributes["POSITION"] = iVertices;
-    if (iTangents >= 0) faces.attributes["TANGENT"] = iTangents;
-    if (iColors >= 0) faces.attributes["COLOR_0"] = iColors;
-    if (iNormals >= 0) faces.attributes["NORMAL"] = iNormals;
-    if (iTexCoords >= 0) faces.attributes["TEXCOORD_0"] = iTexCoords;
-    
-    tinygltf::Material mat = tinygltf::Material();
-    mat.name = "default_material";
-    mat.emissiveFactor = {0.0, 0.0, 0.0};       // length 3. default [0, 0, 0]
-    mat.alphaMode   = "OPAQUE";                 // default "OPAQUE"
-    mat.alphaCutoff = 0.5;                      // default 0.5
-    mat.doubleSided = false;                    // default false;
-    mat.pbrMetallicRoughness = tinygltf::PbrMetallicRoughness();
-    int iMat = _outModel.materials.size();
-    _outModel.materials.push_back(mat);
-
-    if (iFaces >= 0) faces.indices = iFaces;
-    faces.material = iMat;
-    mesh.primitives.push_back(faces);
 
     tinygltf::Node node = tinygltf::Node();
     node.name = "meshNode";
