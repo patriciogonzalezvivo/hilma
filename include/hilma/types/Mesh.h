@@ -122,6 +122,7 @@ public:
     const bool  haveTangents() const { return !tangents.empty(); }
     const glm::vec4&   getTangent(size_t _index) const { return tangents[_index]; }
     const std::vector<glm::vec4>& getTangents() const { return tangents; }
+    size_t      getTangetsTotal() const { return tangents.size(); }
     bool        computeTangents();
     void        clearTangets() { tangents.clear(); }
 

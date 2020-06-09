@@ -617,31 +617,30 @@ bool    loadGltf( const std::string& _filename, Mesh& _mesh ) {
     return true;
 }
 
-int makeBuffer( const std::string& _name, const float* _data, const int _total, const int _floatsPerData,
-                tinygltf::Model& _outModel, bool _embebedFiles ) {
+int makeView(   const std::string& _name, const int _bufferIndex, 
+                const float* _data, const int _totalElements, const int _floatsPerData, 
+                tinygltf::Model& _outModel, int& _byteOffset) {
 
-    tinygltf::Buffer        buffer = tinygltf::Buffer();
     tinygltf::BufferView    view = tinygltf::BufferView();
     tinygltf::Accessor      accessor = tinygltf::Accessor();
 
-    // give the buffer a unique name and address
-    buffer.name = _name;
-    if (!_embebedFiles)
-        buffer.uri = _name + ".bin";
-
-    // Convert vector of vec3 to binnaty 
-    view.target = TINYGLTF_TARGET_ARRAY_BUFFER;
-    view.byteOffset = 0;
-    view.byteStride = 0;
-    // view.byteStride = sizeof(float) * _floatsPerData;
-    view.byteLength = sizeof(float) * _floatsPerData * _total;
+    // Grow the buffer
     const unsigned char* bytes = reinterpret_cast<const unsigned char*>(_data);
-    buffer.data = std::vector<unsigned char>(   bytes + view.byteOffset, 
-                                                bytes + view.byteOffset + view.byteLength);
+    std::vector<unsigned char> bytesVector = std::vector<unsigned char>(bytes, 
+                                                                        bytes + sizeof(float) * _floatsPerData * _totalElements);
+    _outModel.buffers[_bufferIndex].data.insert(_outModel.buffers[_bufferIndex].data.end(), 
+                                                bytesVector.begin(), bytesVector.end());
 
-    // Assigne the position on the vector of buffers where it will store
-    view.buffer = _outModel.buffers.size();
-    _outModel.buffers.push_back(buffer);
+    // give the buffer a unique name and address
+    view.name = _name;
+    view.buffer = _bufferIndex;
+    view.target = TINYGLTF_TARGET_ARRAY_BUFFER;
+
+    view.byteOffset = _byteOffset;
+    view.byteStride = 0;
+    view.byteLength = sizeof(float) * _floatsPerData * _totalElements;
+    std::cout << _name << " form: " << _byteOffset << " to " << _byteOffset + view.byteLength << " ( " << view.byteLength << " ) " << std::endl;
+    _byteOffset += view.byteLength;
 
     // Assign the position of the vector of bufferViews wher it will be store
     accessor.bufferView = _outModel.bufferViews.size();
@@ -660,11 +659,11 @@ int makeBuffer( const std::string& _name, const float* _data, const int _total, 
         accessor.type = TINYGLTF_TYPE_VECTOR;
 
     accessor.componentType = TINYGLTF_COMPONENT_TYPE_FLOAT;
-    accessor.count = _total;
+    accessor.count = _totalElements;
     accessor.normalized = false;
 
     std::cout << _name << " min: ";
-    std::vector<float> range_min = getMin(_data, _total, _floatsPerData);
+    std::vector<float> range_min = getMin(_data, _totalElements, _floatsPerData);
     for (size_t i = 0; i < range_min.size(); i++) {
         accessor.minValues.push_back(range_min[i]);
         std::cout << range_min[i] << " ";
@@ -672,7 +671,7 @@ int makeBuffer( const std::string& _name, const float* _data, const int _total, 
     std::cout << std::endl;
 
     std::cout << _name << " max: ";
-    std::vector<float> range_max = getMax(_data, _total, _floatsPerData);
+    std::vector<float> range_max = getMax(_data, _totalElements, _floatsPerData);
     for (size_t i = 0; i < range_max.size(); i++) {
         accessor.maxValues.push_back(range_max[i]);
         std::cout << range_max[i] << " ";
@@ -689,7 +688,7 @@ int makeBuffer( const std::string& _name, const float* _data, const int _total, 
 bool convertMesh( const Mesh& _inMesh, tinygltf::Model& _outModel, bool _embebedFiles) {
     tinygltf::Mesh mesh = tinygltf::Mesh();
     mesh.name = _inMesh.getName();
-
+    
     int iVertices = -1;
     int iFaces = -1;
     int iColors = -1;
@@ -697,28 +696,48 @@ bool convertMesh( const Mesh& _inMesh, tinygltf::Model& _outModel, bool _embebed
     int iTexCoords = -1;
     int iTangents = -1;
 
+    // Make a Buffer to grow
+    tinygltf::Buffer buffer = tinygltf::Buffer();
+    buffer.name = mesh.name;
+    if (!_embebedFiles)
+        buffer.uri = mesh.name + ".bin";
+    int iBuffer = _outModel.buffers.size();
+    _outModel.buffers.push_back(buffer);
+
+
+    int bytesOffset = 0;
+
     // Vertices
     {
-        iVertices = makeBuffer( _inMesh.getName() + "_vertices", &_inMesh.getVertices()[0].x, _inMesh.getVerticesTotal(), 3, _outModel, _embebedFiles);
+        iVertices = makeView(   mesh.name + "_vertices", iBuffer, 
+                                &_inMesh.getVertices()[0].x, _inMesh.getVerticesTotal(), 3, 
+                                _outModel, bytesOffset);
     }
     
-    // Colors
+    // // Colors
     // if (_inMesh.haveColors())
-    //     iColors = makeBuffer( _inMesh.getName() + "_colors", &_inMesh.getColors()[0].x, _inMesh.getColorsTotal(), 4, _outModel, _embebedFiles);
+    //     iColors = makeView(     mesh.name + "_colors", iBuffer,
+    //                             &_inMesh.getColors()[0].x, _inMesh.getColorsTotal(), 4, 
+    //                             _outModel, bytesOffset);
 
     // // Tangent
     // if (_inMesh.haveTangents())
-    //     iTangents = makeBuffer( _inMesh.getName() + "_tangents", &_inMesh.getTangents()[0].x, _inMesh.getTangetsTotal(), 4, _outModel, _embebedFiles);
+    //     iTangents = makeView(   mesh.name + "_tangents", iBuffer,
+    //                             &_inMesh.getTangents()[0].x, _inMesh.getTangetsTotal(), 4, 
+    //                             _outModel, bytesOffset);
 
-
-    // // Normals
+    // Normals
     // if (_inMesh.haveNormals())
-    //     iNormals = makeBuffer( _inMesh.getName() + "_normals", &_inMesh.getNormals()[0].x, _inMesh.getNormalsTotal(), 3, _outModel, _embebedFiles);
+    //     iNormals = makeView(    mesh.name + "_normals", iBuffer,
+    //                             &_inMesh.getNormals()[0].x, _inMesh.getNormalsTotal(), 3,
+    //                             _outModel, bytesOffset);
 
     
     // // TexCoords
     // if (_inMesh.haveColors())
-    //     iColors = makeBuffer( _inMesh.getName() + "_texcoords", &_inMesh.getTexCoords()[0].x, _inMesh.getTexCoordsTotal(), 2, nullptr, _outModel, _embebedFiles);
+    //     iColors = makeView(     mesh.name + "_texcoords", iBuffer,
+    //                             &_inMesh.getTexCoords()[0].x, _inMesh.getTexCoordsTotal(), 2, 
+    //                             _outModel, bytesOffset);
 
     // Indices
     if ( _inMesh.haveFaceIndices() ) {
@@ -727,13 +746,13 @@ bool convertMesh( const Mesh& _inMesh, tinygltf::Model& _outModel, bool _embebed
         tinygltf::Accessor      facesAccessor = tinygltf::Accessor();
 
         // give the buffer a unique name and address
-        facesBuffer.name = _inMesh.getName() + "_facesBuffer";
+        facesBuffer.name = mesh.name + "_facesBuffer";
         if (!_embebedFiles)
-            facesBuffer.uri = _inMesh.getName() + "_faces.bin";
+            facesBuffer.uri = mesh.name + "_faces.bin";
 
         // Convert to a binnary buffer
         const unsigned char* bytes = reinterpret_cast<const unsigned char*>(&_inMesh.getFaceIndices()[0]);
-        facesView.name = _inMesh.getName() + "_facesView";
+        facesView.name = mesh.name + "_facesView";
         facesView.target = TINYGLTF_TARGET_ELEMENT_ARRAY_BUFFER;
         facesView.byteOffset = 0;
         // facesView.byteStride = sizeof(INDEX_TYPE);
@@ -745,7 +764,7 @@ bool convertMesh( const Mesh& _inMesh, tinygltf::Model& _outModel, bool _embebed
         _outModel.buffers.push_back(facesBuffer);
 
         // Reference the view on the accessor
-        facesAccessor.name = _inMesh.getName() + "_facesAccessor";
+        facesAccessor.name = mesh.name + "_facesAccessor";
         facesAccessor.bufferView = _outModel.bufferViews.size();
         _outModel.bufferViews.push_back(facesView);
         facesAccessor.byteOffset = 0;
