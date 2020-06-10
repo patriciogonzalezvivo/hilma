@@ -18,20 +18,11 @@ void                remap(Image& _image,
 void                autolevel(Image& _image);
 void                threshold(Image& _image, float _threshold = 0.5f);
 
+unsigned char*      to8bit(const Image& _image);
 Image               toNormalmap(const Image& _heightmap, float _zScale = 100.0f);
 Image               toLuma(const Image& _image);
-
-Image               denoise(const Image& _color, const Image& _normal, const Image& _albedo, bool _hdr = true);
-
 Image               toHeightmap(const Image& _terrariumImage);
 Image               toHueRainbow(const Image& _graysale);
-
-Image               mergeChannels(const Image& _red, const Image& _green, const Image& _blue);
-Image               mergeChannels(const Image& _red, const Image& _green, const Image& _blue, const Image& _alpha);
-Image               addAlpha(const Image& _rgb, const Image& _alpha);
-std::vector<Image>  splitChannels(const Image& _image);
-
-Image               packInSprite(const std::vector<Image>& _images);
 
 Mesh                toTerrain(  const Image& _image,
                                 const float _zScale,
@@ -43,5 +34,12 @@ Mesh                toTerrain(  const Image& _image,
 Image               toSdf(const Image& _image, float _on = 1.0f);
 std::vector<Image>  toSdf(const Mesh& _mesh, float _scale, bool _absolute = false);
 
+Image               mergeChannels(const Image& _red, const Image& _green, const Image& _blue);
+Image               mergeChannels(const Image& _red, const Image& _green, const Image& _blue, const Image& _alpha);
+Image               addAlpha(const Image& _rgb, const Image& _alpha);
+Image               packInSprite(const std::vector<Image>& _images);
+std::vector<Image>  splitChannels(const Image& _image);
+
+Image               denoise(const Image& _color, const Image& _normal, const Image& _albedo, bool _hdr = true);
 
 }

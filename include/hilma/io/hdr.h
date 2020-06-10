@@ -18,7 +18,7 @@ inline Image    loadHdr(const std::string& _filename, int _channel = 0) {
     return out;
 }
 
-bool    saveHdr(const std::string& _filename, Image& _image);
+bool    saveHdr(const std::string& _filename, const Image& _image);
 bool    saveHdr(const std::string& _filename, const float* _pixels, int _width, int _height, int _channels);
 
 }

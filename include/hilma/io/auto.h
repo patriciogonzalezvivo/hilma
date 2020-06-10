@@ -18,6 +18,6 @@ unsigned char*  load(const std::string& _filename, int* _width, int* _height, in
 
 bool            load(const std::string& _filename, Mesh& _mesh);
 
-bool            save(const std::string& _filename, Image& _image);
+bool            save(const std::string& _filename, const Image& _image);
 
 }

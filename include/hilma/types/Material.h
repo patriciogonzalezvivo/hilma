@@ -34,7 +34,6 @@ public:
     bool            haveProperty(const std::string& _property) const;
 
     std::string     getImagePath(const std::string& _property) const;
-    // ImagePtr        getImage(const std::string& _property);
     Image           getImage(const std::string& _property) const;
     glm::vec4       getColor(const std::string& _property, const glm::vec2& _uv) const;
     float           getValue(const std::string& _property, const glm::vec2& _uv) const;

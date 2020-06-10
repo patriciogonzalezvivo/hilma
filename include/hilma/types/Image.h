@@ -25,8 +25,10 @@ public:
     int         getHeight() const { return height;};
     int         getChannels() const { return channels;};
 
+    const float& at(int _index) const { return data[_index]; }
     const float& operator[] (int _index) const { return data[_index]; }
     float&      operator[] (int _index) { return data[_index]; }
+    
     size_t      size() const { return data.size(); }
 
     size_t      getIndex(size_t _x, size_t _y) const { return (_y * width + _x) * channels; };

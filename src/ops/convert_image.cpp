@@ -1148,4 +1148,12 @@ Image packInSprite( const std::vector<Image>& _images ) {
     return out;
 }
 
+unsigned char* to8bit(const Image& _image) {
+    int total = _image.getWidth() * _image.getHeight() * _image.getChannels();
+    unsigned char* pixels = new unsigned char[total];
+    for (int i = 0; i < total; i++)
+        pixels[i] = static_cast<char>(256 * clamp(_image[i], 0.0f, 0.999f));
+    return pixels;
+}
+
 }

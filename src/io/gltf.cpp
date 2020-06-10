@@ -95,7 +95,7 @@ bool saveHdr(const std::string& _filename, const float* _pixels, int _width, int
     return stbi_write_hdr(_filename.c_str(), _width, _height, _channels, _pixels);
 }
 
-bool saveHdr(const std::string& _filename, Image& _image) {
+bool saveHdr(const std::string& _filename, const Image& _image) {
     return stbi_write_hdr(_filename.c_str(), _image.getWidth(), _image.getHeight(), _image.getChannels(), &_image[0]);
 }
 
@@ -103,11 +103,8 @@ bool savePng(const std::string& _filename, const unsigned char* _pixels, int _wi
     return stbi_write_png(_filename.c_str(), _width, _height, _channels, _pixels, 0);
 }
 
-bool savePng(const std::string& _filename, Image& _image) {
-    int total = _image.getWidth() * _image.getHeight() * _image.getChannels();
-    unsigned char* pixels = new unsigned char[total];
-    for (int i = 0; i < total; i++)
-        pixels[i] = static_cast<char>(256 * clamp(_image[i], 0.0f, 0.999f));
+bool savePng(const std::string& _filename, const Image& _image) {
+    unsigned char* pixels = to8bit(_image);
     savePng(_filename, pixels, _image.getWidth(), _image.getHeight(), _image.getChannels());
     delete [] pixels;
 
@@ -118,18 +115,15 @@ bool saveJpg(const std::string& _filename, const unsigned char* _pixels, int _wi
     return stbi_write_jpg(_filename.c_str(), _width, _height, _channels, _pixels, 90);
 }
 
-bool saveJpg(const std::string& _filename, Image& _image) {
-    int total = _image.getWidth() * _image.getHeight() * _image.getChannels();
-    unsigned char* pixels = new unsigned char[total];
-    for (int i = 0; i < total; i++)
-        pixels[i] = static_cast<char>(256 * clamp(_image[i], 0.0, 0.999));
+bool saveJpg(const std::string& _filename, const Image& _image) {
+    unsigned char* pixels = to8bit(_image);
     saveJpg(_filename, pixels, _image.getWidth(), _image.getHeight(), _image.getChannels());
     delete [] pixels;
 
     return true;
 }
 
-bool save(const std::string& _filename, Image& _image) {
+bool save(const std::string& _filename, const Image& _image) {
     std::string ext = getExt(_filename);
 
     if (ext == "hdr" || ext == "HDR") {
@@ -657,7 +651,6 @@ int makeView(   const std::string& _name, const int _bufferIndex,
     for (size_t i = 0; i < range_max.size(); i++)
         accessor.maxValues.push_back(range_max[i]);
 
-
     accessor.normalized = false;
     accessor.bufferView = _outModel.bufferViews.size();
     _outModel.bufferViews.push_back(view);
@@ -735,7 +728,76 @@ std::vector<double> convertColor(const glm::vec4& _color, int _totalValues = 4) 
     return out;
 }
 
-int convertMaterial(const std::string& _name, MaterialPtr _material, tinygltf::Model& _outModel) {
+int convertTexture(const std::string _filename, const Image& _image, tinygltf::Model& _outModel, bool _embebedFiles) {
+    tinygltf::Texture   tex;
+    tinygltf::Image     img;
+
+    if (_image.name != "undefined") {
+        img.name = _image.name;
+        tex.name = _image.name;
+    }
+    else {
+        img.name = _filename;
+        tex.name = _filename;
+    }
+
+    img.width = _image.getWidth();
+    img.height = _image.getHeight();
+    img.component = _image.getChannels();
+    img.image = toBytes(&_image[0], img.width * img.width * img.component);
+    img.bits = 8;
+    img.pixel_type = TINYGLTF_COMPONENT_TYPE_FLOAT;
+    img.as_is = false;
+
+    if (!_embebedFiles) {
+        img.uri = _filename;
+        if (!urlExists(_filename))
+            save(_filename, _image);
+    }
+    else {
+        tinygltf::Buffer    buf;
+        tinygltf::BufferView view;
+
+        if (_image.name != "undefined") {
+            buf.name = _image.name;
+            view.name = _image.name;
+        }
+        else {
+            buf.name = _filename;
+            view.name = _filename;
+        }
+
+        int len;
+        unsigned char* data = to8bit(_image);
+        unsigned char *png = stbi_write_png_to_mem(data, 0,_image.getWidth(), _image.getHeight(), _image.getChannels(), &len);
+        buf.data = std::vector<unsigned char>(png, png + len);
+        
+        view.buffer = _outModel.buffers.size();
+        _outModel.buffers.push_back(buf);
+
+        view.target = TINYGLTF_TEXTURE_TARGET_TEXTURE2D;
+
+        view.byteOffset = 0;
+        view.byteStride = 0,
+        view.byteLength = buf.data.size();
+
+        img.bufferView = _outModel.bufferViews.size();
+        _outModel.bufferViews.push_back(view);
+
+        img.mimeType = "image/png";
+    }
+
+    tex.sampler = 0; // default
+    tex.source = _outModel.images.size();
+    _outModel.images.push_back(img);
+
+    int index = _outModel.textures.size();
+    _outModel.textures.push_back(tex);
+
+    return index;
+}
+
+int convertMaterial(const std::string& _name, MaterialPtr _material, tinygltf::Model& _outModel, bool _embebedFiles) {
     tinygltf::Material mat = tinygltf::Material();
     mat.name = _name;
     mat.alphaMode   = "OPAQUE";                 // default "OPAQUE"
@@ -747,7 +809,11 @@ int convertMaterial(const std::string& _name, MaterialPtr _material, tinygltf::M
         if (type == COLOR)
             mat.emissiveFactor = convertColor(_material->getColor("emissive"), 3);
         else if (type == TEXTURE) {
-            // TODO
+            mat.emissiveTexture = tinygltf::TextureInfo();
+            mat.emissiveTexture.index = convertTexture( _material->getImagePath("emissive"), 
+                                                        _material->getImage("emissive"),
+                                                        _outModel, _embebedFiles);
+            mat.emissiveTexture.texCoord = 0;
         }
     }
 
@@ -758,7 +824,11 @@ int convertMaterial(const std::string& _name, MaterialPtr _material, tinygltf::M
         if (type == COLOR)
             mat.pbrMetallicRoughness.baseColorFactor = convertColor(_material->getColor("diffuse"), 4);
         else if (type == TEXTURE) {
-            // TODO
+            mat.pbrMetallicRoughness.baseColorTexture = tinygltf::TextureInfo();
+            mat.pbrMetallicRoughness.baseColorTexture.index = convertTexture(   _material->getImagePath("diffuse"), 
+                                                                                _material->getImage("diffuse"),
+                                                                                _outModel, _embebedFiles);
+            mat.pbrMetallicRoughness.baseColorTexture.texCoord = 0;
         }
     }
 
@@ -781,7 +851,21 @@ int convertMaterial(const std::string& _name, MaterialPtr _material, tinygltf::M
     }
 
     if (_material->haveProperty("normalmap")) {
-        // TODO
+        mat.normalTexture = tinygltf::NormalTextureInfo();
+        mat.normalTexture.scale = 1.0;
+        mat.normalTexture.index = convertTexture(   _material->getImagePath("normalmap"), 
+                                                    _material->getImage("normalmap"),
+                                                    _outModel, _embebedFiles);
+        mat.normalTexture.texCoord = 0;
+    }
+
+    if (_material->haveProperty("occlusion")) {
+        mat.occlusionTexture = tinygltf::OcclusionTextureInfo();
+        mat.occlusionTexture.strength = 1.0;
+        mat.occlusionTexture.index = convertTexture(    _material->getImagePath("occlusion"), 
+                                                        _material->getImage("occlusion"),
+                                                        _outModel, _embebedFiles);
+        mat.normalTexture.texCoord = 0;
     }
 
     int access_index = _outModel.materials.size();
@@ -890,7 +974,7 @@ bool convertMesh( const Mesh& _inMesh, tinygltf::Model& _outModel, bool _embebed
             if (iNormals >= 0) faces.attributes["NORMAL"] = iNormals;
             if (iTexCoords >= 0) faces.attributes["TEXCOORD_0"] = iTexCoords;
 
-            faces.material = convertMaterial(name, material, _outModel);
+            faces.material = convertMaterial(name, material,  _outModel, _embebedFiles);
             mesh.primitives.push_back(faces);
         }
     }
@@ -918,6 +1002,11 @@ bool saveGltf( const std::string& _filename, const Mesh& _mesh ) {
     model.asset.version = "2.0";
     model.asset.generator = "Genereted using Hilma C++/Python Library";
     model.asset.copyright = "2020 (c) Patricio Gonzalez Vivo";
+
+    tinygltf::Sampler sampler = tinygltf::Sampler();
+    sampler.minFilter = TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR;
+    sampler.magFilter = TINYGLTF_TEXTURE_FILTER_LINEAR;
+    model.samplers.push_back(sampler);
 
     std::string ext = getExt(_filename);
     bool bin = (ext == "glb" || ext == "GLB");

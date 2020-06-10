@@ -20,7 +20,7 @@ inline unsigned char* loadJpg(const std::string& _filename, int* _width, int* _h
     return load(_filename.c_str(), _width, _height, _channels);
 }
 
-bool            saveJpg(const std::string& _filename, Image& _image);
+bool            saveJpg(const std::string& _filename, const Image& _image);
 bool            saveJpg(const std::string& _filename, const unsigned char* _pixels, int _width, int _height, int _channels);
 
 }
