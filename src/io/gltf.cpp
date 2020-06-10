@@ -396,6 +396,8 @@ Material extractMaterial(const tinygltf::Model& _model, const tinygltf::Material
                 imgs[0].name = name + "_occlusion";
                 
                 mat.set("occlusion", imgs[0]);
+                mat.set("occlusion_strength", _material.occlusionTexture.strength);
+
                 isOcclusionRoughnessMetallic = true;
                 if (_verbose)
                     std::cout << "Loading " << name << " as occlusion image" << std::endl;
@@ -444,6 +446,7 @@ Material extractMaterial(const tinygltf::Model& _model, const tinygltf::Material
         img.name = name;
         
         mat.set("normalmap", img);
+        mat.set("normalmap_scale", _material.normalTexture.scale);
         if (_verbose)
             std::cout << "Loading " << name << " as normalmap" << std::endl;
     }
@@ -797,14 +800,25 @@ int convertTexture(const std::string _filename, const Image& _image, tinygltf::M
     return index;
 }
 
-int convertMaterial(const std::string& _name, MaterialPtr _material, tinygltf::Model& _outModel, bool _embebedFiles) {
+int convertMaterial(MaterialPtr _material, tinygltf::Model& _outModel, bool _embebedFiles) {
+
+    // Don't create a material if already exist
+    for(size_t i = 0; i < _outModel.materials.size(); i++)
+        if (_outModel.materials[i].name == _material->getName())
+            return i;
+
+    // Create a new material;
     tinygltf::Material mat = tinygltf::Material();
-    mat.name = _name;
-    mat.alphaMode   = "OPAQUE";                 // default "OPAQUE"
-    mat.alphaCutoff = 0.5;                      // default 0.5
-    mat.doubleSided = false;                    // default false;
+    mat.name = _material->getName();
+
+    // Defaults
+    mat.alphaMode   = "OPAQUE";
+    mat.alphaCutoff = 0.5;
+    mat.doubleSided = false;
 
     if (_material->haveProperty("emissive")) {
+        mat.emissiveFactor = {1,1,1};
+
         MaterialPropertyType type = _material->properties["emissive"];
         if (type == COLOR)
             mat.emissiveFactor = convertColor(_material->getColor("emissive"), 3);
@@ -832,46 +846,92 @@ int convertMaterial(const std::string& _name, MaterialPtr _material, tinygltf::M
         }
     }
 
+    bool canBePacked = false;
+    Image occlusion;
+    Image roughness;
+    Image metallic;
+
     if (_material->haveProperty("roughness")) {
         MaterialPropertyType type = _material->properties["roughness"];
         if (type == VALUE)
             mat.pbrMetallicRoughness.roughnessFactor = _material->getValue("roughness");
-        else if (type == TEXTURE) {
-            // TODO
-        }
+        else if (type == TEXTURE)
+            roughness = _material->getImage("roughness");
     }
 
     if (_material->haveProperty("metallic")) {
         MaterialPropertyType type = _material->properties["metallic"];
         if (type == VALUE)
             mat.pbrMetallicRoughness.metallicFactor = _material->getValue("metallic");
-        else if (type == TEXTURE) {
-            // TODO
-        }
-    }
-
-    if (_material->haveProperty("normalmap")) {
-        mat.normalTexture = tinygltf::NormalTextureInfo();
-        mat.normalTexture.scale = 1.0;
-        mat.normalTexture.index = convertTexture(   _material->getImagePath("normalmap"), 
-                                                    _material->getImage("normalmap"),
-                                                    _outModel, _embebedFiles);
-        mat.normalTexture.texCoord = 0;
+        else if (type == TEXTURE)
+            metallic = _material->getImage("metallic");
     }
 
     if (_material->haveProperty("occlusion")) {
         mat.occlusionTexture = tinygltf::OcclusionTextureInfo();
-        mat.occlusionTexture.strength = 1.0;
-        mat.occlusionTexture.index = convertTexture(    _material->getImagePath("occlusion"), 
-                                                        _material->getImage("occlusion"),
-                                                        _outModel, _embebedFiles);
         mat.normalTexture.texCoord = 0;
+
+        occlusion = _material->getImage("occlusion");
+        
+        mat.occlusionTexture.index = convertTexture(    _material->getImagePath("occlusion"), 
+                                                        occlusion,
+                                                        _outModel, _embebedFiles);
+
+        mat.occlusionTexture.strength = 1.0;
+        if (_material->haveProperty("occlusion_strength"))
+            mat.occlusionTexture.strength = _material->getValue("occlusion_strength");
     }
 
-    int access_index = _outModel.materials.size();
+    if (roughness.getChannels() != 0) {
+        Image red, green, blue;
+
+        if (occlusion.getWidth() == roughness.getWidth() ||
+            occlusion.getHeight() == roughness.getHeight())
+            if (occlusion.getChannels() == 1)
+                red = occlusion;
+            else 
+                red = splitChannels(occlusion)[1];
+        else
+            red = Image(roughness.getWidth(), roughness.getHeight(), 1);
+
+        if (roughness.getChannels() == 1)
+            green = roughness;
+        else
+            green = splitChannels(roughness)[1];
+
+        if (roughness.getWidth() == metallic.getWidth() ||
+            roughness.getHeight() == metallic.getHeight() )
+            if (metallic.getChannels() == 1)
+                blue = metallic;
+            else
+                blue = splitChannels(metallic)[1];
+        else
+            blue = Image(roughness.getWidth(), roughness.getHeight(), 1);
+
+        Image OcRoMe = mergeChannels(red, green, blue);
+        mat.pbrMetallicRoughness.metallicRoughnessTexture = tinygltf::TextureInfo();
+        mat.pbrMetallicRoughness.metallicRoughnessTexture.texCoord = 0;
+        mat.pbrMetallicRoughness.metallicRoughnessTexture.index = convertTexture(   _material->getName() +  "_roughnessMetallic.png", 
+                                                                                    OcRoMe,
+                                                                                    _outModel, _embebedFiles);
+    }
+
+    if (_material->haveProperty("normalmap")) {
+        mat.normalTexture = tinygltf::NormalTextureInfo();
+        mat.normalTexture.texCoord = 0;
+        mat.normalTexture.index = convertTexture(   _material->getImagePath("normalmap"), 
+                                                    _material->getImage("normalmap"),
+                                                    _outModel, _embebedFiles);
+        mat.normalTexture.scale = 1.0;
+        if (_material->haveProperty("normalmap_scale"))
+            mat.normalTexture.scale = _material->getValue("normalmap_scale");
+
+    }
+
+    int index = _outModel.materials.size();
     _outModel.materials.push_back(mat);
 
-    return access_index;
+    return index;
 }
 
 bool convertMesh( const Mesh& _inMesh, tinygltf::Model& _outModel, bool _embebedFiles) {
@@ -974,7 +1034,7 @@ bool convertMesh( const Mesh& _inMesh, tinygltf::Model& _outModel, bool _embebed
             if (iNormals >= 0) faces.attributes["NORMAL"] = iNormals;
             if (iTexCoords >= 0) faces.attributes["TEXCOORD_0"] = iTexCoords;
 
-            faces.material = convertMaterial(name, material,  _outModel, _embebedFiles);
+            faces.material = convertMaterial(material,  _outModel, _embebedFiles);
             mesh.primitives.push_back(faces);
         }
     }
@@ -1004,7 +1064,7 @@ bool saveGltf( const std::string& _filename, const Mesh& _mesh ) {
     model.asset.copyright = "2020 (c) Patricio Gonzalez Vivo";
 
     tinygltf::Sampler sampler = tinygltf::Sampler();
-    sampler.minFilter = TINYGLTF_TEXTURE_FILTER_NEAREST_MIPMAP_LINEAR;
+    sampler.minFilter = TINYGLTF_TEXTURE_FILTER_LINEAR;
     sampler.magFilter = TINYGLTF_TEXTURE_FILTER_LINEAR;
     model.samplers.push_back(sampler);
 

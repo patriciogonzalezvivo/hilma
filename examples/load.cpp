@@ -24,8 +24,10 @@ int main(int argc, char **argv) {
 
     hilma::Mesh mesh;
 
-    hilma::load("head.ply", mesh);
+    // hilma::load("head.ply", mesh);
     // hilma::load("CornellBox.obj", mesh);
+    hilma::load("BoomBox.glb", mesh);
+    // hilma::load("Duck.glb", mesh);
     // hilma::load("dragon.obj", mesh);
     // mesh = hilma::icosphere(1, 2);
 
@@ -48,7 +50,7 @@ int main(int argc, char **argv) {
     // hilma::saveStl("out_bin.stl", mesh, true);
 
     hilma::saveGltf("out.glb", mesh);
-    hilma::saveGltf("out.gltf", mesh);
+    // hilma::saveGltf("out.gltf", mesh);
 
     // hilma::Timer timer;
     // timer.start();
