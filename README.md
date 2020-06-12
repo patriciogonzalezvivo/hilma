@@ -30,7 +30,7 @@ swig -c++ -python hilma.i
 
 ## Hilma as C++ lib
 
-Alternativelly to installing Hilma on your system you can easily copy the content of `include/` and `src/` folder to your project, just make sure you 
+Alternatively to installing Hilma on your system you can easily copy the content of `include/` and `src/` folder to your project, just make sure you 
 
 
 ```cpp
@@ -73,7 +73,7 @@ savePly("rect.ply", mesh, False)
 
 ```
 
-# Aknoledgements 
+# Acknowledgements 
 
 Some of the code is based on:
 
