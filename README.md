@@ -5,15 +5,26 @@ Hilma is 3D geometry library in C++ with Python bindings (with support for Numpy
 
 Dependencies:
 
+* CMake, Swig and Python3
 * [GLM](https://github.com/g-truc/glm) required
 * [OpenImageDenoise](https://github.com/OpenImageDenoise/oidn) optional
 
+
 ## Compile and install Hilma
 
-Before compiling 
+1. Before compiling install dependencies:
 
 ```bash
-sudo apt install cmake swig python3-numpy  
+// In linux
+sudo apt install libglm-dev cmake swig python3-numpy  
+
+// In MacOS
+brew install glm cmake swig
+```
+
+2. Then compile
+
+```bash
 mkdir build
 cd build
 cmake ..
