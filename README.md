@@ -93,6 +93,7 @@ Some of the code is based on:
 * [Tangram-es's ployline to spline converter](https://github.com/tangrams/tangram-es/blob/master/core/src/util/builders.cpp)
 * [Dan Wilcox's swig wrapper for GLM](https://github.com/danomatika/swig-openframeworks)
 * [Dimitri Diakopoulos' TinyPly](https://github.com/ddiakopoulos/tinyply)
+* [Syoyo Fujita's TinyGltf](https://github.com/syoyo/tinygltf)
 * [Syoyo Fujita's TinyObj loader](https://github.com/tinyobjloader/tinyobjloader)
 * [Peter Shirley's Ray Tracing in One Weekend ](https://raytracing.github.io/books/RayTracingInOneWeekend.html)
 * [Ray/Triangle intersection](https://www.scratchapixel.com/lessons/3d-basic-rendering/ray-tracing-rendering-a-triangle)
