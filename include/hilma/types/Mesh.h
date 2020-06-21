@@ -147,7 +147,7 @@ public:
     size_t      getFaceIndicesTotal() const { return faceIndices.size(); }
     const std::vector<INDEX_TYPE>& getFaceIndices() const { return faceIndices; }
     void        clearFaceIndices() { faceIndices.clear(); }
-    void        invertWindingOrder();
+    void        invertWindingOrder( const std::string& _materialname = "" );
 
     // EDGES
     void        addEdgeIndex(INDEX_TYPE _i);

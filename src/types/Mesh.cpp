@@ -247,13 +247,36 @@ bool Mesh::computeNormals() {
     return true;
 }
 
-void Mesh::invertWindingOrder() {
+void Mesh::invertWindingOrder(const std::string& _materialname) {
     if ( getFaceType() == TRIANGLES) {
-        int tmp;
-        for (size_t i = 0; i < faceIndices.size(); i += 3) {
-            tmp = faceIndices[i+1];
-            faceIndices[i+1] = faceIndices[i+2];
-            faceIndices[i+2] = tmp;
+        
+        if (_materialname.size() != 0) {
+            for (size_t i = 0; i < materialsByIndices.size(); i++ ) {
+                if (materialsByIndices[i].second->name == _materialname) {
+                    size_t first = materialsByIndices[i].first;
+                    size_t last = first;
+
+                    if (i+1 < materialsByIndices.size())
+                        last = materialsByIndices[i+1].first;
+                    else
+                        last = faceIndices.size();
+
+                    int tmp;
+                    for (size_t i = first; i < last; i += 3) {
+                        tmp = faceIndices[i+1];
+                        faceIndices[i+1] = faceIndices[i+2];
+                        faceIndices[i+2] = tmp;
+                    }
+                }
+            }
+        }
+        else {
+            int tmp;
+            for (size_t i = 0; i < faceIndices.size(); i += 3) {
+                tmp = faceIndices[i+1];
+                faceIndices[i+1] = faceIndices[i+2];
+                faceIndices[i+2] = tmp;
+            }
         }
     }
 }
