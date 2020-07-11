@@ -13,6 +13,8 @@ file(GLOB TYPES_SOURCE "${PROJECT_SOURCE_DIR}/src/types/*.cpp")
 file(GLOB ACCEL_HEADER "${PROJECT_SOURCE_DIR}/include/hilma/accel/*.h")
 file(GLOB ACCEL_SOURCE "${PROJECT_SOURCE_DIR}/src/accel/*.cpp")
 
+file(GLOB DEPS_SOURCE "${PROJECT_SOURCE_DIR}/src/deps/*.cpp")
+
 set(INCLUDE_FOLDER "${PROJECT_SOURCE_DIR}/include")
 set(INCLUDE_SWIG_FILE "${PROJECT_SOURCE_DIR}/${PROJECT_NAME}.i")
 
@@ -22,7 +24,7 @@ find_package(OpenImageDenoise)
 
 # C++ LIBRAY
 #
-add_library(hilma ${ROOT_SOURCE} ${IO_SOURCE} ${OPS_SOURCE} ${TYPES_SOURCE} ${ACCEL_SOURCE})
+add_library(hilma ${ROOT_SOURCE} ${IO_SOURCE} ${OPS_SOURCE} ${TYPES_SOURCE} ${ACCEL_SOURCE} ${DEPS_SOURCE})
 
 if( OpenImageDenoise_FOUND )
   message(STATUS "Compiling with OpenImageDenoise support")
@@ -49,6 +51,7 @@ install(FILES ${ACCEL_HEADER} DESTINATION include/hilma/accel)
 
 # PYTHON BINDINGS 
 #
+
 if(POLICY CMP0078)
   cmake_policy(SET CMP0078 OLD)
 endif(POLICY CMP0078)

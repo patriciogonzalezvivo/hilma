@@ -1,5 +1,9 @@
 include_directories("${CMAKE_SOURCE_DIR}/include")
 
+if(POLICY CMP0002)
+  cmake_policy(SET CMP0002 OLD)
+endif(POLICY CMP0002)
+
 add_executable (rect rect.cpp)
 target_link_libraries (rect PRIVATE hilma)
 
@@ -32,3 +36,6 @@ target_link_libraries (load PRIVATE hilma)
 
 add_executable (process process.cpp)
 target_link_libraries (process PRIVATE hilma)
+
+add_executable (atlas atlas.cpp)
+target_link_libraries (atlas PRIVATE hilma)
