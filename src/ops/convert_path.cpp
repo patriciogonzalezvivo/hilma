@@ -1,5 +1,5 @@
 #include "hilma/ops/convert_path.h"
-#include "hilma/ops/earcut.h"
+#include "../deps/earcut.h"
 
 #include "hilma/math.h"
 #include "hilma/accel/BoundingBox.h"

@@ -44,7 +44,6 @@
     #include "hilma/ops/convert_path.h"
     #include "hilma/ops/transform.h"
     #include "hilma/ops/raytrace.h"
-    #include "hilma/ops/earcut.h"
     #include "hilma/io/jpg.h"
     #include "hilma/io/png.h"
     #include "hilma/io/hdr.h"
