@@ -2,6 +2,8 @@ language: cpp
 compiler: clang
 sudo: false
 dist: bionic
+compiler:
+  - gcc
 addons:
   apt:
     packages:
