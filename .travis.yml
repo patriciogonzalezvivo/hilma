@@ -1,7 +1,7 @@
 language: cpp
 compiler: clang
 sudo: false
-dist: trusty
+dist: xenial
 addons:
   apt:
     packages:
