@@ -1,0 +1,17 @@
+language: cpp
+compiler: clang
+sudo: false
+dist: trusty
+addons:
+  apt:
+    packages:
+      - ninja-build
+      - libglm-dev
+      - cmake 
+      - swig
+      - python3-numpy  
+script:
+  - mkdir build
+  - cd build
+  - cmake .. -GNinja
+  - cmake --build .
