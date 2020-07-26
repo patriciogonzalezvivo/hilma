@@ -1,6 +1,9 @@
 
 ![](docs/00.jpg)
 
+[![Build Status](https://travis-ci.org/patriciogonzalezvivo/hilma.svg?branch=master)](https://travis-ci.org/patriciogonzalezvivo/hilma)
+
+
 Hilma is 3D geometry library in C++ with Python bindings (with support for Numpy) ready to be embed into your projects. 
 
 Dependencies:
