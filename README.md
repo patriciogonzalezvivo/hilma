@@ -23,6 +23,7 @@ sudo apt install libglm-dev cmake swig python3-numpy
 
 // In MacOS
 brew install glm cmake swig
+brew install --build-from-source open-image-denoise
 ```
 
 2. Then compile
