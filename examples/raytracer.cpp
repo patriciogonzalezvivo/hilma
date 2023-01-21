@@ -97,12 +97,12 @@ int main(int argc, char **argv) {
     scene.push_back( Hittable(plane.getTriangles(), 0) );
     scene_mesh.append(plane);
 
-    // Mesh head = loadPly("head.ply");
-    // center(head);
-    // scale(head, 0.15f);
-    // translateY(head, 0.4f);
-    // scene.push_back( Hittable(head.getTriangles(), branches) );
-    // scene_mesh.append(head);
+    Mesh head = loadPly("head.ply");
+    center(head);
+    scale(head, 0.15f);
+    translateY(head, 0.4f);
+    scene.push_back( Hittable(head.getTriangles(), branches) );
+    scene_mesh.append(head);
 
     // Mesh helmet = Mesh("helmet");
     // loadGltf("helmet.glb", helmet);
@@ -119,15 +119,15 @@ int main(int argc, char **argv) {
     // scene.push_back( Hittable(Duck.getTriangles(), branches) );
     // scene_mesh.append(Duck);
 
-    Mesh BoomBox = Mesh("BoomBox");
-    loadGltf("BoomBox.glb", BoomBox);
-    if (!BoomBox.haveTangents())
-        BoomBox.computeTangents();
-    center(BoomBox);
-    scale(BoomBox, 100.0f);
-    translateY(BoomBox, 0.4f);
-    scene.push_back( Hittable(BoomBox.getTriangles(), branches) );
-    scene_mesh.append(BoomBox);
+    // Mesh BoomBox = Mesh("BoomBox");
+    // loadGltf("BoomBox.glb", BoomBox);
+    // if (!BoomBox.haveTangents())
+    //     BoomBox.computeTangents();
+    // center(BoomBox);
+    // scale(BoomBox, 100.0f);
+    // translateY(BoomBox, 0.4f);
+    // scene.push_back( Hittable(BoomBox.getTriangles(), branches) );
+    // scene_mesh.append(BoomBox);
 
     // Mesh icosphere = hilma::icosphere(0.5f, 2);
     // icosphere.setMaterial(metal);
