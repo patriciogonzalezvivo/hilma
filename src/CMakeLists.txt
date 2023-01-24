@@ -20,7 +20,7 @@ set(INCLUDE_SWIG_FILE "${PROJECT_SOURCE_DIR}/${PROJECT_NAME}.i")
 
 find_package(Threads)
 
-find_package(OpenImageDenoise)
+find_package(OpenImageDenoise QUIET)
 
 # C++ LIBRAY
 #
