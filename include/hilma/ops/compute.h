@@ -1,7 +1,7 @@
 #pragma once
 
-#include "hilma/types/Mesh.h"
-#include "hilma/accel/BoundingBox.h"
+#include "hilma/types/mesh.h"
+#include "hilma/types/boundingBox.h"
 
 namespace hilma {
 

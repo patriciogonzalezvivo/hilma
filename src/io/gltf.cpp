@@ -5,8 +5,8 @@
 #include "hilma/io/png.h"
 #include "hilma/io/hdr.h"
 
-#include "hilma/math.h"
-#include "hilma/fs.h"
+#include "hilma/ops/math.h"
+#include "hilma/ops/fs.h"
 
 #include <iostream>
 #include <fstream>
@@ -29,9 +29,9 @@
 
 #define BUFFER_OFFSET(i) ((char *)NULL + (i))
 
-#include "hilma/fs.h"
-#include "hilma/text.h"
-#include "hilma/ops/convert_image.h"
+#include "hilma/ops/fs.h"
+#include "hilma/ops/text.h"
+#include "hilma/ops/image.h"
 #include "hilma/ops/compute.h"
 
 namespace hilma {

@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "hilma/io/auto.h"
-#include "hilma/ops/convert_image.h"
+#include "hilma/ops/image.h"
 
 using namespace hilma;
 

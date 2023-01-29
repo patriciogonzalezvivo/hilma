@@ -3,8 +3,8 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/norm.hpp"
 
-#include "hilma/math.h"
-#include "hilma/text.h"
+#include "hilma/ops/math.h"
+#include "hilma/ops/text.h"
 
 #ifndef ABS
 #define ABS(x) (((x) < 0) ? -(x) : (x))

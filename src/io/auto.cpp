@@ -7,7 +7,7 @@
 
 #include "hilma/io/auto.h"
 
-#include "hilma/fs.h"
+#include "hilma/ops/fs.h"
 
 #include "hilma/io/gltf.h"
 #include "hilma/io/obj.h"

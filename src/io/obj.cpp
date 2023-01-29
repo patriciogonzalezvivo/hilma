@@ -17,8 +17,8 @@
 #define HILMA_LINE_MAX 2048
 #endif
 
-#include "hilma/fs.h"
-#include "hilma/text.h"
+#include "hilma/ops/fs.h"
+#include "hilma/ops/text.h"
 
 namespace hilma {
 

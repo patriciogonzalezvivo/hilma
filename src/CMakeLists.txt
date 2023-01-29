@@ -10,9 +10,6 @@ file(GLOB OPS_SOURCE "${PROJECT_SOURCE_DIR}/src/ops/*.cpp")
 file(GLOB TYPES_HEADER "${PROJECT_SOURCE_DIR}/include/hilma/types/*.h")
 file(GLOB TYPES_SOURCE "${PROJECT_SOURCE_DIR}/src/types/*.cpp")
 
-file(GLOB ACCEL_HEADER "${PROJECT_SOURCE_DIR}/include/hilma/accel/*.h")
-file(GLOB ACCEL_SOURCE "${PROJECT_SOURCE_DIR}/src/accel/*.cpp")
-
 file(GLOB DEPS_SOURCE "${PROJECT_SOURCE_DIR}/src/deps/*.cpp")
 
 set(INCLUDE_FOLDER "${PROJECT_SOURCE_DIR}/include")
@@ -49,8 +46,6 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   install(FILES ${IO_HEADER} DESTINATION include/hilma/io)
   install(FILES ${OPS_HEADER} DESTINATION include/hilma/ops)
   install(FILES ${TYPES_HEADER} DESTINATION include/hilma/types)
-  install(FILES ${ACCEL_HEADER} DESTINATION include/hilma/accel)
-
 
   # PYTHON BINDINGS 
   #

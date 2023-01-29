@@ -6,16 +6,16 @@
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/norm.hpp"
 
-#include "hilma/math.h"
-#include "hilma/timer.h"
+#include "hilma/ops/math.h"
+#include "hilma/types/timer.h"
 
-#include "hilma/types/Camera.h"
-#include "hilma/types/Image.h"
+#include "hilma/types/camera.h"
+#include "hilma/types/image.h"
 
 
 #include "hilma/ops/generate.h"
 #include "hilma/ops/transform.h"
-#include "hilma/ops/convert_path.h"
+#include "hilma/ops/path.h"
 #include "hilma/ops/raytrace.h"
 #include "hilma/ops/intersection.h"
 

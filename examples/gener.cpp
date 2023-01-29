@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <iostream>
 
-#include "hilma/types/Mesh.h"
+#include "hilma/types/mesh.h"
 #include "hilma/ops/generate.h"
 #include "hilma/ops/transform.h"
 #include "hilma/io/ply.h"

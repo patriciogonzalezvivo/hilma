@@ -1,9 +1,9 @@
 #pragma once
 
-#include "hilma/types/Mesh.h"
-#include "hilma/types/Image.h"
-#include "hilma/types/Polyline.h"
-#include "hilma/types/Polygon.h"
+#include "hilma/types/mesh.h"
+#include "hilma/types/image.h"
+#include "hilma/types/polyline.h"
+#include "hilma/types/polygon.h"
 
 #include <glm/gtc/quaternion.hpp>
 

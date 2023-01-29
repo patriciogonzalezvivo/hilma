@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "hilma/types/Mesh.h"
+#include "hilma/types/mesh.h"
 
 namespace hilma {
 

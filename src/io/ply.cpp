@@ -9,7 +9,7 @@
 #include "../deps/tinyply.h"
 
 #include "hilma/io/ply.h"
-#include "hilma/text.h"
+#include "hilma/ops/text.h"
 
 namespace hilma {
 

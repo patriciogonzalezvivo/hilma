@@ -3,7 +3,7 @@
 #include <unistd.h>
 #include <iostream>
 
-#include "hilma/types/Mesh.h"
+#include "hilma/types/mesh.h"
 
 #include "hilma/ops/compute.h"
 #include "hilma/ops/convert_path.h"
@@ -17,8 +17,8 @@
 #include "hilma/io/ply.h"
 #include "hilma/io/png.h"
 
-#include "hilma/timer.h"
-#include "hilma/text.h"
+#include "hilma/types/timer.h"
+#include "hilma/ops/text.h"
 
 int main(int argc, char **argv) {
 

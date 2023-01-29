@@ -1,6 +1,6 @@
 #include "hilma/ops/generate.h"
 
-#include "hilma/math.h"
+#include "hilma/ops/math.h"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/rotate_vector.hpp"

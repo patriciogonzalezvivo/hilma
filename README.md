@@ -49,7 +49,7 @@ Alternatively to installing Hilma on your system you can easily copy the content
 
 
 ```cpp
-#include "hilma/types/Mesh.h"
+#include "hilma/types/mesh.h"
 #include "hilma/io/ply.h"
 
 int main(int argc, char **argv) {

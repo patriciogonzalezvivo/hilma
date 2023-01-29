@@ -2,8 +2,8 @@
 
 #include <string>
 
-#include "hilma/types/Mesh.h"
-#include "hilma/types/Image.h"
+#include "hilma/types/mesh.h"
+#include "hilma/types/image.h"
 
 namespace hilma {
 

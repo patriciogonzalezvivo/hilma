@@ -6,8 +6,8 @@
 
 #include "glm/glm.hpp"
 
-#include "hilma/math.h"
-#include "hilma/text.h"
+#include "hilma/ops/math.h"
+#include "hilma/ops/text.h"
 #include "hilma/ops/intersection.h"
 
 #include <thread>

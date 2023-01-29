@@ -5,10 +5,10 @@
 #include <memory>
 #include <functional>
 
-#include "hilma/types/Ray.h"
-#include "hilma/types/Mesh.h"
-#include "hilma/types/Image.h"
-#include "hilma/types/Camera.h"
+#include "hilma/types/ray.h"
+#include "hilma/types/mesh.h"
+#include "hilma/types/image.h"
+#include "hilma/types/camera.h"
 
 namespace hilma {
 

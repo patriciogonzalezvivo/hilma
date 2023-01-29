@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include "hilma/types/Image.h"
+#include "hilma/types/image.h"
 #include "hilma/io/auto.h"
 
 namespace hilma {

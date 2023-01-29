@@ -1,10 +1,10 @@
 #pragma once
 
-#include "hilma/types/Ray.h"
-#include "hilma/types/Line.h"
-#include "hilma/types/Plane.h"
-#include "hilma/types/Triangle.h"
-#include "hilma/accel/BoundingBox.h"
+#include "hilma/types/ray.h"
+#include "hilma/types/line.h"
+#include "hilma/types/plane.h"
+#include "hilma/types/triangle.h"
+#include "hilma/types/boundingBox.h"
 
 #include <string>
 
