@@ -256,26 +256,26 @@ glm::vec3 default_rayColor(const Ray& _ray, const std::vector<Hittable>& _hittab
             normal = rec.triangle->getNormal(rec.barycentric);
             diffuse = rec.triangle->getColor(rec.barycentric);
 
-            if (rec.triangle->material != nullptr) {
-                bool haveUV = rec.triangle->haveTexCoords();
-                glm::vec2 uv;
+            // if (rec.triangle->material != nullptr) {
+            //     bool haveUV = rec.triangle->haveTexCoords();
+            //     glm::vec2 uv;
 
-                if (haveUV) uv = rec.triangle->getTexCoord(rec.barycentric);
-                // uv.x = 1.0f - uv.x;
+            //     if (haveUV) uv = rec.triangle->getTexCoord(rec.barycentric);
+            //     // uv.x = 1.0f - uv.x;
 
-                if ( rec.triangle->material->haveProperty("emissive") )
-                    if ( haveUV ) emissive = rec.triangle->material->getColor("emissive", uv);
-                    else emissive = rec.triangle->material->getColor("emissive");
+            //     if ( rec.triangle->material->haveProperty("emissive") )
+            //         if ( haveUV ) emissive = rec.triangle->material->getColor("emissive", uv);
+            //         else emissive = rec.triangle->material->getColor("emissive");
                 
-                if ( rec.triangle->material->haveProperty("roughness") )
-                    roughtness = rec.triangle->material->getValue("roughness", uv);
+            //     if ( rec.triangle->material->haveProperty("roughness") )
+            //         roughtness = rec.triangle->material->getValue("roughness", uv);
 
-                if ( rec.triangle->material->haveProperty("metallic") )
-                    metallic = rec.triangle->material->getValue("metallic", uv);
+            //     if ( rec.triangle->material->haveProperty("metallic") )
+            //         metallic = rec.triangle->material->getValue("metallic", uv);
 
-                if ( rec.triangle->material->haveProperty("opacity") )
-                    opacity = rec.triangle->material->getValue("opacity", uv);
-            }
+            //     if ( rec.triangle->material->haveProperty("opacity") )
+            //         opacity = rec.triangle->material->getValue("opacity", uv);
+            // }
         }
 
         glm::vec3 dir = glm::normalize(_ray.getDirection());

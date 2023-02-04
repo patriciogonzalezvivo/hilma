@@ -1,10 +1,23 @@
 cmake_minimum_required(VERSION 3.2)
 
-# Project name and a few useful settings. Other commands can pick up the results
-project(hilma
+find_package(CUDA)
+if (CUDA_FOUND)
+  include_directories(${CUDA_INCLUDE_DIRS})
+  link_libraries(${CUDA_LIBRARIES})
+  project(hilma
+    VERSION 0.2
+    DESCRIPTION "library for 2D/3D geometric"
+    LANGUAGES CXX CUDA)
+
+else()
+  project(hilma
     VERSION 0.2
     DESCRIPTION "library for 2D/3D geometric"
     LANGUAGES CXX)
+endif()
+
+# Project name and a few useful settings. Other commands can pick up the results
+
 
 # The compiled library code is here
 add_subdirectory(src)
