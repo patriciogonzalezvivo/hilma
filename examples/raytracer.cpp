@@ -16,7 +16,7 @@
 #include "hilma/ops/transform.h"
 #include "hilma/ops/raytrace.h"
 #include "hilma/ops/intersection.h"
-#include "hilma/ops/convert_image.h"
+#include "hilma/ops/image.h"
 
 #include "hilma/io/png.h"
 #include "hilma/io/jpg.h"

@@ -6,8 +6,8 @@
 #include "hilma/types/mesh.h"
 
 #include "hilma/ops/compute.h"
-#include "hilma/ops/convert_path.h"
-#include "hilma/ops/convert_image.h"
+#include "hilma/ops/path.h"
+#include "hilma/ops/image.h"
 #include "hilma/ops/generate.h"
 
 #include "hilma/io/auto.h"
