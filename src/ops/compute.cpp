@@ -317,72 +317,72 @@ std::vector<float> getMin(const float* _array2D, int _m, int _n) {
 
 }
 
-void textureAtlas(Mesh& _mesh) {
-    xatlas::Atlas *atlas = xatlas::Create();
+// void textureAtlas(Mesh& _mesh) {
+//     xatlas::Atlas *atlas = xatlas::Create();
 
-    xatlas::MeshDecl meshDecl;
-    meshDecl.vertexCount = (uint32_t)_mesh.getVerticesTotal();
-    meshDecl.vertexPositionData = &_mesh.getVertices()[0].x;
-    meshDecl.vertexPositionStride = sizeof(float) * 3;
-    if (_mesh.haveNormals()) {
-        meshDecl.vertexNormalData =  &_mesh.getNormals()[0].x;
-        meshDecl.vertexNormalStride = sizeof(float) * 3;
-    }
-    if (_mesh.haveTexCoords()) {
-        meshDecl.vertexUvData = &_mesh.getNormals()[0].x;
-        meshDecl.vertexUvStride = sizeof(float) * 2;
-    }
-    meshDecl.indexCount = (uint32_t)_mesh.getFaceIndicesTotal();
-    meshDecl.indexData = _mesh.getFaceIndices().data();
-    meshDecl.indexFormat = xatlas::IndexFormat::UInt32;
-    xatlas::AddMeshError::Enum error = xatlas::AddMesh(atlas, meshDecl, 1);
-    if (error != xatlas::AddMeshError::Success) {
-        xatlas::Destroy(atlas);
-        printf("\rError adding mesh '%s': %s\n", _mesh.getName().c_str(), xatlas::StringForEnum(error));
-    }
-    xatlas::Generate(atlas);
+//     xatlas::MeshDecl meshDecl;
+//     meshDecl.vertexCount = (uint32_t)_mesh.getVerticesTotal();
+//     meshDecl.vertexPositionData = &_mesh.getVertices()[0].x;
+//     meshDecl.vertexPositionStride = sizeof(float) * 3;
+//     if (_mesh.haveNormals()) {
+//         meshDecl.vertexNormalData =  &_mesh.getNormals()[0].x;
+//         meshDecl.vertexNormalStride = sizeof(float) * 3;
+//     }
+//     if (_mesh.haveTexCoords()) {
+//         meshDecl.vertexUvData = &_mesh.getNormals()[0].x;
+//         meshDecl.vertexUvStride = sizeof(float) * 2;
+//     }
+//     meshDecl.indexCount = (uint32_t)_mesh.getFaceIndicesTotal();
+//     meshDecl.indexData = _mesh.getFaceIndices().data();
+//     meshDecl.indexFormat = xatlas::IndexFormat::UInt32;
+//     xatlas::AddMeshError::Enum error = xatlas::AddMesh(atlas, meshDecl, 1);
+//     if (error != xatlas::AddMeshError::Success) {
+//         xatlas::Destroy(atlas);
+//         printf("\rError adding mesh '%s': %s\n", _mesh.getName().c_str(), xatlas::StringForEnum(error));
+//     }
+//     xatlas::Generate(atlas);
 
-    printf("   %d charts\n", atlas->chartCount);
-    printf("   %d atlases\n", atlas->atlasCount);
-    for (uint32_t i = 0; i < atlas->atlasCount; i++)
-        printf("      %d: %0.2f%% utilization\n", i, atlas->utilization[i] * 100.0f);
-    printf("   %ux%u resolution\n", atlas->width, atlas->height);
-    int totalVertices = 0;
-    int totalFaces = 0;
-    for (uint32_t i = 0; i < atlas->meshCount; i++) {
-        const xatlas::Mesh &mesh = atlas->meshes[i];
-        totalVertices += mesh.vertexCount;
-        totalFaces += mesh.indexCount / 3;
-    }
-    printf("   %u total vertices\n", totalVertices);
-    printf("   %u total triangles\n", totalFaces);
+//     printf("   %d charts\n", atlas->chartCount);
+//     printf("   %d atlases\n", atlas->atlasCount);
+//     for (uint32_t i = 0; i < atlas->atlasCount; i++)
+//         printf("      %d: %0.2f%% utilization\n", i, atlas->utilization[i] * 100.0f);
+//     printf("   %ux%u resolution\n", atlas->width, atlas->height);
+//     int totalVertices = 0;
+//     int totalFaces = 0;
+//     for (uint32_t i = 0; i < atlas->meshCount; i++) {
+//         const xatlas::Mesh &mesh = atlas->meshes[i];
+//         totalVertices += mesh.vertexCount;
+//         totalFaces += mesh.indexCount / 3;
+//     }
+//     printf("   %u total vertices\n", totalVertices);
+//     printf("   %u total triangles\n", totalFaces);
 
-    if (atlas->width > 0 && 
-        atlas->height > 0 && 
-        atlas->meshCount > 0) {
-        Mesh out;
-        const xatlas::Mesh &mesh = atlas->meshes[0];
-        for (uint32_t v = 0; v < mesh.vertexCount; v++) {
-            const xatlas::Vertex &vertex = mesh.vertexArray[v];
+//     if (atlas->width > 0 && 
+//         atlas->height > 0 && 
+//         atlas->meshCount > 0) {
+//         Mesh out;
+//         const xatlas::Mesh &mesh = atlas->meshes[0];
+//         for (uint32_t v = 0; v < mesh.vertexCount; v++) {
+//             const xatlas::Vertex &vertex = mesh.vertexArray[v];
             
-            out.addVertex( _mesh.getVertex(vertex.xref) );
+//             out.addVertex( _mesh.getVertex(vertex.xref) );
 
-            if (_mesh.haveNormals())
-                out.addNormal( _mesh.getNormal(vertex.xref) );
+//             if (_mesh.haveNormals())
+//                 out.addNormal( _mesh.getNormal(vertex.xref) );
             
-            if (_mesh.haveColors() )
-                out.addColor( _mesh.getColor(vertex.xref) );
+//             if (_mesh.haveColors() )
+//                 out.addColor( _mesh.getColor(vertex.xref) );
 
-            out.addTexCoord( vertex.uv[0] / atlas->width, vertex.uv[1] / atlas->height );
-        }
+//             out.addTexCoord( vertex.uv[0] / atlas->width, vertex.uv[1] / atlas->height );
+//         }
 
-        for (uint32_t f = 0; f < mesh.indexCount; f++) {
-            out.addFaceIndex(mesh.indexArray[f]);
-        }
+//         for (uint32_t f = 0; f < mesh.indexCount; f++) {
+//             out.addFaceIndex(mesh.indexArray[f]);
+//         }
 
-        _mesh = out;
-    }
-}
+//         _mesh = out;
+//     }
+// }
 
 }
 

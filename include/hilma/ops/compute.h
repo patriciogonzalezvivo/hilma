@@ -27,6 +27,6 @@ std::vector<float>      getMin(const float* _array2D, int _m, int _n);
 // Image
 glm::vec2               getRange(const Image& _image);
 
-void                    textureAtlas(Mesh& _mesh);
+// void                    textureAtlas(Mesh& _mesh);
 
 }

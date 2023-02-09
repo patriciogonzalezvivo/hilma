@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
 
     // mesh.flatNormals();
     
-    hilma::textureAtlas( mesh );
+    // hilma::textureAtlas( mesh );
     hilma::savePly("out.ply", mesh, false, true);
 
     return 1;
