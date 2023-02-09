@@ -15,7 +15,7 @@ def toBlenderImage(_name, _image):
     if _name in bpy.data.images:
         bimage = bpy.data.images[_name]
     else:
-        bimage = bpy.data.images.new(_name, _image.getWidth(), _image.getHeight(), alpha=True)
+        bimage = bpy.data.images.new(_name, _image.getWidth(), _image.getHeight(), alpha=True, float_buffer=True)
 
     def feedGrayscalePixels(img):
         for y in range(img.getHeight()):
